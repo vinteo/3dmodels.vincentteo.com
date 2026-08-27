@@ -12,7 +12,7 @@
       "3D Print",
       "Keychain"
     ],
-    "defaultConfiguration": "hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_spoke_thickness=2+millimeter;height=2+millimeter",
+    "defaultConfiguration": "hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=2+millimeter;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter",
     "parameters": [
       {
         "id": "hex_radius",
@@ -21,8 +21,8 @@
         "unit": "millimeter",
         "default": 20,
         "min": 10,
-        "max": 60,
-        "step": 2,
+        "max": 50,
+        "step": 1,
         "description": "Outer radius of the hexagonal Kumiko boundary"
       },
       {
@@ -32,9 +32,20 @@
         "unit": "millimeter",
         "default": 2,
         "min": 1,
-        "max": 5,
+        "max": 10,
         "step": 0.5,
         "description": "Outer perimeter border frame thickness"
+      },
+      {
+        "id": "hex_fillet",
+        "name": "Hex Corner Fillet",
+        "type": "quantity",
+        "unit": "millimeter",
+        "default": 0.2,
+        "min": 0,
+        "max": 1,
+        "step": 0.05,
+        "description": "Corner fillet radius on the outer hexagon"
       },
       {
         "id": "hex_spoke_thickness",
@@ -42,10 +53,21 @@
         "type": "quantity",
         "unit": "millimeter",
         "default": 2,
-        "min": 0.8,
-        "max": 4,
+        "min": 1,
+        "max": 10,
         "step": 0.2,
         "description": "Internal spoke lattice strip thickness"
+      },
+      {
+        "id": "hex_design_thickness",
+        "name": "Design Lattice Thickness",
+        "type": "quantity",
+        "unit": "millimeter",
+        "default": 1,
+        "min": 0.5,
+        "max": 10,
+        "step": 0.5,
+        "description": "Thickness of the internal geometric pattern ribs"
       },
       {
         "id": "height",
@@ -54,20 +76,31 @@
         "unit": "millimeter",
         "default": 2,
         "min": 1,
-        "max": 10,
+        "max": 5,
         "step": 0.5,
         "description": "Total extruded depth of the Kumiko woodwork"
       },
       {
         "id": "ring_thickness",
-        "name": "Ring Thickness",
+        "name": "Keychain Ring Thickness",
         "type": "quantity",
         "unit": "millimeter",
         "default": 2,
-        "min": 1,
-        "max": 5,
+        "min": 0,
+        "max": 10,
         "step": 0.5,
-        "description": "Circular ring rib thickness"
+        "description": "Thickness of the keychain ring"
+      },
+      {
+        "id": "ring_fillet",
+        "name": "Keychain Ring Fillet",
+        "type": "quantity",
+        "unit": "millimeter",
+        "default": 0.2,
+        "min": 0,
+        "max": 1,
+        "step": 0.05,
+        "description": "Fillet radius on the keychain ring attachment"
       }
     ]
   },

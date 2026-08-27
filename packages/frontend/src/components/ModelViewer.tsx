@@ -15,16 +15,12 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-import { ModelConfig } from '../types/model';
-
 interface ModelViewerProps {
   meshData: ArrayBuffer | null;
   loading: boolean;
   error?: string | null;
   modelName: string;
   onRefresh?: () => void;
-  parameters?: Record<string, number | string | boolean>;
-  modelConfig?: ModelConfig;
 }
 
 export const ModelViewer: React.FC<ModelViewerProps> = ({
@@ -32,9 +28,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   loading,
   error,
   modelName,
-  onRefresh,
-  parameters,
-  modelConfig
+  onRefresh
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -252,21 +246,6 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
       console.error('Failed to parse or render 3D STL mesh:', err);
     }
   }, [meshData, wireframe]);
-
-  // Real-time visual feedback for parameter adjustments
-  useEffect(() => {
-    if (!currentMeshRef.current) return;
-
-    if (parameters && modelConfig?.id === 'kumiko-pattern-keychain') {
-      const radius = Number(parameters['hex_radius']) || 20;
-      const height = Number(parameters['height']) || 2;
-      const scaleXZ = radius / 20;
-      const scaleY = height / 2;
-      currentMeshRef.current.scale.set(scaleXZ, scaleY, scaleXZ);
-    } else {
-      currentMeshRef.current.scale.set(1, 1, 1);
-    }
-  }, [parameters, modelConfig]);
 
   // Camera Reset Handler
   const handleResetCamera = useCallback(() => {

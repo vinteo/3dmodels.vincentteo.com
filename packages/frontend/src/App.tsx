@@ -138,8 +138,6 @@ export const App: React.FC = () => {
               error={previewError}
               modelName={activeModel.name}
               onRefresh={handleApplyParameters}
-              parameters={currentValues}
-              modelConfig={activeModel}
             />
           ) : (
             <div className="flex items-center justify-center h-full text-sm text-slate-500">
