@@ -184,14 +184,23 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
       // Compute bounding box and center geometry
       geometry.computeBoundingBox();
       geometry.computeVertexNormals();
+      const bbox = geometry.boundingBox || new THREE.Box3();
 
-      const bbox = geometry.boundingBox;
-      if (bbox) {
-        const center = new THREE.Vector3();
-        bbox.getCenter(center);
-        // Translate to origin and rest on bottom plane
-        geometry.translate(-center.x, -bbox.min.y, -center.z);
+      // Auto-orient: If CAD model was extruded along Z (thin along Z), rotate to lie flat on the Three.js XZ ground grid
+      const rawSize = new THREE.Vector3();
+      bbox.getSize(rawSize);
+      if (rawSize.z < rawSize.x && rawSize.z < rawSize.y) {
+        geometry.rotateX(-Math.PI / 2);
+        geometry.computeBoundingBox();
       }
+
+      const updatedBbox = geometry.boundingBox || bbox;
+      const center = new THREE.Vector3();
+      updatedBbox.getCenter(center);
+
+      // Center horizontally on X & Z, and place bottom on ground plane (Y = 0)
+      geometry.translate(-center.x, -updatedBbox.min.y, -center.z);
+      geometry.computeBoundingBox();
 
       // Remove existing model mesh if present
       if (currentMeshRef.current && sceneRef.current) {
@@ -205,9 +214,9 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
         currentMeshRef.current = null;
       }
 
-      // Create material matching the dark futuristic slate-violet CAD aesthetic
+      // Material tailored to engineering satin / architectural woodwork
       const material = new THREE.MeshStandardMaterial({
-        color: '#e2e8f0', // Clean engineering satin finish
+        color: '#e2e8f0',
         roughness: 0.35,
         metalness: 0.15,
         wireframe
@@ -221,16 +230,16 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
       currentMeshRef.current = mesh;
 
       // Automatically frame camera around geometry size
-      if (bbox && cameraRef.current && controlsRef.current) {
-        const size = new THREE.Vector3();
-        bbox.getSize(size);
-        const maxDim = Math.max(size.x, size.y, size.z, 50);
+      if (cameraRef.current && controlsRef.current && geometry.boundingBox) {
+        const finalSize = new THREE.Vector3();
+        geometry.boundingBox.getSize(finalSize);
+        const maxDim = Math.max(finalSize.x, finalSize.y, finalSize.z, 20);
         const fov = cameraRef.current.fov * (Math.PI / 180);
-        const distance = Math.abs(maxDim / Math.sin(fov / 2)) * 0.9;
+        const distance = Math.abs(maxDim / Math.sin(fov / 2)) * 0.85;
 
-        cameraRef.current.position.set(distance * 0.7, distance * 0.7, distance * 0.9);
-        cameraRef.current.lookAt(0, size.y / 2, 0);
-        controlsRef.current.target.set(0, size.y / 2, 0);
+        cameraRef.current.position.set(distance * 0.65, distance * 0.7, distance * 0.85);
+        cameraRef.current.lookAt(0, finalSize.y / 2, 0);
+        controlsRef.current.target.set(0, finalSize.y / 2, 0);
         controlsRef.current.update();
       }
     } catch (err) {

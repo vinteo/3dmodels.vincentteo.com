@@ -43,19 +43,6 @@ export const App: React.FC = () => {
     return models.find((m) => m.id === selectedModelId) || models[0];
   }, [models, selectedModelId]);
 
-  // Initialize parameters when active model changes
-  useEffect(() => {
-    if (!activeModel) return;
-
-    const initialValues: Record<string, number | string | boolean> = {};
-    for (const p of activeModel.parameters) {
-      initialValues[p.id] = p.default;
-    }
-
-    setCurrentValues(initialValues);
-    setAppliedValues(initialValues);
-  }, [activeModel]);
-
   // Load 3D preview mesh for given model & parameters
   const loadPreview = useCallback(async (model: ModelConfig, params: Record<string, number | string | boolean>) => {
     setLoadingPreview(true);
@@ -73,11 +60,19 @@ export const App: React.FC = () => {
     }
   }, []);
 
-  // Fetch preview when appliedValues or active model changes initially
+  // Initialize parameters and immediately trigger preview when active model changes or loads
   useEffect(() => {
-    if (!activeModel || Object.keys(appliedValues).length === 0) return;
-    loadPreview(activeModel, appliedValues);
-  }, [activeModel?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!activeModel) return;
+
+    const initialValues: Record<string, number | string | boolean> = {};
+    for (const p of activeModel.parameters) {
+      initialValues[p.id] = p.default;
+    }
+
+    setCurrentValues(initialValues);
+    setAppliedValues(initialValues);
+    loadPreview(activeModel, initialValues);
+  }, [activeModel?.id, loadPreview]);
 
   // Determine if there are unapplied parameter edits
   const isDirty = useMemo(() => {

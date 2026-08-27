@@ -1,5 +1,5 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "3dmodels-backend",
   "main": "src/index.ts",
   "compatibility_date": "2024-12-30",
@@ -8,6 +8,8 @@
     "enabled": true
   },
   "vars": {
+    "ONSHAPE_ACCESS_KEY": "on_a04C0YmSei7s7fqTCPYHt",
+    "ONSHAPE_SECRET_KEY": "Ag6nR5CRvHsVU7fkRVxFfZ1RBtNeC6BCUjKxKBQN4IPvTmPc",
     "ONSHAPE_BASE_URL": "https://cad.onshape.com",
     "MOCK_MODE": "auto"
   }
