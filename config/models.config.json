@@ -12,8 +12,15 @@
       "3D Print",
       "Keychain"
     ],
-    "defaultConfiguration": "hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=2+millimeter;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter",
+    "defaultConfiguration": "hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=2+millimeter;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter;include_keychain_ring=true",
     "parameters": [
+      {
+        "id": "include_keychain_ring",
+        "name": "Keychain Ring Attachment",
+        "type": "boolean",
+        "default": true,
+        "description": "Include top mounting loop for keychain hardware (uncheck for clean tile / coaster)"
+      },
       {
         "id": "hex_radius",
         "name": "Hexagon Radius",
