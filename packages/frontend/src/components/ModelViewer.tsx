@@ -43,7 +43,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   const frameIdRef = useRef<number>(0);
 
   // Viewport display controls
-  const [autoRotate, setAutoRotate] = useState<boolean>(true);
+  const [autoRotate, setAutoRotate] = useState<boolean>(false);
   const [wireframe, setWireframe] = useState<boolean>(false);
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
