@@ -17,7 +17,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
     // Drawer should appear
     await expect(page.locator("text=Model Catalog")).toBeVisible();
-    await expect(page.locator("button:has-text('Kumiko Woodcraft Pattern')")).toBeVisible();
+    await expect(page.locator("button:has-text('Kumiko Keychain')")).toBeVisible();
     await expect(page.locator("button:has-text('Heavy-Duty Shelf Bracket')")).toBeVisible();
 
     // Select Shelf Bracket from pop-out drawer

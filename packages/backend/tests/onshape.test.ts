@@ -7,18 +7,18 @@ describe('Models Configuration and Parsing', () => {
   it('should load configured models from catalog', () => {
     const models = getAllModels();
     expect(models.length).toBeGreaterThan(0);
-    expect(models[0].id).toBe('kumiko-woodcraft-pattern');
+    expect(models[0].id).toBe('kumiko-pattern-keychain');
   });
 
   it('should retrieve a specific model by ID', () => {
-    const model = getModelById('kumiko-woodcraft-pattern');
+    const model = getModelById('kumiko-pattern-keychain');
     expect(model).toBeDefined();
     expect(model?.name).toContain('Kumiko');
     expect(model?.parameters.length).toBeGreaterThan(0);
   });
 
   it('should serialize parameters into an Onshape configuration string', () => {
-    const model = getModelById('kumiko-woodcraft-pattern')!;
+    const model = getModelById('kumiko-pattern-keychain')!;
     const configStr = buildConfigurationString(model, {
       hex_radius: 25,
       hex_thickness: 2.5
@@ -38,7 +38,7 @@ describe('Models Configuration and Parsing', () => {
 
 describe('Mock Geometry Generators', () => {
   it('should generate valid ASCII STL file for mock rendering and export', () => {
-    const model = getModelById('kumiko-woodcraft-pattern')!;
+    const model = getModelById('kumiko-pattern-keychain')!;
     const stl = generateMockSTL(model, 'hex_radius=20+millimeter');
     expect(stl.startsWith('solid ')).toBe(true);
     expect(stl.includes('facet normal')).toBe(true);
@@ -46,7 +46,7 @@ describe('Mock Geometry Generators', () => {
   });
 
   it('should generate valid mock STEP file', () => {
-    const model = getModelById('kumiko-woodcraft-pattern')!;
+    const model = getModelById('kumiko-pattern-keychain')!;
     const step = generateMockSTEP(model, 'hex_radius=20+millimeter');
     expect(step).toContain('ISO-10303-21;');
     expect(step).toContain('FILE_DESCRIPTION');
@@ -72,15 +72,15 @@ describe('Backend API Endpoints (Hono In-Memory Tests)', () => {
   });
 
   it('GET /api/models/:id should return single model', async () => {
-    const res = await app.request('/api/models/kumiko-woodcraft-pattern');
+    const res = await app.request('/api/models/kumiko-pattern-keychain');
     expect(res.status).toBe(200);
     const body = (await res.json()) as any;
     expect(body.success).toBe(true);
-    expect(body.data.id).toBe('kumiko-woodcraft-pattern');
+    expect(body.data.id).toBe('kumiko-pattern-keychain');
   });
 
   it('POST /api/models/:id/preview should return 3D STL preview data', async () => {
-    const res = await app.request('/api/models/kumiko-woodcraft-pattern/preview', {
+    const res = await app.request('/api/models/kumiko-pattern-keychain/preview', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -89,11 +89,11 @@ describe('Backend API Endpoints (Hono In-Memory Tests)', () => {
     });
     expect(res.status).toBe(200);
     const text = await res.text();
-    expect(text).toContain('solid kumiko-woodcraft-pattern');
+    expect(text).toContain('solid kumiko-pattern-keychain');
   });
 
   it('POST /api/models/:id/export should return downloadable STL file', async () => {
-    const res = await app.request('/api/models/kumiko-woodcraft-pattern/export', {
+    const res = await app.request('/api/models/kumiko-pattern-keychain/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -106,7 +106,7 @@ describe('Backend API Endpoints (Hono In-Memory Tests)', () => {
   });
 
   it('POST /api/models/:id/export should return downloadable STEP file', async () => {
-    const res = await app.request('/api/models/kumiko-woodcraft-pattern/export', {
+    const res = await app.request('/api/models/kumiko-pattern-keychain/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

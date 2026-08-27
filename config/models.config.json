@@ -1,13 +1,17 @@
 [
   {
-    "id": "kumiko-woodcraft-pattern",
-    "name": "Kumiko Woodcraft Pattern (Asa-no-ha)",
-    "description": "Traditional Japanese Kumiko woodworking lattice featuring the geometric Asa-no-ha (hemp leaf) motif. Configured directly from live Onshape Part Studio.",
+    "id": "kumiko-pattern-keychain",
+    "name": "Kumiko Keychain",
+    "description": "Geometric Japanese Kumiko lattice keychain.",
     "documentId": "2df95888f1ccf2ebe511e5ce",
     "workspaceId": "c6b29a76d27afd2301c0bb88",
     "elementId": "0d5d97d3dc742d1e76ff657d",
     "elementType": "partstudio",
-    "tags": ["Kumiko", "Woodworking", "Geometric", "3D Print"],
+    "tags": [
+      "Kumiko",
+      "3D Print",
+      "Keychain"
+    ],
     "defaultConfiguration": "hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_spoke_thickness=2+millimeter;height=2+millimeter",
     "parameters": [
       {
@@ -75,7 +79,11 @@
     "workspaceId": "34492b290a49fbbedddc64c4",
     "elementId": "b01ef8d42f32c825ccf99120",
     "elementType": "partstudio",
-    "tags": ["Hardware", "Functional", "Mechanical"],
+    "tags": [
+      "Hardware",
+      "Functional",
+      "Mechanical"
+    ],
     "defaultConfiguration": "ArmLength=140+millimeter;Height=110+millimeter;Width=32+millimeter;Thickness=6+millimeter;HoleDiameter=5+millimeter;GussetType=Truss",
     "parameters": [
       {
@@ -128,9 +136,18 @@
         "type": "enum",
         "default": "5+millimeter",
         "options": [
-          { "value": "4+millimeter", "label": "M4 / #8 Screw (4.2mm)" },
-          { "value": "5+millimeter", "label": "M5 / #10 Screw (5.2mm)" },
-          { "value": "6+millimeter", "label": "M6 / 1/4\" Screw (6.4mm)" }
+          {
+            "value": "4+millimeter",
+            "label": "M4 / #8 Screw (4.2mm)"
+          },
+          {
+            "value": "5+millimeter",
+            "label": "M5 / #10 Screw (5.2mm)"
+          },
+          {
+            "value": "6+millimeter",
+            "label": "M6 / 1/4\" Screw (6.4mm)"
+          }
         ],
         "description": "Countersunk screw hole clearance"
       },
@@ -140,9 +157,18 @@
         "type": "enum",
         "default": "Truss",
         "options": [
-          { "value": "Solid", "label": "Solid Web" },
-          { "value": "Truss", "label": "Lightweight Truss Cutout" },
-          { "value": "Minimal", "label": "Corner Chamfer Only" }
+          {
+            "value": "Solid",
+            "label": "Solid Web"
+          },
+          {
+            "value": "Truss",
+            "label": "Lightweight Truss Cutout"
+          },
+          {
+            "value": "Minimal",
+            "label": "Corner Chamfer Only"
+          }
         ],
         "description": "Internal diagonal brace geometry"
       }
@@ -156,7 +182,11 @@
     "workspaceId": "45503c301b50acceedde75d5",
     "elementId": "c12fe9e53a43d936dde00231",
     "elementType": "partstudio",
-    "tags": ["PC Modding", "Cable Management", "Precision"],
+    "tags": [
+      "PC Modding",
+      "Cable Management",
+      "Precision"
+    ],
     "defaultConfiguration": "WireSlots=8;WireDiameter=3.8+millimeter;CombThickness=4+millimeter;ClosedLoop=false",
     "parameters": [
       {
@@ -165,12 +195,30 @@
         "type": "enum",
         "default": "8",
         "options": [
-          { "value": "4", "label": "4 Slots (CPU 4-Pin)" },
-          { "value": "6", "label": "6 Slots (PCIe 6-Pin)" },
-          { "value": "8", "label": "8 Slots (PCIe / EPS 8-Pin)" },
-          { "value": "12", "label": "12 Slots (Dual 6-Pin)" },
-          { "value": "16", "label": "16 Slots (Dual 8-Pin)" },
-          { "value": "24", "label": "24 Slots (Motherboard ATX 24-Pin)" }
+          {
+            "value": "4",
+            "label": "4 Slots (CPU 4-Pin)"
+          },
+          {
+            "value": "6",
+            "label": "6 Slots (PCIe 6-Pin)"
+          },
+          {
+            "value": "8",
+            "label": "8 Slots (PCIe / EPS 8-Pin)"
+          },
+          {
+            "value": "12",
+            "label": "12 Slots (Dual 6-Pin)"
+          },
+          {
+            "value": "16",
+            "label": "16 Slots (Dual 8-Pin)"
+          },
+          {
+            "value": "24",
+            "label": "24 Slots (Motherboard ATX 24-Pin)"
+          }
         ],
         "description": "Number of cable channels in the comb"
       },
