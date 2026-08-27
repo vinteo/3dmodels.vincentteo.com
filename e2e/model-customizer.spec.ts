@@ -20,7 +20,7 @@ test.describe('3D Models Customizer & Exporter E2E Flow', () => {
 
   test('should display model catalog cards and allow switching models', async ({ page }) => {
     // Check available models
-    await expect(page.locator("text=Parametric Desk Organizer").first()).toBeVisible();
+    await expect(page.locator("text=Kumiko Woodcraft Pattern").first()).toBeVisible();
     await expect(page.locator("text=Heavy-Duty Shelf Bracket").first()).toBeVisible();
     await expect(page.locator("text=PC Cable Management Comb").first()).toBeVisible();
 
@@ -45,16 +45,16 @@ test.describe('3D Models Customizer & Exporter E2E Flow', () => {
   });
 
   test('should detect dirty state when parameter is changed', async ({ page }) => {
-    // Find number input for Length
-    const lengthInput = page.locator("input[type='number']").first();
-    await expect(lengthInput).toBeVisible();
+    // Find number input for Hexagon Radius
+    const radiusInput = page.locator("input[type='number']").first();
+    await expect(radiusInput).toBeVisible();
 
     // Initial state: preview up-to-date
     const updateBtn = page.locator("button:has-text('Preview Up-to-Date'), button:has-text('Update 3D Preview')");
     await expect(updateBtn).toBeVisible();
 
     // Edit value
-    await lengthInput.fill('160');
+    await radiusInput.fill('26');
 
     // Should now indicate "Update 3D Preview"
     await expect(page.locator("button:has-text('Update 3D Preview')")).toBeVisible();

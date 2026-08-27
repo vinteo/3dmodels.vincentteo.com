@@ -96,14 +96,29 @@ export class OnshapeClient {
     }
 
     const encConfig = encodeURIComponent(configuration);
-    const url = `${this.baseUrl}/api/v6/partstudios/d/${model.documentId}/w/${model.workspaceId}/e/${model.elementId}/stl?configuration=${encConfig}&mode=${mode}&units=${units}`;
+    const configQuery = configuration ? `&configuration=${encConfig}` : '';
+    const url = `${this.baseUrl}/api/v6/partstudios/d/${model.documentId}/w/${model.workspaceId}/e/${model.elementId}/stl?mode=${mode}&units=${units}${configQuery}`;
 
-    const res = await fetch(url, {
+    let res = await fetch(url, {
       headers: {
         Authorization: this.getAuthHeader().Authorization,
         Accept: 'application/octet-stream'
-      }
+      },
+      redirect: 'manual'
     });
+
+    // Onshape issues 307 redirects to regional cluster nodes (e.g. cad-aps2.onshape.com)
+    if (res.status === 307 || res.status === 302) {
+      const redirectUrl = res.headers.get('Location');
+      if (redirectUrl) {
+        res = await fetch(redirectUrl, {
+          headers: {
+            Authorization: this.getAuthHeader().Authorization,
+            Accept: 'application/octet-stream'
+          }
+        });
+      }
+    }
 
     if (!res.ok) {
       const err = await res.text();
@@ -129,14 +144,28 @@ export class OnshapeClient {
     }
 
     const encConfig = encodeURIComponent(configuration);
-    const url = `${this.baseUrl}/api/v6/partstudios/d/${model.documentId}/w/${model.workspaceId}/e/${model.elementId}/gltf?configuration=${encConfig}`;
+    const configQuery = configuration ? `?configuration=${encConfig}` : '';
+    const url = `${this.baseUrl}/api/v6/partstudios/d/${model.documentId}/w/${model.workspaceId}/e/${model.elementId}/gltf${configQuery}`;
 
-    const res = await fetch(url, {
+    let res = await fetch(url, {
       headers: {
         Authorization: this.getAuthHeader().Authorization,
         Accept: 'model/gltf-binary, model/gltf+json, application/octet-stream'
-      }
+      },
+      redirect: 'manual'
     });
+
+    if (res.status === 307 || res.status === 302) {
+      const redirectUrl = res.headers.get('Location');
+      if (redirectUrl) {
+        res = await fetch(redirectUrl, {
+          headers: {
+            Authorization: this.getAuthHeader().Authorization,
+            Accept: 'model/gltf-binary, model/gltf+json, application/octet-stream'
+          }
+        });
+      }
+    }
 
     // If direct gltf is not supported for this element, fall back to STL preview
     if (!res.ok) {
