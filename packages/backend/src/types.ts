@@ -23,6 +23,8 @@ export interface ParameterDefinition {
   step?: number;
   options?: ParameterOption[];
   description?: string;
+  group?: string;
+  dependsOn?: string;
 }
 
 export interface ModelConfig {

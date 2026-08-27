@@ -148,6 +148,8 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-5">
         {model.parameters.map((param) => {
           const val = currentValues[param.id] ?? param.default;
+          const isEnabled = param.dependsOn ? Boolean(currentValues[param.dependsOn]) : true;
+          const isDependent = Boolean(param.dependsOn);
 
           if (param.type === 'quantity') {
             const numVal = Number(val);
@@ -156,13 +158,25 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
             const step = param.step ?? 1;
 
             return (
-              <div key={param.id} className="space-y-1.5">
+              <div
+                key={param.id}
+                className={`space-y-1.5 transition-all duration-200 ${
+                  isDependent ? 'ml-3 pl-3 border-l-2 border-slate-800/80' : ''
+                } ${!isEnabled ? 'opacity-40 pointer-events-none' : ''}`}
+              >
                 <div className="flex items-center justify-between text-xs">
                   <label
                     htmlFor={`param-${param.id}`}
-                    className="font-bold text-slate-200 flex items-center gap-1.5"
+                    className={`font-bold flex items-center gap-1.5 ${
+                      isEnabled ? 'text-slate-200' : 'text-slate-500'
+                    }`}
                   >
                     {param.name}
+                    {!isEnabled && (
+                      <span className="text-[10px] font-normal text-slate-500 italic">
+                        (Disabled)
+                      </span>
+                    )}
                     {param.description && (
                       <span title={param.description} className="text-slate-500 cursor-help">
                         <Info className="w-3 h-3" />
@@ -176,9 +190,10 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                       min={min}
                       max={max}
                       step={step}
+                      disabled={!isEnabled}
                       value={numVal}
                       onChange={(e) => handleChange(param.id, parseFloat(e.target.value) || min)}
-                      className="w-16 bg-slate-950 border border-slate-800 rounded-lg px-2 py-0.5 text-right text-xs font-mono font-bold text-fuchsia-300 focus:outline-none focus:border-fuchsia-500"
+                      className="w-16 bg-slate-950 border border-slate-800 rounded-lg px-2 py-0.5 text-right text-xs font-mono font-bold text-fuchsia-300 focus:outline-none focus:border-fuchsia-500 disabled:text-slate-600 disabled:border-slate-900"
                     />
                     <span className="text-[11px] font-mono text-slate-400 font-semibold">
                       {param.unit === 'millimeter' ? 'mm' : param.unit || ''}
@@ -191,9 +206,10 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                   min={min}
                   max={max}
                   step={step}
+                  disabled={!isEnabled}
                   value={numVal}
                   onChange={(e) => handleChange(param.id, parseFloat(e.target.value))}
-                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 />
 
                 <div className="flex justify-between text-[10px] text-slate-500 font-mono">
@@ -206,18 +222,29 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
 
           if (param.type === 'enum') {
             return (
-              <div key={param.id} className="space-y-1.5">
+              <div
+                key={param.id}
+                className={`space-y-1.5 transition-all duration-200 ${
+                  isDependent ? 'ml-3 pl-3 border-l-2 border-slate-800/80' : ''
+                } ${!isEnabled ? 'opacity-40 pointer-events-none' : ''}`}
+              >
                 <label
                   htmlFor={`param-${param.id}`}
                   className="block text-xs font-bold text-slate-200"
                 >
                   {param.name}
+                  {!isEnabled && (
+                    <span className="ml-1.5 text-[10px] font-normal text-slate-500 italic">
+                      (Disabled)
+                    </span>
+                  )}
                 </label>
                 <select
                   id={`param-${param.id}`}
                   value={String(val)}
+                  disabled={!isEnabled}
                   onChange={(e) => handleChange(param.id, e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-fuchsia-500 cursor-pointer"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-fuchsia-500 cursor-pointer disabled:text-slate-600 disabled:border-slate-900"
                 >
                   {param.options?.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -238,7 +265,7 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                 className="flex items-center justify-between py-1"
               >
                 <div>
-                  <span className="block text-xs font-bold text-slate-200">
+                  <span className="block text-xs font-bold text-white">
                     {param.name}
                   </span>
                   {param.description && (
