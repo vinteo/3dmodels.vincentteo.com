@@ -57,12 +57,13 @@ describe('ParameterControls Component', () => {
         onChangeValues={onChangeValues}
         onApply={onApply}
         onOpenExport={onOpenExport}
+        onOpenModelDrawer={vi.fn()}
         isDirty={false}
         loading={false}
       />
     );
 
-    expect(screen.getByText('Customization')).toBeInTheDocument();
+    expect(screen.getByText('Parameters')).toBeInTheDocument();
     expect(screen.getByLabelText('Length')).toBeInTheDocument();
     expect(screen.getByLabelText('Dividers')).toBeInTheDocument();
     expect(screen.getByText('Chamfer Base')).toBeInTheDocument();
@@ -79,6 +80,7 @@ describe('ParameterControls Component', () => {
         onChangeValues={onChangeValues}
         onApply={vi.fn()}
         onOpenExport={vi.fn()}
+        onOpenModelDrawer={vi.fn()}
         isDirty={false}
         loading={false}
       />
@@ -104,6 +106,7 @@ describe('ParameterControls Component', () => {
         onChangeValues={vi.fn()}
         onApply={vi.fn()}
         onOpenExport={onOpenExport}
+        onOpenModelDrawer={vi.fn()}
         isDirty={false}
         loading={false}
       />

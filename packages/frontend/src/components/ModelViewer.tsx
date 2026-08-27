@@ -271,9 +271,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full min-h-[460px] lg:min-h-[560px] rounded-3xl overflow-hidden bg-[#0c0919] border-2 border-slate-800/80 shadow-2xl flex flex-col justify-between ${
-        isFullscreen ? 'rounded-none border-0' : ''
-      }`}
+      className="relative w-full h-full min-h-0 overflow-hidden bg-[#0c0919] flex flex-col justify-between"
     >
       {/* 3D WebGL Canvas */}
       <canvas

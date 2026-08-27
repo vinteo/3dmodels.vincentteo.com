@@ -7,12 +7,16 @@ import { ModelViewer } from './components/ModelViewer';
 import { ParameterControls } from './components/ParameterControls';
 import { ExportModal } from './components/ExportModal';
 import { Footer } from './components/Footer';
-import { Sparkles, Box, Cpu } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [models, setModels] = useState<ModelConfig[]>([]);
   const [mockMode, setMockMode] = useState<boolean>(false);
   const [selectedModelId, setSelectedModelId] = useState<string>('');
+
+  // UI state
+  const [modelDrawerOpen, setModelDrawerOpen] = useState<boolean>(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
 
   // Parameter State: user edited vs last previewed
   const [currentValues, setCurrentValues] = useState<Record<string, number | string | boolean>>({});
@@ -22,9 +26,6 @@ export const App: React.FC = () => {
   const [meshData, setMeshData] = useState<ArrayBuffer | null>(null);
   const [loadingPreview, setLoadingPreview] = useState<boolean>(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
-
-  // Modal State
-  const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
 
   // Load models catalog on mount
   useEffect(() => {
@@ -89,7 +90,7 @@ export const App: React.FC = () => {
     return false;
   }, [activeModel, currentValues, appliedValues]);
 
-  // User explicitly triggers preview update
+  // User triggers preview update
   const handleApplyParameters = () => {
     if (!activeModel) return;
     loadPreview(activeModel, currentValues);
@@ -107,85 +108,61 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#120e25] text-slate-200 antialiased selection:bg-violet-500 selection:text-white">
-      {/* Sticky Header */}
-      <Header mockMode={mockMode} />
+    <div className="h-screen w-screen overflow-hidden flex flex-col bg-[#120e25] text-slate-200 antialiased selection:bg-violet-500 selection:text-white">
+      {/* 1. Fixed Top Header */}
+      <Header
+        mockMode={mockMode}
+        onOpenModelDrawer={() => setModelDrawerOpen(true)}
+        activeModelName={activeModel?.name || ''}
+      />
 
-      <main className="flex-grow pb-24">
-        {/* Ambient background glow effects */}
-        <div className="fixed top-20 left-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-[140px] pointer-events-none -z-10" />
-        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-[140px] pointer-events-none -z-10" />
+      {/* 2. Middle Body: Sidebar + Full Viewport 3D Canvas */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Left Sidebar: Customisation Parameters */}
+        {activeModel && (
+          <ParameterControls
+            model={activeModel}
+            currentValues={currentValues}
+            onChangeValues={setCurrentValues}
+            onApply={handleApplyParameters}
+            onOpenExport={() => setExportModalOpen(true)}
+            onOpenModelDrawer={() => setModelDrawerOpen(true)}
+            isDirty={isDirty}
+            loading={loadingPreview}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
+        )}
 
-        <div className="mx-auto max-w-7xl px-6 pt-8 space-y-8">
-          {/* Hero / Overview Banner */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-800/80 pb-8 gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-300 text-xs font-bold mb-3">
-                <Sparkles className="w-3.5 h-3.5" />
-                Cloud CAD Customizer
-              </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-                Parametric 3D Models
-              </h1>
-              <p className="mt-2 text-sm sm:text-base text-slate-400 max-w-2xl leading-relaxed font-medium">
-                Live Onshape CAD document integration. Customize dimensions, inspect full 3D render previews in real-time, and download production-ready STL or STEP files.
-              </p>
-            </div>
-
-            {/* Quick stats pills */}
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs font-semibold text-slate-300">
-                <Cpu className="w-3.5 h-3.5 text-pink-400" />
-                Onshape API V6
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs font-semibold text-slate-300">
-                <Box className="w-3.5 h-3.5 text-violet-400" />
-                WebGL 3D Studio
-              </div>
-            </div>
-          </div>
-
-          {/* Model Selector Cards */}
-          {models.length > 0 && (
-            <section aria-label="Available CAD Models">
-              <ModelSelector
-                models={models}
-                selectedModelId={selectedModelId}
-                onSelectModel={handleSelectModel}
-              />
-            </section>
-          )}
-
-          {/* Main 3D Viewport & Parameter Controls Layout */}
-          {activeModel && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* 3D Viewport Column (8 cols on large screens) */}
-              <div className="lg:col-span-8 w-full">
-                <ModelViewer
-                  meshData={meshData}
-                  loading={loadingPreview}
-                  error={previewError}
-                  modelName={activeModel.name}
-                  onRefresh={handleApplyParameters}
-                />
-              </div>
-
-              {/* Parameter Controls Column (4 cols on large screens) */}
-              <div className="lg:col-span-4 w-full">
-                <ParameterControls
-                  model={activeModel}
-                  currentValues={currentValues}
-                  onChangeValues={setCurrentValues}
-                  onApply={handleApplyParameters}
-                  onOpenExport={() => setExportModalOpen(true)}
-                  isDirty={isDirty}
-                  loading={loadingPreview}
-                />
-              </div>
+        {/* 3D Preview Canvas: Takes up all remaining space */}
+        <main className="flex-1 h-full min-w-0 relative">
+          {activeModel ? (
+            <ModelViewer
+              meshData={meshData}
+              loading={loadingPreview}
+              error={previewError}
+              modelName={activeModel.name}
+              onRefresh={handleApplyParameters}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-sm text-slate-500">
+              Loading 3D Model...
             </div>
           )}
-        </div>
-      </main>
+        </main>
+
+        {/* Left Pop-out Model Selection Drawer */}
+        <ModelSelector
+          isOpen={modelDrawerOpen}
+          onClose={() => setModelDrawerOpen(false)}
+          models={models}
+          selectedModelId={selectedModelId}
+          onSelectModel={handleSelectModel}
+        />
+      </div>
+
+      {/* 3. Minimal Bottom Footer */}
+      <Footer />
 
       {/* Export Modal Dialog */}
       {activeModel && (
@@ -197,9 +174,6 @@ export const App: React.FC = () => {
           onTriggerExport={handleExport}
         />
       )}
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 };

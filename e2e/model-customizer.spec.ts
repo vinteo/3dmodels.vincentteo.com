@@ -1,39 +1,36 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('3D Models Customizer & Exporter E2E Flow', () => {
+test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
 
-  test('should display brand identity and header consistent with vincentteo.com', async ({ page }) => {
-    // Verify Brand title & 3D badge in header
-    await expect(page.locator("header").locator("text=Vin's Space")).toBeVisible();
-    await expect(page.locator("header").locator("text=3D Models")).toBeVisible();
-
-    // Verify main nav links
-    await expect(page.locator("a:has-text('Open Source')").first()).toBeVisible();
-    await expect(page.locator("a:has-text('Games')").first()).toBeVisible();
-    await expect(page.locator("a:has-text('Blog')").first()).toBeVisible();
-    await expect(page.locator("a:has-text('Travel')").first()).toBeVisible();
-    await expect(page.locator("a:has-text('Get in Touch')").first()).toBeVisible();
+  test('should display minimalist header with logo and title', async ({ page }) => {
+    // Verify compact header with Vin's Space 3D Models title
+    await expect(page.locator("header").locator("text=Vin's Space 3D Models")).toBeVisible();
+    await expect(page.locator("button[title='Open Model Catalog']")).toBeVisible();
   });
 
-  test('should display model catalog cards and allow switching models', async ({ page }) => {
-    // Check available models
-    await expect(page.locator("text=Kumiko Woodcraft Pattern").first()).toBeVisible();
-    await expect(page.locator("text=Heavy-Duty Shelf Bracket").first()).toBeVisible();
-    await expect(page.locator("text=PC Cable Management Comb").first()).toBeVisible();
+  test('should open left model pop-out drawer and switch models', async ({ page }) => {
+    // Open left model catalog drawer
+    await page.click("button:has-text('Models')");
 
-    // Switch to Shelf Bracket
-    await page.click("text=Heavy-Duty Shelf Bracket");
+    // Drawer should appear
+    await expect(page.locator("text=Model Catalog")).toBeVisible();
+    await expect(page.locator("button:has-text('Kumiko Woodcraft Pattern')")).toBeVisible();
+    await expect(page.locator("button:has-text('Heavy-Duty Shelf Bracket')")).toBeVisible();
 
-    // Verify parameter controls updated for Shelf Bracket
+    // Select Shelf Bracket from pop-out drawer
+    await page.click("button:has-text('Heavy-Duty Shelf Bracket')");
+
+    // Drawer closes and left sidebar shows parameters for Shelf Bracket
+    await expect(page.locator("text=Model Catalog")).not.toBeVisible();
     await expect(page.locator("text=Shelf Depth (Arm)")).toBeVisible();
     await expect(page.locator("text=Wall Mount Height")).toBeVisible();
   });
 
-  test('should render 3D WebGL viewport canvas with toolbar controls', async ({ page }) => {
-    // Verify 3D canvas element is present and rendered
+  test('should render full viewport 3D WebGL canvas with controls', async ({ page }) => {
+    // Verify 3D canvas element fills viewport
     const canvas = page.locator('canvas');
     await expect(canvas).toBeVisible();
 
@@ -44,9 +41,9 @@ test.describe('3D Models Customizer & Exporter E2E Flow', () => {
     await expect(page.locator("button[title='Reset Camera View']")).toBeVisible();
   });
 
-  test('should detect dirty state when parameter is changed', async ({ page }) => {
-    // Find number input for Hexagon Radius
-    const radiusInput = page.locator("input[type='number']").first();
+  test('should adjust parameter in left sidebar and detect dirty state', async ({ page }) => {
+    // Find number input for Hexagon Radius in left sidebar
+    const radiusInput = page.locator("aside input[type='number']").first();
     await expect(radiusInput).toBeVisible();
 
     // Initial state: preview up-to-date
@@ -54,22 +51,22 @@ test.describe('3D Models Customizer & Exporter E2E Flow', () => {
     await expect(updateBtn).toBeVisible();
 
     // Edit value
-    await radiusInput.fill('26');
+    await radiusInput.fill('28');
 
     // Should now indicate "Update 3D Preview"
     await expect(page.locator("button:has-text('Update 3D Preview')")).toBeVisible();
   });
 
-  test('should open export modal and allow format selection', async ({ page }) => {
-    // Click Export button
-    await page.click("button:has-text('Export STL / STEP Files')");
+  test('should open export modal and switch format tabs', async ({ page }) => {
+    // Click Export button in left sidebar
+    await page.click("aside button:has-text('Export STL / STEP Files')");
 
     // Modal should be visible
     await expect(page.locator("text=Export Customized Model")).toBeVisible();
     await expect(page.locator("text=STL (3D Printing)")).toBeVisible();
     await expect(page.locator("text=STEP (CAD / CNC)")).toBeVisible();
 
-    // Switch to STEP format tab
+    // Switch to STEP tab
     await page.click("text=STEP (CAD / CNC)");
     await expect(page.locator("text=STEP Protocol")).toBeVisible();
     await expect(page.locator("button:has-text('Download STEP Model')")).toBeVisible();
