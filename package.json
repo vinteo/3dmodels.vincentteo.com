@@ -1,0 +1,31 @@
+{
+  "name": "3dmodels-vincentteo-com",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Parametric 3D Model Customizer & Exporter powered by Onshape and Cloudflare Workers",
+  "workspaces": [
+    "packages/frontend",
+    "packages/backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"worker,frontend\" -c \"cyan,magenta\" \"npm run dev -w packages/backend\" \"npm run dev -w packages/frontend\"",
+    "dev:frontend": "npm run dev -w packages/frontend",
+    "dev:backend": "npm run dev -w packages/backend",
+    "build": "npm run build -w packages/backend && npm run build -w packages/frontend",
+    "build:frontend": "npm run build -w packages/frontend",
+    "build:backend": "npm run build -w packages/backend",
+    "lint": "npm run lint -w packages/frontend && npm run lint -w packages/backend",
+    "typecheck": "npm run typecheck -w packages/frontend && npm run typecheck -w packages/backend",
+    "test": "npm run test -w packages/backend && npm run test -w packages/frontend",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^20.19.43",
+    "concurrently": "^9.1.0",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

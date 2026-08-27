@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Models Customizer & Exporter | Vincent Teo</title>
+    <meta name="description" content="Parametric 3D CAD model customizer powered by Onshape and Cloudflare Workers. Customize dimensions in real-time and export production-ready STL and STEP files." />
+    
+    <!-- OpenGraph / Social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="3D Models Customizer & Exporter | Vincent Teo" />
+    <meta property="og:description" content="Interactive 3D model customization and direct STL/STEP CAD export powered by Onshape." />
+    <meta property="og:image" content="https://vincentteo.com/assets/images/profile.jpg" />
+
+    <!-- Google Fonts (Outfit + Inter matching vincentteo.com) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://vincentteo.com/assets/images/favicon.png" />
+  </head>
+  <body class="bg-[#120e25] text-slate-200 antialiased selection:bg-violet-500 selection:text-white flex flex-col min-h-screen">
+    <div id="root" class="flex flex-col min-h-screen"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
