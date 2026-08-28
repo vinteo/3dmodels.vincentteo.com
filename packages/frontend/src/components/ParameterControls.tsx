@@ -10,7 +10,8 @@ import {
   Layers,
   ChevronLeft,
   ChevronRight,
-  Share2
+  Share2,
+  CircleDot
 } from 'lucide-react';
 
 interface ParameterControlsProps {
@@ -193,6 +194,165 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
       {/* Scrollable Parameters Form */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5">
         {model.parameters.map((param) => {
+          // Render Keychain Ring group in a dedicated styled card at include_keychain_ring
+          if (param.id === 'include_keychain_ring') {
+            const isRingIncluded = Boolean(currentValues['include_keychain_ring'] ?? param.default);
+            const ringThicknessParam = model.parameters.find((p) => p.id === 'ring_thickness');
+            const ringFilletParam = model.parameters.find((p) => p.id === 'ring_fillet');
+
+            return (
+              <div
+                key="keychain-ring-group"
+                className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800/90 space-y-3 shadow-inner"
+              >
+                {/* Header with Title and Toggle Switch */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <CircleDot className="w-3.5 h-3.5 text-fuchsia-400" />
+                    <div>
+                      <span className="text-xs font-bold text-white block">Keychain Ring</span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={isRingIncluded}
+                    onClick={() => handleChange(param.id, !isRingIncluded)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      isRingIncluded ? 'bg-fuchsia-500' : 'bg-slate-800'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        isRingIncluded ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {param.description && (
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    {param.description}
+                  </p>
+                )}
+
+                {/* Sub-parameters: Ring Thickness & Ring Fillet */}
+                {(ringThicknessParam || ringFilletParam) && (
+                  <div
+                    className={`space-y-3 pt-2.5 border-t border-slate-800/80 transition-all duration-200 ${
+                      !isRingIncluded ? 'opacity-40 pointer-events-none' : ''
+                    }`}
+                  >
+                    {ringThicknessParam && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <label
+                            htmlFor={`param-${ringThicknessParam.id}`}
+                            className={`font-bold flex items-center gap-1.5 ${
+                              isRingIncluded ? 'text-slate-200' : 'text-slate-500'
+                            }`}
+                          >
+                            {ringThicknessParam.name}
+                            {!isRingIncluded && (
+                              <span className="text-[10px] font-normal text-slate-500 italic">
+                                (Disabled)
+                              </span>
+                            )}
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="number"
+                              id={`param-${ringThicknessParam.id}`}
+                              min={ringThicknessParam.min ?? 1}
+                              max={ringThicknessParam.max ?? 10}
+                              step={ringThicknessParam.step ?? 0.5}
+                              disabled={!isRingIncluded}
+                              value={Number(currentValues[ringThicknessParam.id] ?? ringThicknessParam.default)}
+                              onChange={(e) => handleChange(ringThicknessParam.id, parseFloat(e.target.value) || (ringThicknessParam.min ?? 1))}
+                              className="w-16 bg-slate-950 border border-slate-800 rounded-lg px-2 py-0.5 text-right text-xs font-mono font-bold text-fuchsia-300 focus:outline-none focus:border-fuchsia-500 disabled:text-slate-600 disabled:border-slate-900"
+                            />
+                            <span className="text-[11px] font-mono text-slate-400 font-semibold">
+                              {ringThicknessParam.unit === 'millimeter' ? 'mm' : ringThicknessParam.unit || ''}
+                            </span>
+                          </div>
+                        </div>
+
+                        <input
+                          type="range"
+                          min={ringThicknessParam.min ?? 1}
+                          max={ringThicknessParam.max ?? 10}
+                          step={ringThicknessParam.step ?? 0.5}
+                          disabled={!isRingIncluded}
+                          value={Number(currentValues[ringThicknessParam.id] ?? ringThicknessParam.default)}
+                          onChange={(e) => handleChange(ringThicknessParam.id, parseFloat(e.target.value))}
+                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                        />
+
+                        <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                          <span>{ringThicknessParam.min ?? 1} mm</span>
+                          <span>{ringThicknessParam.max ?? 10} mm</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {ringFilletParam && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <label
+                            htmlFor={`param-${ringFilletParam.id}`}
+                            className={`font-bold flex items-center gap-1.5 ${
+                              isRingIncluded ? 'text-slate-200' : 'text-slate-500'
+                            }`}
+                          >
+                            {ringFilletParam.name}
+                            {!isRingIncluded && (
+                              <span className="text-[10px] font-normal text-slate-500 italic">
+                                (Disabled)
+                              </span>
+                            )}
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="number"
+                              id={`param-${ringFilletParam.id}`}
+                              min={ringFilletParam.min ?? 0}
+                              max={ringFilletParam.max ?? 1}
+                              step={ringFilletParam.step ?? 0.05}
+                              disabled={!isRingIncluded}
+                              value={Number(currentValues[ringFilletParam.id] ?? ringFilletParam.default)}
+                              onChange={(e) => handleChange(ringFilletParam.id, parseFloat(e.target.value) || (ringFilletParam.min ?? 0))}
+                              className="w-16 bg-slate-950 border border-slate-800 rounded-lg px-2 py-0.5 text-right text-xs font-mono font-bold text-fuchsia-300 focus:outline-none focus:border-fuchsia-500 disabled:text-slate-600 disabled:border-slate-900"
+                            />
+                            <span className="text-[11px] font-mono text-slate-400 font-semibold">
+                              {ringFilletParam.unit === 'millimeter' ? 'mm' : ringFilletParam.unit || ''}
+                            </span>
+                          </div>
+                        </div>
+
+                        <input
+                          type="range"
+                          min={ringFilletParam.min ?? 0}
+                          max={ringFilletParam.max ?? 1}
+                          step={ringFilletParam.step ?? 0.05}
+                          disabled={!isRingIncluded}
+                          value={Number(currentValues[ringFilletParam.id] ?? ringFilletParam.default)}
+                          onChange={(e) => handleChange(ringFilletParam.id, parseFloat(e.target.value))}
+                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                        />
+
+                        <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                          <span>{ringFilletParam.min ?? 0} mm</span>
+                          <span>{ringFilletParam.max ?? 1} mm</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
           // If this is a section parameter, render all 6 in a unified Section Patterns card at section_1
           if (param.id === 'section_1' && hasSections) {
             return (
@@ -332,8 +492,13 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
             );
           }
 
-          // Skip section_2 through section_6 and hex_design_thickness since they are rendered inside the Section Patterns card
-          if ((param.id.startsWith('section_') && param.id !== 'section_1') || (param.id === 'hex_design_thickness' && hasSections)) {
+          // Skip parameters rendered inside cards
+          if (
+            (param.id.startsWith('section_') && param.id !== 'section_1') ||
+            (param.id === 'hex_design_thickness' && hasSections) ||
+            param.id === 'ring_thickness' ||
+            param.id === 'ring_fillet'
+          ) {
             return null;
           }
 
