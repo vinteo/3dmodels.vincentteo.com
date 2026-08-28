@@ -99,33 +99,40 @@ export function createStrutDrawing(
     .close();
 }
 
+export type Point2D = [number, number];
+export type Triangle2D = [Point2D, Point2D, Point2D];
+
 /**
  * Generates the authentic 2D Asa-no-ha lattice pattern drawings for a 60° Kumiko wedge sector.
- * Directly constructed between the two sector vertices v1 and v2 for flawless geometric alignment.
+ * @param patternType Infill pattern type ('0' = empty, '1' = classic Asa-no-ha, '2' = Ryuso Asa-no-ha)
+ * @param spokeTriangle [center, spoke1, spoke2] - Vertices of the outer spoke wedge triangle
+ * @param innerTriangle [center, inner1, inner2] - Vertices of the inner hex frame wedge triangle
+ * @param designThick Infill strut thickness
  */
 function createSectorPattern(
   patternType: string | number,
-  v1: [number, number],
-  v2: [number, number],
-  inner1: [number, number], // inner vertex 1 at hex frame edge
-  inner2: [number, number], // inner vertex 2 at hex frame edge
+  spokeTriangle: Triangle2D,
+  innerTriangle: Triangle2D,
   designThick: number
 ): Drawing[] {
   const pType = String(patternType);
   const struts: Drawing[] = [];
 
-  // Midpoints of boundary geometry
-  const midSpoke1: [number, number] = [v1[0] / 2, v1[1] / 2];
-  const midSpoke2: [number, number] = [v2[0] / 2, v2[1] / 2];
-  const midOuter: [number, number] = [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
+  const [center, v1, v2] = spokeTriangle;
+  const [, inner1, inner2] = innerTriangle;
+
+  // Midpoints of spoke boundary geometry
+  const midSpoke1: Point2D = [(center[0] + v1[0]) / 2, (center[1] + v1[1]) / 2];
+  const midSpoke2: Point2D = [(center[0] + v2[0]) / 2, (center[1] + v2[1]) / 2];
+  const midOuter: Point2D = [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
 
   // Midpoints of inner boundary geometry
-  const midInner1: [number, number] = [inner1[0] / 2, inner1[1] / 2];
-  const midInner2: [number, number] = [inner2[0] / 2, inner2[1] / 2];
-  const midInnerOuter: [number, number] = [(inner1[0] + inner2[0]) / 2, (inner1[1] + inner2[1]) / 2];
+  const midInner1: Point2D = [(center[0] + inner1[0]) / 2, (center[1] + inner1[1]) / 2];
+  const midInner2: Point2D = [(center[0] + inner2[0]) / 2, (center[1] + inner2[1]) / 2];
+  const midInnerOuter: Point2D = [(inner1[0] + inner2[0]) / 2, (inner1[1] + inner2[1]) / 2];
 
   // Centroid Y-junction apex C of the equilateral wedge sub-triangle
-  const C: [number, number] = getCentroid(midSpoke1, midSpoke2, midOuter);
+  const C: Point2D = getCentroid(midSpoke1, midSpoke2, midOuter);
 
   switch (pType) {
     case '0':
@@ -134,7 +141,7 @@ function createSectorPattern(
 
     case '1': {
       // 1: Classic Asa-no-ha (Tripod branching from apex C)
-      const branchCenter = createStrutDrawing(C, [0, 0], designThick);
+      const branchCenter = createStrutDrawing(C, center, designThick);
       const branchSpoke1 = createStrutDrawing(C, v1, designThick);
       const branchSpoke2 = createStrutDrawing(C, v2, designThick);
 
@@ -146,7 +153,7 @@ function createSectorPattern(
 
     case '2': {
       // 2: Ryuso Asa-no-ha (Classic tripod + secondary framing struts)
-      const branchCenter = createStrutDrawing(C, [0, 0], designThick);
+      const branchCenter = createStrutDrawing(C, center, designThick);
       const branchSpoke1 = createStrutDrawing(C, v1, designThick);
       const branchSpoke2 = createStrutDrawing(C, v2, designThick);
 
@@ -154,9 +161,9 @@ function createSectorPattern(
       if (branchSpoke1) struts.push(branchSpoke1);
       if (branchSpoke2) struts.push(branchSpoke2);
 
-      const diag1 = createStrutDrawing(midInner1, midInnerOuter, designThick);
-      const diag2 = createStrutDrawing(midInner2, midInnerOuter, designThick);
-      const diag3 = createStrutDrawing(midInner1, midInner2, designThick);
+      const diag1 = createStrutDrawing(midInner1, midInnerOuter, designThick, 'inner');
+      const diag2 = createStrutDrawing(midInner2, midInnerOuter, designThick, 'inner');
+      const diag3 = createStrutDrawing(midInner1, midInner2, designThick, 'inner');
 
       if (diag1) struts.push(diag1);
       if (diag2) struts.push(diag2);
@@ -288,14 +295,13 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
   let pattern2D: Drawing | null = null;
 
+  const center: Point2D = [0, 0];
   for (let i = 0; i < 6; i++) {
     const patternType = sections[i];
-    const v1 = spokeVertices[i];
-    const v2 = spokeVertices[(i + 1) % 6];
-    const inner1 = innerSpokeVertices[i];
-    const inner2 = innerSpokeVertices[(i + 1) % 6];
+    const spokeTriangle: Triangle2D = [center, spokeVertices[i], spokeVertices[(i + 1) % 6]];
+    const innerTriangle: Triangle2D = [center, innerSpokeVertices[i], innerSpokeVertices[(i + 1) % 6]];
 
-    const sectorStruts = createSectorPattern(patternType, v1, v2, inner1, inner2, tDesign);
+    const sectorStruts = createSectorPattern(patternType, spokeTriangle, innerTriangle, tDesign);
     for (const strut of sectorStruts) {
       pattern2D = pattern2D ? pattern2D.fuse(strut) : strut;
     }
