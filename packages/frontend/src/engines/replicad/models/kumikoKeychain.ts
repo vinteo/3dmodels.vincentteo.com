@@ -138,51 +138,43 @@ export function createSectorPattern(
   // Centroid Y-junction apex C of the equilateral wedge sub-triangle
   const C: Point2D = getCentroid(midSpoke1, midSpoke2, midOuter);
 
+  let sector2D: Drawing | null = null;
+  const struts: (Drawing | null)[] = [];
+
+  // Classic Asa-no-ha tripod branches from apex C
+  const branchCenter = createStrutDrawing(C, center, designThick);
+  const branchSpoke1 = createStrutDrawing(C, v1, designThick);
+  const branchSpoke2 = createStrutDrawing(C, v2, designThick);
+
   switch (pType) {
-    case '0':
-      return null;
-
-    case '1': {
+    case '1':
       // 1: Classic Asa-no-ha (Tripod branching from apex C)
-      let sector2D: Drawing | null = null;
-      const branchCenter = createStrutDrawing(C, center, designThick);
-      const branchSpoke1 = createStrutDrawing(C, v1, designThick);
-      const branchSpoke2 = createStrutDrawing(C, v2, designThick);
-
-      for (const strut of [branchCenter, branchSpoke1, branchSpoke2]) {
-        if (strut) sector2D = sector2D ? sector2D.fuse(strut) : strut;
-      }
-
-      if (!sector2D) return null;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sketch = sector2D.sketchOnPlane('XY') as any;
-      return sketch.extrude(height);
-    }
+      struts.push(branchCenter, branchSpoke1, branchSpoke2);
+      break;
 
     case '2': {
       // 2: Ryuso Asa-no-ha (Classic tripod + secondary framing struts)
-      let sector2D: Drawing | null = null;
-      const branchCenter = createStrutDrawing(C, center, designThick);
-      const branchSpoke1 = createStrutDrawing(C, v1, designThick);
-      const branchSpoke2 = createStrutDrawing(C, v2, designThick);
-
       const diag1 = createStrutDrawing(midInner1, midInnerOuter, designThick, 'outer');
       const diag2 = createStrutDrawing(midInner2, midInnerOuter, designThick, 'inner');
       const diag3 = createStrutDrawing(midInner1, midInner2, designThick, 'inner');
-
-      for (const strut of [branchCenter, branchSpoke1, branchSpoke2, diag1, diag2, diag3]) {
-        if (strut) sector2D = sector2D ? sector2D.fuse(strut) : strut;
-      }
-
-      if (!sector2D) return null;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sketch = sector2D.sketchOnPlane('XY') as any;
-      return sketch.extrude(height);
+      struts.push(branchCenter, branchSpoke1, branchSpoke2, diag1, diag2, diag3);
+      break;
     }
 
     default:
       return null;
   }
+
+  for (const strut of struts) {
+    if (strut) {
+      sector2D = sector2D ? sector2D.fuse(strut) : strut;
+    }
+  }
+
+  if (!sector2D) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sketch = sector2D.sketchOnPlane('XY') as any;
+  return sketch.extrude(height);
 }
 
 /**
