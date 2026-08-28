@@ -152,7 +152,33 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   // ==========================================
   // Part 1: Hexagonal Perimeter Frame
   // ==========================================
-  const outerHex = drawPolysides(rOuter, 6);
+  const ringInnerR = 3;
+  const ringOuterR = ringInnerR + tRing;
+  const ringCenterY = rOuter + ringOuterR - 1.5;
+
+  // Split outerHex edges at the exact intersection with ringOuter so the 1.5mm contact
+  // section is an independent edge that remains sharp, while the rest of the edge is filleted
+  let outerHex: Drawing;
+  const cos30 = Math.cos(Math.PI / 6);
+
+  if (hasRing) {
+    const s = 1.5; // Exact contact offset along edge from top vertex (0, rOuter)
+    const pLeft: [number, number] = [-s * cos30, rOuter - s * 0.5];
+    const pRight: [number, number] = [s * cos30, rOuter - s * 0.5];
+
+    outerHex = draw([0, rOuter])
+      .lineTo(pLeft)
+      .lineTo([-rOuter * cos30, rOuter * 0.5])
+      .lineTo([-rOuter * cos30, -rOuter * 0.5])
+      .lineTo([0, -rOuter])
+      .lineTo([rOuter * cos30, -rOuter * 0.5])
+      .lineTo([rOuter * cos30, rOuter * 0.5])
+      .lineTo(pRight)
+      .close();
+  } else {
+    outerHex = drawPolysides(rOuter, 6);
+  }
+
   const innerHex = drawPolysides(rInner, 6);
   const frame2D = outerHex.cut(innerHex);
 
@@ -162,7 +188,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
   if (fHex > 0 && fHex < 0.6) {
     try {
-      // Fillet all outer perimeter edges of the hex frame, keeping inner frame walls sharp
+      // Fillet all free outer perimeter edges, but keep only the small contact section under the ring sharp
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hexSolid = hexSolid.fillet(fHex, (ef: any) =>
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -171,7 +197,9 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
           const x = pt?.x ?? pt?.[0] ?? 0;
           const y = pt?.y ?? pt?.[1] ?? 0;
           const dist = Math.hypot(x, y);
-          return dist >= rMidpoint - 0.1;
+          // Only the small contact segment under the ring loop (inside ringOuter) stays sharp
+          const isUnderRing = hasRing && Math.hypot(x, y - ringCenterY) < ringOuterR - 0.05;
+          return dist >= rMidpoint - 0.1 && !isUnderRing;
         })
       );
     } catch {
