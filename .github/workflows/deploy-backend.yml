@@ -1,17 +1,19 @@
-name: Deploy Backend to Cloudflare Workers
+name: Deploy Backend to Cloudflare Workers (Disabled)
 
+# Disabled for now - manual trigger only (inactive)
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'packages/backend/**'
-      - 'config/**'
-      - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'packages/backend/**'
+  #     - 'config/**'
+  #     - '.github/workflows/deploy-backend.yml'
 
 jobs:
   deploy:
     name: Deploy Worker
+    if: false # Disabled for now
     runs-on: ubuntu-latest
 
     steps:
