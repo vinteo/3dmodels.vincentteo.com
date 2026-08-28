@@ -55,8 +55,18 @@
         "default": "1",
         "group": "Section Patterns",
         "options": [
-          { "value": "0", "label": "Empty" },
-          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+          {
+            "value": "0",
+            "label": "Empty"
+          },
+          {
+            "value": "1",
+            "label": "Asa-no-ha (Hemp Leaf)"
+          },
+          {
+            "value": "2",
+            "label": "Ryuso Asa-no-ha"
+          }
         ],
         "description": "Lattice pattern for Section 1"
       },
@@ -67,8 +77,18 @@
         "default": "1",
         "group": "Section Patterns",
         "options": [
-          { "value": "0", "label": "Empty" },
-          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+          {
+            "value": "0",
+            "label": "Empty"
+          },
+          {
+            "value": "1",
+            "label": "Asa-no-ha (Hemp Leaf)"
+          },
+          {
+            "value": "2",
+            "label": "Ryuso Asa-no-ha"
+          }
         ],
         "description": "Lattice pattern for Section 2"
       },
@@ -79,8 +99,18 @@
         "default": "1",
         "group": "Section Patterns",
         "options": [
-          { "value": "0", "label": "Empty" },
-          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+          {
+            "value": "0",
+            "label": "Empty"
+          },
+          {
+            "value": "1",
+            "label": "Asa-no-ha (Hemp Leaf)"
+          },
+          {
+            "value": "2",
+            "label": "Ryuso Asa-no-ha"
+          }
         ],
         "description": "Lattice pattern for Section 3"
       },
@@ -91,8 +121,18 @@
         "default": "1",
         "group": "Section Patterns",
         "options": [
-          { "value": "0", "label": "Empty" },
-          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+          {
+            "value": "0",
+            "label": "Empty"
+          },
+          {
+            "value": "1",
+            "label": "Asa-no-ha (Hemp Leaf)"
+          },
+          {
+            "value": "2",
+            "label": "Ryuso Asa-no-ha"
+          }
         ],
         "description": "Lattice pattern for Section 4"
       },
@@ -103,8 +143,18 @@
         "default": "1",
         "group": "Section Patterns",
         "options": [
-          { "value": "0", "label": "Empty" },
-          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+          {
+            "value": "0",
+            "label": "Empty"
+          },
+          {
+            "value": "1",
+            "label": "Asa-no-ha (Hemp Leaf)"
+          },
+          {
+            "value": "2",
+            "label": "Ryuso Asa-no-ha"
+          }
         ],
         "description": "Lattice pattern for Section 5"
       },
@@ -115,8 +165,18 @@
         "default": "1",
         "group": "Section Patterns",
         "options": [
-          { "value": "0", "label": "Empty" },
-          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+          {
+            "value": "0",
+            "label": "Empty"
+          },
+          {
+            "value": "1",
+            "label": "Asa-no-ha (Hemp Leaf)"
+          },
+          {
+            "value": "2",
+            "label": "Ryuso Asa-no-ha"
+          }
         ],
         "description": "Lattice pattern for Section 6"
       },
@@ -139,7 +199,7 @@
         "unit": "millimeter",
         "default": 20,
         "min": 10,
-        "max": 50,
+        "max": 45,
         "step": 1,
         "group": "Hexagon Lattice",
         "description": "Outer radius of the hexagonal Kumiko boundary"

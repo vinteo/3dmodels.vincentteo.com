@@ -42,7 +42,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
   test('should adjust parameter in left sidebar and detect dirty state', async ({ page }) => {
     // Find number input for Hexagon Radius in left sidebar
-    const radiusInput = page.locator("aside input[type='number']").first();
+    const radiusInput = page.locator('#param-hex_radius');
     await expect(radiusInput).toBeVisible();
 
     // Initial state: preview up-to-date
