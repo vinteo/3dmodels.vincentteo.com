@@ -52,7 +52,7 @@ function createStrutDrawing(
 
 /**
  * Generates the 2D Asa-no-ha lattice pattern drawings for a 60° Kumiko wedge.
- * Sector is centered along the X-axis (spanning -30° to +30° between adjacent spokes).
+ * Base sector is centered along the positive X-axis (spanning -30° to +30°).
  */
 function createWedgePattern(
   patternType: string | number,
@@ -203,7 +203,8 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     const patternType = sections[i];
     const wedgeStruts = createWedgePattern(patternType, rOuter, tDesign);
     for (const strut of wedgeStruts) {
-      const rotatedStrut = strut.rotate(i * 60, [0, 0]);
+      // Rotate by i * 60 + 60 degrees to center exactly in sector between spoke i and spoke i+1
+      const rotatedStrut = strut.rotate(i * 60 + 60, [0, 0]);
       pattern2D = pattern2D ? pattern2D.fuse(rotatedStrut) : rotatedStrut;
     }
   }
