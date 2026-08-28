@@ -1,5 +1,6 @@
 import { setOC } from 'replicad';
 import opencascade from 'replicad-opencascadejs';
+import wasmUrl from 'replicad-opencascadejs/wasm?url';
 
 let occtPromise: Promise<unknown> | null = null;
 let isInitialized = false;
@@ -12,8 +13,15 @@ export async function ensureReplicadReady(): Promise<void> {
 
   if (!occtPromise) {
     occtPromise = (async () => {
-      // Initialize OpenCASCADE WebAssembly
-      const OC = await opencascade();
+      // Initialize OpenCASCADE WebAssembly with explicit Vite wasm asset URL
+      const OC = await opencascade({
+        locateFile: (path: string) => {
+          if (path.endsWith('.wasm')) {
+            return wasmUrl;
+          }
+          return path;
+        }
+      });
       setOC(OC);
       isInitialized = true;
     })();

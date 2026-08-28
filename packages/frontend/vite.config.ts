@@ -1,17 +1,17 @@
-import { defineConfig } from 'vitest/config';
+/// <reference types="vitest" />
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import wasm from 'vite-plugin-wasm';
-import topLevelAwait from 'vite-plugin-top-level-await';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     tailwindcss(),
-    react(),
-    wasm(),
-    topLevelAwait()
+    react()
   ],
+  optimizeDeps: {
+    exclude: ['replicad-opencascadejs']
+  },
   base: process.env.VITE_BASE_URL || '/',
   server: {
     port: 5173,
@@ -27,4 +27,4 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/__tests__/setup.ts'
   }
-});
+} as import('vite').UserConfig & { test: import('vitest/node').InlineConfig });
