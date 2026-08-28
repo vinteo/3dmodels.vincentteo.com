@@ -83,7 +83,6 @@ function createStrutDrawing(
  */
 function createSectorPattern(
   patternType: string | number,
-  center: [number, number],
   v1: [number, number],
   v2: [number, number],
   designThick: number
@@ -98,12 +97,11 @@ function createSectorPattern(
 
   // Centroid Y-junction apex C of the equilateral wedge sub-triangle
   const C: [number, number] = getCentroid(midSpoke1, midSpoke2, midOuter);
-  console.log(center)
   const struts: Drawing[] = [];
 
   // 1. Classic Asa-no-ha Y-junction (Tripod branching from apex C):
   // - Branch to center
-  const branchCenter = createStrutDrawing(C, center, designThick);
+  const branchCenter = createStrutDrawing(C, [0, 0], designThick);
   // - Branch to upper spoke vertex
   const branchSpoke1 = createStrutDrawing(C, v1, designThick);
   // - Branch to lower spoke vertex
@@ -164,7 +162,18 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
   if (fHex > 0 && fHex < 0.6) {
     try {
-      hexSolid = hexSolid.fillet(fHex);
+      // Fillet only the outer perimeter edges, keeping all inner frame edges sharp
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      hexSolid = hexSolid.fillet(fHex, (ef: any) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ef.when(({ center, element }: any) => {
+          const pt = center || element?.center || element?.startPoint;
+          const x = pt?.x ?? pt?.[0] ?? 0;
+          const y = pt?.y ?? pt?.[1] ?? 0;
+          const dist = Math.hypot(x, y);
+          return dist >= rMidpoint - 0.1;
+        })
+      );
     } catch {
       // Keep unfilleted if geometry is non-manifold
     }
@@ -233,9 +242,8 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     const patternType = sections[i];
     const v1 = spokeVertices[i];
     const v2 = spokeVertices[(i + 1) % 6];
-    const center = getCentroid(spokeVertices[0], spokeVertices[2], spokeVertices[4])
 
-    const sectorStruts = createSectorPattern(patternType, center, v1, v2, tDesign);
+    const sectorStruts = createSectorPattern(patternType, v1, v2, tDesign);
     for (const strut of sectorStruts) {
       pattern2D = pattern2D ? pattern2D.fuse(strut) : strut;
     }
