@@ -334,7 +334,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
             const x = pt?.x ?? pt?.[0] ?? 0;
             const y = pt?.y ?? pt?.[1] ?? 0;
             const distToCenter = Math.hypot(x, y);
-            return distToCenter > rOuter + 0.3;
+            return distToCenter > rOuter + 0.1;
           })
         );
       } catch {
