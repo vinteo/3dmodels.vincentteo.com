@@ -31,10 +31,11 @@ export interface ModelConfig {
   id: string;
   name: string;
   description: string;
-  documentId: string;
-  workspaceId: string;
-  elementId: string;
-  elementType: 'partstudio' | 'assembly';
+  engine?: 'onshape' | 'replicad';
+  documentId?: string;
+  workspaceId?: string;
+  elementId?: string;
+  elementType?: 'partstudio' | 'assembly';
   tags: string[];
   defaultConfiguration: string;
   parameters: ParameterDefinition[];

@@ -1,5 +1,6 @@
 import { ExportOptions, ModelConfig, ModelsApiResponse } from '../types/model';
 import fallbackModels from '../../../../config/models.config.json';
+import { generateReplicadPreviewMesh, exportReplicadFile } from '../engines/replicad';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -22,10 +23,16 @@ export async function getModels(): Promise<{ models: ModelConfig[]; mockMode: bo
 }
 
 export async function fetchModelPreviewMesh(
-  modelId: string,
+  model: ModelConfig,
   parameters: Record<string, number | string | boolean>
 ): Promise<ArrayBuffer> {
-  const res = await fetch(`${API_BASE}/api/models/${modelId}/preview`, {
+  // If model is powered by in-browser Replicad CAD engine
+  if (model.engine === 'replicad') {
+    return generateReplicadPreviewMesh(model.id, parameters);
+  }
+
+  // Otherwise query Cloudflare + Onshape backend API proxy
+  const res = await fetch(`${API_BASE}/api/models/${model.id}/preview`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -43,32 +50,41 @@ export async function fetchModelPreviewMesh(
 }
 
 export async function triggerModelExport(
-  modelId: string,
+  model: ModelConfig,
   parameters: Record<string, number | string | boolean>,
   options: ExportOptions
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/models/${modelId}/export`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      parameters,
-      ...options
-    })
-  });
+  let blob: Blob;
 
-  if (!res.ok) {
-    const errText = await res.text().catch(() => res.statusText);
-    throw new Error(`Export failed: ${errText}`);
+  // If model is powered by in-browser Replicad CAD engine
+  if (model.engine === 'replicad') {
+    blob = await exportReplicadFile(model.id, parameters, options);
+  } else {
+    // Query Cloudflare + Onshape backend API proxy
+    const res = await fetch(`${API_BASE}/api/models/${model.id}/export`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        parameters,
+        ...options
+      })
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => res.statusText);
+      throw new Error(`Export failed: ${errText}`);
+    }
+
+    blob = await res.blob();
   }
 
-  const blob = await res.blob();
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.style.display = 'none';
   a.href = url;
-  a.download = `${modelId}-${Date.now()}.${options.format}`;
+  a.download = `${model.id}-${Date.now()}.${options.format}`;
   document.body.appendChild(a);
   a.click();
   window.URL.revokeObjectURL(url);

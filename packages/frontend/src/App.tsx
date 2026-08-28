@@ -86,7 +86,7 @@ export const App: React.FC = () => {
     setPreviewError(null);
 
     try {
-      const buffer = await fetchModelPreviewMesh(model.id, params);
+      const buffer = await fetchModelPreviewMesh(model, params);
       setMeshData(buffer);
       setAppliedValues({ ...params });
     } catch (err: unknown) {
@@ -176,7 +176,7 @@ export const App: React.FC = () => {
   // Trigger file download
   const handleExport = async (options: ExportOptions) => {
     if (!activeModel) return;
-    await triggerModelExport(activeModel.id, currentValues, options);
+    await triggerModelExport(activeModel, currentValues, options);
   };
 
   return (

@@ -24,13 +24,13 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await page.click("button:has-text('Models')");
 
     // Drawer should appear
-    await expect(page.locator("text=Model Catalog")).toBeVisible();
-    await expect(page.locator("button:has-text('Kumiko Keychain')")).toBeVisible();
+    await expect(page.locator("button:has-text('Kumiko Keychain (Instant In-Browser)')")).toBeVisible();
+    await expect(page.locator("button:has-text('Kumiko Keychain (Onshape)')")).toBeVisible();
 
-    // Select Kumiko Keychain from pop-out drawer
-    await page.click("button:has-text('Kumiko Keychain')");
+    // Select Replicad model from pop-out drawer
+    await page.click("button:has-text('Kumiko Keychain (Instant In-Browser)')");
 
-    // Drawer closes and left sidebar shows parameters for Kumiko Keychain
+    // Drawer closes and left sidebar shows parameters
     await expect(page.locator("text=Model Catalog")).not.toBeVisible();
     await expect(page.locator("text=Section Patterns (6 Wedges)")).toBeVisible();
     await expect(page.locator("text=Hexagon Radius")).toBeVisible();
@@ -85,5 +85,17 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
     // Verify address bar contains /kumiko-pattern-keychain
     expect(page.url()).toContain('/kumiko-pattern-keychain');
+  });
+
+  test('should load in-browser Replicad model directly via clean path slug URL', async ({ page }) => {
+    // Navigate directly to the Replicad model slug
+    await page.goto('/kumiko-keychain-replicad');
+
+    // Should display Replicad model in sidebar
+    await expect(page.locator("aside").locator("text=Kumiko Keychain (Instant In-Browser)")).toBeVisible();
+    await expect(page.locator("text=Section Patterns (6 Wedges)")).toBeVisible();
+
+    // Verify address bar contains /kumiko-keychain-replicad
+    expect(page.url()).toContain('/kumiko-keychain-replicad');
   });
 });
