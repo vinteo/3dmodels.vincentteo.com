@@ -105,7 +105,10 @@ function createWedgePattern(
 }
 
 /**
- * Builds the 3D Kumiko Keychain parts as distinct named components for STEP assemblies
+ * Builds the 3D Kumiko Keychain assembly with separate non-overlapping parts:
+ * 1. Hex Frame
+ * 2. Radial Spokes & Kumiko Lattice (cut/bounded by hex frame)
+ * 3. Keychain Ring Attachment (cut by hex frame)
  */
 export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart[] {
   const rOuter = Number(params.hex_radius ?? 20);
@@ -120,12 +123,34 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
   const rInner = Math.max(2, rOuter - tHex);
 
-  // 1. Outer & Inner Hexagonal Perimeter Frame
+  // 1. Hexagonal Perimeter Frame
   const outerHex = drawPolysides(rOuter, 6);
   const innerHex = drawPolysides(rInner, 6);
+  const frame2D = outerHex.cut(innerHex);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hexSketch = frame2D.sketchOnPlane('XY') as any;
+  let hexSolid = hexSketch.extrude(h);
+
+  if (fHex > 0 && fHex < 0.6) {
+    try {
+      hexSolid = hexSolid.fillet(fHex);
+    } catch {
+      // Keep unfilleted if geometry is non-manifold
+    }
+  }
+
+  const parts: ReplicadPart[] = [
+    {
+      shape: hexSolid,
+      name: 'Kumiko_Hex_Frame',
+      color: '#334155'
+    }
+  ];
+
+  // 2. Radial Spokes and Kumiko Lattice Patterns
   let internal2D: Drawing | null = null;
 
-  // 2. 6 Radial Spokes (rotated 30 degrees)
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI) / 3 + Math.PI / 6;
     const spokeEnd: [number, number] = [
@@ -138,7 +163,6 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     }
   }
 
-  // 3. 6 Wedge Lattice Patterns (aligned with 30-degree spokes)
   const sections = [
     params.section_1 ?? '1',
     params.section_2 ?? '1',
@@ -157,32 +181,21 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     }
   }
 
-  // 4. Clip all internal geometry strictly to outerHex so spokes never protrude outside the frame
-  const frame2D = outerHex.cut(innerHex);
-  const composite2D = internal2D ? frame2D.fuse(internal2D.intersect(outerHex)) : frame2D;
+  // Cut spokes and lattice with the hex frame boundary (strictly innerHex) for zero overlap
+  if (internal2D) {
+    const spokes2D = internal2D.intersect(innerHex);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const spokesSketch = spokes2D.sketchOnPlane('XY') as any;
+    const spokesSolid = spokesSketch.extrude(h);
 
-  // 5. Extrude Kumiko Hexagon Part
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const hexSketch = composite2D.sketchOnPlane('XY') as any;
-  let hexSolid = hexSketch.extrude(h);
-
-  if (fHex > 0 && fHex < 0.6) {
-    try {
-      hexSolid = hexSolid.fillet(fHex);
-    } catch {
-      // Keep unfilleted if geometry is non-manifold
-    }
+    parts.push({
+      shape: spokesSolid,
+      name: 'Kumiko_Spokes_Lattice',
+      color: '#38bdf8'
+    });
   }
 
-  const parts: ReplicadPart[] = [
-    {
-      shape: hexSolid,
-      name: 'Kumiko_Hexagon_Body',
-      color: '#475569'
-    }
-  ];
-
-  // 6. Keychain Ring Loop Attachment (modeled as a separate part)
+  // 3. Keychain Ring Attachment (modeled as a separate part, cut by outerHex)
   if (hasRing) {
     const ringInnerR = 3;
     const ringOuterR = ringInnerR + tRing;
