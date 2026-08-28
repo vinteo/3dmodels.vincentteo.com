@@ -11,22 +11,21 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await expect(page.locator("button[title='Open Model Catalog']")).toBeVisible();
   });
 
-  test('should open left model pop-out drawer and switch models', async ({ page }) => {
+  test('should open left model pop-out drawer and select model', async ({ page }) => {
     // Open left model catalog drawer
     await page.click("button:has-text('Models')");
 
     // Drawer should appear
     await expect(page.locator("text=Model Catalog")).toBeVisible();
     await expect(page.locator("button:has-text('Kumiko Keychain')")).toBeVisible();
-    await expect(page.locator("button:has-text('Heavy-Duty Shelf Bracket')")).toBeVisible();
 
-    // Select Shelf Bracket from pop-out drawer
-    await page.click("button:has-text('Heavy-Duty Shelf Bracket')");
+    // Select Kumiko Keychain from pop-out drawer
+    await page.click("button:has-text('Kumiko Keychain')");
 
-    // Drawer closes and left sidebar shows parameters for Shelf Bracket
+    // Drawer closes and left sidebar shows parameters for Kumiko Keychain
     await expect(page.locator("text=Model Catalog")).not.toBeVisible();
-    await expect(page.locator("text=Shelf Depth (Arm)")).toBeVisible();
-    await expect(page.locator("text=Wall Mount Height")).toBeVisible();
+    await expect(page.locator("text=Section Patterns (6 Wedges)")).toBeVisible();
+    await expect(page.locator("text=Hexagon Radius")).toBeVisible();
   });
 
   test('should render full viewport 3D WebGL canvas with controls', async ({ page }) => {
@@ -78,13 +77,13 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
   test('should load model directly via clean path slug URL and synchronize address bar', async ({ page }) => {
     // Navigate directly using a path slug permalink
-    await page.goto('/parametric-shelf-bracket');
+    await page.goto('/kumiko-pattern-keychain');
 
-    // Should load the Shelf Bracket model directly
-    await expect(page.locator("aside").locator("text=Heavy-Duty Shelf Bracket")).toBeVisible();
-    await expect(page.locator("text=Shelf Depth (Arm)")).toBeVisible();
+    // Should load the Kumiko Keychain model directly
+    await expect(page.locator("aside").locator("text=Kumiko Keychain")).toBeVisible();
+    await expect(page.locator("text=Section Patterns (6 Wedges)")).toBeVisible();
 
-    // Verify address bar contains /parametric-shelf-bracket
-    expect(page.url()).toContain('/parametric-shelf-bracket');
+    // Verify address bar contains /kumiko-pattern-keychain
+    expect(page.url()).toContain('/kumiko-pattern-keychain');
   });
 });
