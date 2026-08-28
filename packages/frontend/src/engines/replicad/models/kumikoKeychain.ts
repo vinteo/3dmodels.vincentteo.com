@@ -160,13 +160,9 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   const hexSketch = frame2D.sketchOnPlane('XY') as any;
   let hexSolid = hexSketch.extrude(h);
 
-  const ringInnerR = 3;
-  const ringOuterR = ringInnerR + tRing;
-  const ringCenterY = rOuter + ringOuterR - 1.5;
-
   if (fHex > 0 && fHex < 0.6) {
     try {
-      // Fillet only the outer perimeter edges, keeping inner frame edges and ring contact zone sharp
+      // Fillet all outer perimeter edges of the hex frame, keeping inner frame walls sharp
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hexSolid = hexSolid.fillet(fHex, (ef: any) =>
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -175,8 +171,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
           const x = pt?.x ?? pt?.[0] ?? 0;
           const y = pt?.y ?? pt?.[1] ?? 0;
           const dist = Math.hypot(x, y);
-          const isRingContact = hasRing && Math.hypot(x, y - ringCenterY) <= ringOuterR + 0.5;
-          return dist >= rMidpoint - 0.1 && !isRingContact;
+          return dist >= rMidpoint - 0.1;
         })
       );
     } catch {
