@@ -103,20 +103,24 @@ export type Point2D = [number, number];
 export type Triangle2D = [Point2D, Point2D, Point2D];
 
 /**
- * Generates the authentic 2D Asa-no-ha lattice pattern drawings for a 60° Kumiko wedge sector.
- * @param patternType Infill pattern type ('0' = empty, '1' = classic Asa-no-ha, '2' = Ryuso Asa-no-ha)
+ * Generates the 3D lattice/motif pattern solid for a 60° Kumiko wedge sector.
+ * Provides complete flexibility to construct custom 2D/3D shapes, motifs, or embossed solids.
+ *
+ * @param patternType Pattern identifier ('0' = empty, '1' = classic Asa-no-ha, '2' = Ryuso Asa-no-ha, etc.)
  * @param spokeTriangle [center, spoke1, spoke2] - Vertices of the outer spoke wedge triangle
- * @param innerTriangle [center, inner1, inner2] - Vertices of the inner hex frame wedge triangle
+ * @param innerTriangle [innerCenter, inner1, inner2] - Vertices of the inner hex frame wedge triangle
  * @param designThick Infill strut thickness
+ * @param height Extrusion height / thickness in Z
  */
-function createSectorPattern(
+export function createSectorPattern(
   patternType: string | number,
   spokeTriangle: Triangle2D,
   innerTriangle: Triangle2D,
-  designThick: number
-): Drawing[] {
+  designThick: number,
+  height: number
+): AnyShape | null {
   const pType = String(patternType);
-  const struts: Drawing[] = [];
+  if (pType === '0') return null;
 
   const [center, v1, v2] = spokeTriangle;
   const [innerCenter, inner1, inner2] = innerTriangle;
@@ -136,46 +140,49 @@ function createSectorPattern(
 
   switch (pType) {
     case '0':
-      // 0: Empty sector
-      return [];
+      return null;
 
     case '1': {
       // 1: Classic Asa-no-ha (Tripod branching from apex C)
+      let sector2D: Drawing | null = null;
       const branchCenter = createStrutDrawing(C, center, designThick);
       const branchSpoke1 = createStrutDrawing(C, v1, designThick);
       const branchSpoke2 = createStrutDrawing(C, v2, designThick);
 
-      if (branchCenter) struts.push(branchCenter);
-      if (branchSpoke1) struts.push(branchSpoke1);
-      if (branchSpoke2) struts.push(branchSpoke2);
-      break;
+      for (const strut of [branchCenter, branchSpoke1, branchSpoke2]) {
+        if (strut) sector2D = sector2D ? sector2D.fuse(strut) : strut;
+      }
+
+      if (!sector2D) return null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sketch = sector2D.sketchOnPlane('XY') as any;
+      return sketch.extrude(height);
     }
 
     case '2': {
       // 2: Ryuso Asa-no-ha (Classic tripod + secondary framing struts)
+      let sector2D: Drawing | null = null;
       const branchCenter = createStrutDrawing(C, center, designThick);
       const branchSpoke1 = createStrutDrawing(C, v1, designThick);
       const branchSpoke2 = createStrutDrawing(C, v2, designThick);
 
-      if (branchCenter) struts.push(branchCenter);
-      if (branchSpoke1) struts.push(branchSpoke1);
-      if (branchSpoke2) struts.push(branchSpoke2);
-
       const diag1 = createStrutDrawing(midInner1, midInnerOuter, designThick, 'outer');
-      const diag2 = createStrutDrawing(midInner2, midInnerOuter, designThick, 'outer');
-      const diag3 = createStrutDrawing(midInner1, midInner2, designThick, 'outer');
+      const diag2 = createStrutDrawing(midInner2, midInnerOuter, designThick, 'inner');
+      const diag3 = createStrutDrawing(midInner1, midInner2, designThick, 'inner');
 
-      if (diag1) struts.push(diag1);
-      if (diag2) struts.push(diag2);
-      if (diag3) struts.push(diag3);
-      break;
+      for (const strut of [branchCenter, branchSpoke1, branchSpoke2, diag1, diag2, diag3]) {
+        if (strut) sector2D = sector2D ? sector2D.fuse(strut) : strut;
+      }
+
+      if (!sector2D) return null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sketch = sector2D.sketchOnPlane('XY') as any;
+      return sketch.extrude(height);
     }
 
     default:
-      break;
+      return null;
   }
-
-  return struts;
 }
 
 /**
@@ -287,7 +294,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     params.section_6 ?? '1'
   ];
 
-  let pattern2D: Drawing | null = null;
+  let patternSolid: AnyShape | null = null;
 
   const center: Point2D = [0, 0];
   const rInnerCenter = tSpoke; // Offset distance (tSpoke / 2) / sin(30°) = tSpoke
@@ -320,21 +327,19 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     const spokeTriangle: Triangle2D = [center, spokeVertices[i], spokeVertices[(i + 1) % 6]];
     const innerTriangle: Triangle2D = [innerCenter, innerCorner1, innerCorner2];
 
-    const sectorStruts = createSectorPattern(patternType, spokeTriangle, innerTriangle, tDesign);
-    for (const strut of sectorStruts) {
-      pattern2D = pattern2D ? pattern2D.fuse(strut) : strut;
+    const sectorSolid = createSectorPattern(patternType, spokeTriangle, innerTriangle, tDesign, h);
+    if (sectorSolid) {
+      patternSolid = patternSolid ? (patternSolid as any).fuse(sectorSolid) : sectorSolid;
     }
   }
 
-  // 3D Boolean Cut: Extrude pattern solid first, then cut with hex frame and spokes solids
-  if (pattern2D) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const patternSketch = pattern2D.sketchOnPlane('XY') as any;
-    let patternSolid = patternSketch.extrude(h);
+  // 3D Boolean Cut: Cut pattern solid with hex frame and spokes solids
+  if (patternSolid) {
+    let finalSolid: AnyShape = patternSolid;
 
     if (hexSolid) {
       try {
-        patternSolid = patternSolid.cut(hexSolid);
+        finalSolid = (finalSolid as any).cut(hexSolid);
       } catch {
         // Keep uncut if disjoint
       }
@@ -342,14 +347,14 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
     if (spokesSolid) {
       try {
-        patternSolid = patternSolid.cut(spokesSolid);
+        finalSolid = (finalSolid as any).cut(spokesSolid);
       } catch {
         // Keep uncut if disjoint
       }
     }
 
     parts.push({
-      shape: patternSolid,
+      shape: finalSolid,
       name: 'Kumiko_Lattice_Pattern',
       color: '#f59e0b'
     });
