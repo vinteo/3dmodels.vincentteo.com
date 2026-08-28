@@ -41,6 +41,7 @@ jobs:
       - name: Build Frontend
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
         run: npm run build:frontend
 
       - name: Setup GitHub Pages SPA routing & CNAME

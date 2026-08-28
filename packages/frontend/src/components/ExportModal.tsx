@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ModelConfig, ExportOptions } from '../types/model';
+import { trackExport } from '../services/analytics';
 import {
   X,
   Download,
@@ -46,6 +47,18 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         stlMode,
         stepVersion
       });
+
+      // Track export download event in Google Analytics
+      trackExport({
+        modelId: model.id,
+        modelName: model.name,
+        format,
+        units,
+        stlMode: format === 'stl' ? stlMode : undefined,
+        stepVersion: format === 'step' ? stepVersion : undefined,
+        parameterCount: Object.keys(currentValues).length
+      });
+
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
