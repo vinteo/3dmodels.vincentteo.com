@@ -41,6 +41,8 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   const currentMeshRef = useRef<THREE.Mesh | null>(null);
   const gridHelperRef = useRef<THREE.GridHelper | null>(null);
   const frameIdRef = useRef<number>(0);
+  const prevModelNameRef = useRef<string>('');
+  const hasFramedCameraRef = useRef<boolean>(false);
 
   // Viewport display controls
   const [autoRotate, setAutoRotate] = useState<boolean>(false);
@@ -229,23 +231,36 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
       sceneRef.current.add(mesh);
       currentMeshRef.current = mesh;
 
-      // Automatically frame camera around geometry size
-      if (cameraRef.current && controlsRef.current && geometry.boundingBox) {
-        const finalSize = new THREE.Vector3();
-        geometry.boundingBox.getSize(finalSize);
-        const maxDim = Math.max(finalSize.x, finalSize.y, finalSize.z, 20);
-        const fov = cameraRef.current.fov * (Math.PI / 180);
-        const distance = Math.abs(maxDim / Math.sin(fov / 2)) * 0.85;
+      // Check if this is a newly switched model or initial load
+      const isNewModel = prevModelNameRef.current !== modelName;
+      if (isNewModel) {
+        prevModelNameRef.current = modelName;
+        hasFramedCameraRef.current = false;
+      }
 
-        cameraRef.current.position.set(distance * 0.65, distance * 0.7, distance * 0.85);
-        cameraRef.current.lookAt(0, finalSize.y / 2, 0);
-        controlsRef.current.target.set(0, finalSize.y / 2, 0);
-        controlsRef.current.update();
+      // Automatically frame camera around geometry size ONLY on initial load or model change
+      if (cameraRef.current && controlsRef.current && geometry.boundingBox) {
+        if (!hasFramedCameraRef.current) {
+          const finalSize = new THREE.Vector3();
+          geometry.boundingBox.getSize(finalSize);
+          const maxDim = Math.max(finalSize.x, finalSize.y, finalSize.z, 20);
+          const fov = cameraRef.current.fov * (Math.PI / 180);
+          const distance = Math.abs(maxDim / Math.sin(fov / 2)) * 0.85;
+
+          cameraRef.current.position.set(distance * 0.65, distance * 0.7, distance * 0.85);
+          cameraRef.current.lookAt(0, finalSize.y / 2, 0);
+          controlsRef.current.target.set(0, finalSize.y / 2, 0);
+          controlsRef.current.update();
+          hasFramedCameraRef.current = true;
+        } else {
+          // Preview regenerated for same model: maintain user's exact camera angle, zoom, and orientation!
+          controlsRef.current.update();
+        }
       }
     } catch (err) {
       console.error('Failed to parse or render 3D STL mesh:', err);
     }
-  }, [meshData, wireframe]);
+  }, [meshData, modelName, wireframe]);
 
   // Camera Reset Handler
   const handleResetCamera = useCallback(() => {
