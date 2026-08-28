@@ -92,6 +92,30 @@ describe('Backend API Endpoints (Hono In-Memory Tests)', () => {
     expect(text).toContain('solid kumiko-pattern-keychain');
   });
 
+  it('POST /api/models/:id/preview should cache subsequent identical requests in memory/edge cache', async () => {
+    // First request should be a MISS
+    const res1 = await app.request('/api/models/kumiko-pattern-keychain/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        parameters: { hex_radius: 35, hex_thickness: 3 }
+      })
+    });
+    expect(res1.status).toBe(200);
+    expect(res1.headers.get('X-Cache')).toBe('MISS');
+
+    // Second request with identical configuration should be a HIT
+    const res2 = await app.request('/api/models/kumiko-pattern-keychain/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        parameters: { hex_radius: 35, hex_thickness: 3 }
+      })
+    });
+    expect(res2.status).toBe(200);
+    expect(res2.headers.get('X-Cache')).toBe('HIT-MEMORY');
+  });
+
   it('POST /api/models/:id/export should return downloadable STL file', async () => {
     const res = await app.request('/api/models/kumiko-pattern-keychain/export', {
       method: 'POST',

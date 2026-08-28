@@ -92,6 +92,7 @@ export const App: React.FC = () => {
     } catch (err: unknown) {
       console.error('Failed to load model preview:', err);
       setPreviewError(err instanceof Error ? err.message : 'Failed to generate 3D preview.');
+      setAppliedValues({ ...params });
     } finally {
       setLoadingPreview(false);
     }

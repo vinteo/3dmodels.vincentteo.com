@@ -12,10 +12,17 @@ export class OnshapeClient {
     this.secretKey = env?.ONSHAPE_SECRET_KEY;
     this.baseUrl = env?.ONSHAPE_BASE_URL || 'https://cad.onshape.com';
 
-    // Auto-detect mock mode: if keys are missing or MOCK_MODE === 'true', enable mock mode
-    if (env?.MOCK_MODE === 'true') {
+    const isMockEnv =
+      env?.MOCK_MODE === 'true' ||
+      (typeof process !== 'undefined' && process.env?.MOCK_MODE === 'true');
+    const isExplicitLive =
+      env?.MOCK_MODE === 'false' ||
+      (typeof process !== 'undefined' && process.env?.MOCK_MODE === 'false');
+
+    // Auto-detect mock mode: if keys are missing or MOCK_MODE is enabled
+    if (isMockEnv) {
       this.isMockMode = true;
-    } else if (env?.MOCK_MODE === 'false') {
+    } else if (isExplicitLive) {
       this.isMockMode = false;
     } else {
       // auto
@@ -37,6 +44,47 @@ export class OnshapeClient {
       Accept: 'application/json;charset=UTF-8;qs=0.09',
       'Content-Type': 'application/json'
     };
+  }
+
+  /**
+   * Wrapper around fetch that handles Onshape redirects (307/302) and automatic retry on HTTP 429
+   */
+  private async fetchWithRetry(url: string, init?: RequestInit, maxRetries = 2): Promise<Response> {
+    let attempt = 0;
+
+    while (attempt <= maxRetries) {
+      let res = await fetch(url, {
+        ...init,
+        redirect: 'manual'
+      });
+
+      // Handle redirects (e.g. regional cluster nodes cad-aps2.onshape.com)
+      if (res.status === 307 || res.status === 302) {
+        const redirectUrl = res.headers.get('Location');
+        if (redirectUrl) {
+          res = await fetch(redirectUrl, {
+            ...init,
+            redirect: 'manual'
+          });
+        }
+      }
+
+      // If rate limited, backoff and retry
+      if (res.status === 429 && attempt < maxRetries) {
+        attempt++;
+        const retryAfterHeader = res.headers.get('Retry-After');
+        const delaySeconds = retryAfterHeader ? parseInt(retryAfterHeader, 10) : attempt * 2;
+        const delayMs = (isNaN(delaySeconds) ? attempt * 2 : delaySeconds) * 1000;
+
+        console.warn(`[OnshapeClient] Received 429 Too Many Requests. Retrying in ${delayMs}ms (attempt ${attempt}/${maxRetries})...`);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        continue;
+      }
+
+      return res;
+    }
+
+    return fetch(url, init);
   }
 
   /**
@@ -63,7 +111,7 @@ export class OnshapeClient {
     }
 
     const url = `${this.baseUrl}/api/v6/elements/d/${model.documentId}/w/${model.workspaceId}/e/${model.elementId}/configuration`;
-    const res = await fetch(url, {
+    const res = await this.fetchWithRetry(url, {
       headers: this.getAuthHeader()
     });
 
@@ -99,26 +147,12 @@ export class OnshapeClient {
     const configQuery = configuration ? `&configuration=${encConfig}` : '';
     const url = `${this.baseUrl}/api/v6/partstudios/d/${model.documentId}/w/${model.workspaceId}/e/${model.elementId}/stl?mode=${mode}&units=${units}${configQuery}`;
 
-    let res = await fetch(url, {
+    const res = await this.fetchWithRetry(url, {
       headers: {
         Authorization: this.getAuthHeader().Authorization,
         Accept: 'application/octet-stream'
-      },
-      redirect: 'manual'
-    });
-
-    // Onshape issues 307 redirects to regional cluster nodes (e.g. cad-aps2.onshape.com)
-    if (res.status === 307 || res.status === 302) {
-      const redirectUrl = res.headers.get('Location');
-      if (redirectUrl) {
-        res = await fetch(redirectUrl, {
-          headers: {
-            Authorization: this.getAuthHeader().Authorization,
-            Accept: 'application/octet-stream'
-          }
-        });
       }
-    }
+    });
 
     if (!res.ok) {
       const err = await res.text();
@@ -147,25 +181,12 @@ export class OnshapeClient {
     const configQuery = configuration ? `?configuration=${encConfig}` : '';
     const url = `${this.baseUrl}/api/v6/partstudios/d/${model.documentId}/w/${model.workspaceId}/e/${model.elementId}/gltf${configQuery}`;
 
-    let res = await fetch(url, {
+    const res = await this.fetchWithRetry(url, {
       headers: {
         Authorization: this.getAuthHeader().Authorization,
         Accept: 'model/gltf-binary, model/gltf+json, application/octet-stream'
-      },
-      redirect: 'manual'
-    });
-
-    if (res.status === 307 || res.status === 302) {
-      const redirectUrl = res.headers.get('Location');
-      if (redirectUrl) {
-        res = await fetch(redirectUrl, {
-          headers: {
-            Authorization: this.getAuthHeader().Authorization,
-            Accept: 'model/gltf-binary, model/gltf+json, application/octet-stream'
-          }
-        });
       }
-    }
+    });
 
     // If direct gltf is not supported for this element, fall back to STL preview
     if (!res.ok) {
@@ -196,7 +217,7 @@ export class OnshapeClient {
 
     // Initiate translation
     const translationUrl = `${this.baseUrl}/api/v6/partstudios/d/${model.documentId}/w/${model.workspaceId}/e/${model.elementId}/translations`;
-    const initRes = await fetch(translationUrl, {
+    const initRes = await this.fetchWithRetry(translationUrl, {
       method: 'POST',
       headers: this.getAuthHeader(),
       body: JSON.stringify({
@@ -224,7 +245,7 @@ export class OnshapeClient {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       attempts++;
 
-      const statusRes = await fetch(`${this.baseUrl}/api/v6/translations/${translationId}`, {
+      const statusRes = await this.fetchWithRetry(`${this.baseUrl}/api/v6/translations/${translationId}`, {
         headers: this.getAuthHeader()
       });
 
@@ -235,7 +256,7 @@ export class OnshapeClient {
         const externalDataId = statusData.resultExternalDataIds[0];
         const downloadUrl = `${this.baseUrl}/api/v6/documents/d/${model.documentId}/externaldata/${externalDataId}`;
 
-        const fileRes = await fetch(downloadUrl, {
+        const fileRes = await this.fetchWithRetry(downloadUrl, {
           headers: {
             Authorization: this.getAuthHeader().Authorization,
             Accept: 'application/octet-stream'

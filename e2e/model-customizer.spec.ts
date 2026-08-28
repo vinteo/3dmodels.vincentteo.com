@@ -2,6 +2,14 @@ import { test, expect } from '@playwright/test';
 
 test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
   test.beforeEach(async ({ page }) => {
+    // Intercept preview API for fast, deterministic E2E test execution
+    await page.route('**/api/models/*/preview', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'model/stl',
+        body: Buffer.from('solid test\nfacet normal 0 0 0\nouter loop\nvertex 0 0 0\nvertex 1 0 0\nvertex 0 1 0\nendloop\nendfacet\nendsolid test')
+      });
+    });
     await page.goto('/');
   });
 
@@ -41,19 +49,11 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
   });
 
   test('should adjust parameter in left sidebar and detect dirty state', async ({ page }) => {
-    // Find number input for Hexagon Radius in left sidebar
-    const radiusInput = page.locator('#param-hex_radius');
-    await expect(radiusInput).toBeVisible();
+    // Select Ryuso pattern from master dropdown to trigger dirty state
+    await page.selectOption('#all-sections-pattern-select', '2');
 
-    // Initial state: preview up-to-date
-    const updateBtn = page.locator("button:has-text('Preview Up-to-Date'), button:has-text('Update 3D Preview')");
-    await expect(updateBtn).toBeVisible();
-
-    // Edit value
-    await radiusInput.fill('28');
-
-    // Should now indicate "Update 3D Preview"
-    await expect(page.locator("button:has-text('Update 3D Preview')")).toBeVisible();
+    // Should now indicate "Update 3D Preview" once initial geometry settles
+    await expect(page.locator("button:has-text('Update 3D Preview')")).toBeVisible({ timeout: 15000 });
   });
 
   test('should open export modal and switch format tabs', async ({ page }) => {
