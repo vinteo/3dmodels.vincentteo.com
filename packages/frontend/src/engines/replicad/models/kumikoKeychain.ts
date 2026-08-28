@@ -19,6 +19,13 @@ export interface KumikoParameters {
   [key: string]: unknown;
 }
 
+export interface ReplicadPart {
+  shape: AnyShape;
+  name: string;
+  color?: string;
+  alpha?: number;
+}
+
 /**
  * Creates a 2D rectangular strut drawing between two 2D points with given thickness
  */
@@ -98,9 +105,9 @@ function createWedgePattern(
 }
 
 /**
- * Builds the 3D Kumiko Keychain model with the keychain ring as a separate solid part
+ * Builds the 3D Kumiko Keychain parts as distinct named components for STEP assemblies
  */
-export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
+export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart[] {
   const rOuter = Number(params.hex_radius ?? 20);
   const tHex = Number(params.hex_thickness ?? 2);
   const tSpoke = Number(params.hex_spoke_thickness ?? 2);
@@ -167,6 +174,14 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
     }
   }
 
+  const parts: ReplicadPart[] = [
+    {
+      shape: hexSolid,
+      name: 'Kumiko_Hexagon_Body',
+      color: '#475569'
+    }
+  ];
+
   // 6. Keychain Ring Loop Attachment (modeled as a separate part)
   if (hasRing) {
     const ringInnerR = 3;
@@ -189,8 +204,21 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
       }
     }
 
-    return makeCompound([hexSolid, ringSolid]);
+    parts.push({
+      shape: ringSolid,
+      name: 'Keychain_Ring_Attachment',
+      color: '#a855f7'
+    });
   }
 
-  return hexSolid;
+  return parts;
+}
+
+/**
+ * Builds the composite 3D Kumiko Keychain solid model for meshing
+ */
+export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
+  const parts = buildKumikoKeychainParts(params);
+  if (parts.length === 1) return parts[0].shape;
+  return makeCompound(parts.map((p) => p.shape));
 }

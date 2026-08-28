@@ -1,10 +1,30 @@
 import { ensureReplicadReady } from './occt';
-import { buildKumikoKeychain } from './models/kumikoKeychain';
+import {
+  buildKumikoKeychain,
+  buildKumikoKeychainParts,
+  ReplicadPart
+} from './models/kumikoKeychain';
 import { ExportOptions } from '../../types/model';
-import { AnyShape } from 'replicad';
+import { AnyShape, exportSTEP } from 'replicad';
 
 /**
- * Dispatcher mapping model IDs to Replicad geometry generators
+ * Dispatcher mapping model IDs to Replicad named part components
+ */
+function buildModelParts(
+  modelId: string,
+  parameters: Record<string, number | string | boolean>
+): ReplicadPart[] {
+  switch (modelId) {
+    case 'kumiko-keychain-replicad':
+    case 'kumiko-pattern-keychain':
+      return buildKumikoKeychainParts(parameters);
+    default:
+      return buildKumikoKeychainParts(parameters);
+  }
+}
+
+/**
+ * Dispatcher mapping model IDs to single/composite Replicad solid
  */
 function buildModelShape(
   modelId: string,
@@ -49,12 +69,15 @@ export async function exportReplicadFile(
 ): Promise<Blob> {
   await ensureReplicadReady();
 
-  const shape = buildModelShape(modelId, parameters);
-
   if (options.format === 'step') {
-    // Generate native AP242 STEP file directly from OpenCASCADE B-Rep solid
-    return shape.blobSTEP();
+    const parts = buildModelParts(modelId, parameters);
+    // Export OpenCASCADE XCAF Multi-Body Assembly STEP file with distinct named components
+    return exportSTEP(parts, {
+      unit: options.units === 'inch' ? 'INCH' : 'MM'
+    });
   }
+
+  const shape = buildModelShape(modelId, parameters);
 
   // Generate STL file
   return shape.blobSTL({
