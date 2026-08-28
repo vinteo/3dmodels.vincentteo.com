@@ -161,9 +161,9 @@ function createSectorPattern(
       if (branchSpoke1) struts.push(branchSpoke1);
       if (branchSpoke2) struts.push(branchSpoke2);
 
-      const diag1 = createStrutDrawing(midInner1, midInnerOuter, designThick, 'inner');
-      const diag2 = createStrutDrawing(midInner2, midInnerOuter, designThick, 'inner');
-      const diag3 = createStrutDrawing(midInner1, midInner2, designThick, 'inner');
+      const diag1 = createStrutDrawing(midInner1, midInnerOuter, designThick, 'outer');
+      const diag2 = createStrutDrawing(midInner2, midInnerOuter, designThick, 'outer');
+      const diag3 = createStrutDrawing(midInner1, midInner2, designThick, 'outer');
 
       if (diag1) struts.push(diag1);
       if (diag2) struts.push(diag2);
@@ -244,7 +244,6 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   let spokes2D: Drawing | null = null;
   let spokesSolid: AnyShape | null = null;
   const spokeVertices: [number, number][] = [];
-  const innerSpokeVertices: [number, number][] = [];
 
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI) / 3 + Math.PI / 6;
@@ -252,12 +251,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
       rMidpoint * Math.cos(angle),
       rMidpoint * Math.sin(angle)
     ];
-    const innerVertex: [number, number] = [
-      rInner * Math.cos(angle),
-      rInner * Math.sin(angle)
-    ];
     spokeVertices.push(vertex);
-    innerSpokeVertices.push(innerVertex);
 
     const spoke = createStrutDrawing([0, 0], vertex, tSpoke);
     if (spoke) {
@@ -297,6 +291,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
   const center: Point2D = [0, 0];
   const rInnerCenter = tSpoke; // Offset distance (tSpoke / 2) / sin(30°) = tSpoke
+  const sSpokeWall = rInner - tSpoke / (2 * Math.sqrt(3)); // Distance along spoke axis to inner hex wall intersection
 
   for (let i = 0; i < 6; i++) {
     const patternType = sections[i];
@@ -304,14 +299,26 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     const angle2 = ((i + 1) * Math.PI) / 3 + Math.PI / 6;
     const midAngle = (angle1 + angle2) / 2;
 
-    // Vertex of the inner triangle closest to the center where adjacent spoke inner edges meet
+    // 1. Apex vertex closest to center where adjacent spoke inner edges intersect
     const innerCenter: Point2D = [
       rInnerCenter * Math.cos(midAngle),
       rInnerCenter * Math.sin(midAngle)
     ];
 
+    // 2. Inner corner 1: intersection of spoke 1 inner edge with inner hex wall
+    const innerCorner1: Point2D = [
+      sSpokeWall * Math.cos(angle1) - (tSpoke / 2) * Math.sin(angle1),
+      sSpokeWall * Math.sin(angle1) + (tSpoke / 2) * Math.cos(angle1)
+    ];
+
+    // 3. Inner corner 2: intersection of spoke 2 inner edge with inner hex wall
+    const innerCorner2: Point2D = [
+      sSpokeWall * Math.cos(angle2) + (tSpoke / 2) * Math.sin(angle2),
+      sSpokeWall * Math.sin(angle2) - (tSpoke / 2) * Math.cos(angle2)
+    ];
+
     const spokeTriangle: Triangle2D = [center, spokeVertices[i], spokeVertices[(i + 1) % 6]];
-    const innerTriangle: Triangle2D = [innerCenter, innerSpokeVertices[i], innerSpokeVertices[(i + 1) % 6]];
+    const innerTriangle: Triangle2D = [innerCenter, innerCorner1, innerCorner2];
 
     const sectorStruts = createSectorPattern(patternType, spokeTriangle, innerTriangle, tDesign);
     for (const strut of sectorStruts) {
