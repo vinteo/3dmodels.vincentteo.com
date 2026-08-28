@@ -119,16 +119,16 @@ function createSectorPattern(
   const struts: Drawing[] = [];
 
   const [center, v1, v2] = spokeTriangle;
-  const [, inner1, inner2] = innerTriangle;
+  const [innerCenter, inner1, inner2] = innerTriangle;
 
   // Midpoints of spoke boundary geometry
   const midSpoke1: Point2D = [(center[0] + v1[0]) / 2, (center[1] + v1[1]) / 2];
   const midSpoke2: Point2D = [(center[0] + v2[0]) / 2, (center[1] + v2[1]) / 2];
   const midOuter: Point2D = [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
 
-  // Midpoints of inner boundary geometry
-  const midInner1: Point2D = [(center[0] + inner1[0]) / 2, (center[1] + inner1[1]) / 2];
-  const midInner2: Point2D = [(center[0] + inner2[0]) / 2, (center[1] + inner2[1]) / 2];
+  // Midpoints of inner boundary geometry (relative to innerCenter)
+  const midInner1: Point2D = [(innerCenter[0] + inner1[0]) / 2, (innerCenter[1] + inner1[1]) / 2];
+  const midInner2: Point2D = [(innerCenter[0] + inner2[0]) / 2, (innerCenter[1] + inner2[1]) / 2];
   const midInnerOuter: Point2D = [(inner1[0] + inner2[0]) / 2, (inner1[1] + inner2[1]) / 2];
 
   // Centroid Y-junction apex C of the equilateral wedge sub-triangle
@@ -296,10 +296,22 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   let pattern2D: Drawing | null = null;
 
   const center: Point2D = [0, 0];
+  const rInnerCenter = tSpoke; // Offset distance (tSpoke / 2) / sin(30°) = tSpoke
+
   for (let i = 0; i < 6; i++) {
     const patternType = sections[i];
+    const angle1 = (i * Math.PI) / 3 + Math.PI / 6;
+    const angle2 = ((i + 1) * Math.PI) / 3 + Math.PI / 6;
+    const midAngle = (angle1 + angle2) / 2;
+
+    // Vertex of the inner triangle closest to the center where adjacent spoke inner edges meet
+    const innerCenter: Point2D = [
+      rInnerCenter * Math.cos(midAngle),
+      rInnerCenter * Math.sin(midAngle)
+    ];
+
     const spokeTriangle: Triangle2D = [center, spokeVertices[i], spokeVertices[(i + 1) % 6]];
-    const innerTriangle: Triangle2D = [center, innerSpokeVertices[i], innerSpokeVertices[(i + 1) % 6]];
+    const innerTriangle: Triangle2D = [innerCenter, innerSpokeVertices[i], innerSpokeVertices[(i + 1) % 6]];
 
     const sectorStruts = createSectorPattern(patternType, spokeTriangle, innerTriangle, tDesign);
     for (const strut of sectorStruts) {
