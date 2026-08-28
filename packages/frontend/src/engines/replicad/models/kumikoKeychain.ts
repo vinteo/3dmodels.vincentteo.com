@@ -77,14 +77,14 @@ function createSectorPattern(
   const struts: Drawing[] = [];
 
   // 1. Classic Asa-no-ha Y-junction (Tripod branching from apex C):
-  // - Branch to outer frame midpoint
-  const branchOuter = createStrutDrawing(C, midOuter, designThick);
-  // - Branch to upper spoke midpoint
-  const branchSpoke1 = createStrutDrawing(C, midSpoke1, designThick);
-  // - Branch to lower spoke midpoint
-  const branchSpoke2 = createStrutDrawing(C, midSpoke2, designThick);
+  // - Branch to center
+  const branchCenter = createStrutDrawing(C, [0, 0], designThick);
+  // - Branch to upper spoke vertex
+  const branchSpoke1 = createStrutDrawing(C, v1, designThick);
+  // - Branch to lower spoke vertex
+  const branchSpoke2 = createStrutDrawing(C, v2, designThick);
 
-  if (branchOuter) struts.push(branchOuter);
+  if (branchCenter) struts.push(branchCenter);
   if (branchSpoke1) struts.push(branchSpoke1);
   if (branchSpoke2) struts.push(branchSpoke2);
 
@@ -112,7 +112,7 @@ function createSectorPattern(
  * 4. Keychain_Ring_Attachment (keychain ring loop, cut by outer hex)
  */
 export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart[] {
-  const rOuter = Number(params.hex_radius ?? 20);
+  const rMidpoint = Number(params.hex_radius ?? 20);
   const tHex = Number(params.hex_thickness ?? 2);
   const tSpoke = Number(params.hex_spoke_thickness ?? 2);
   const tDesign = Number(params.hex_design_thickness ?? 1);
@@ -122,7 +122,8 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   const fHex = Number(params.hex_fillet ?? 0.2);
   const fRing = Number(params.ring_fillet ?? 0.2);
 
-  const rInner = Math.max(2, rOuter - tHex);
+  const rInner = Math.max(2, rMidpoint - (tHex / 2));
+  const rOuter = rMidpoint + (tHex / 2);
 
   // ==========================================
   // Part 1: Hexagonal Perimeter Frame
@@ -160,8 +161,8 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI) / 3 + Math.PI / 6;
     const vertex: [number, number] = [
-      rOuter * Math.cos(angle),
-      rOuter * Math.sin(angle)
+      rMidpoint * Math.cos(angle),
+      rMidpoint * Math.sin(angle)
     ];
     spokeVertices.push(vertex);
 

@@ -16,9 +16,10 @@ import {
   Share2,
   Check
 } from 'lucide-react';
+import { PreviewMeshData } from '../types/model';
 
 interface ModelViewerProps {
-  meshData: ArrayBuffer | null;
+  meshData: PreviewMeshData | null;
   loading: boolean;
   error?: string | null;
   modelName: string;
@@ -40,7 +41,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
-  const currentMeshRef = useRef<THREE.Mesh | null>(null);
+  const currentGroupRef = useRef<THREE.Group | null>(null);
   const gridHelperRef = useRef<THREE.GridHelper | null>(null);
   const frameIdRef = useRef<number>(0);
   const prevModelNameRef = useRef<string>('');
@@ -98,42 +99,41 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
     controls.dampingFactor = 0.05;
     controls.autoRotate = autoRotate;
     controls.autoRotateSpeed = 2.0;
-    controls.maxDistance = 1000;
-    controls.minDistance = 20;
+    controls.maxDistance = 800;
+    controls.minDistance = 10;
     controlsRef.current = controls;
 
-    // 5. Studio Lighting Setup matching vincentteo.com aesthetic
-    const ambientLight = new THREE.AmbientLight('#ffffff', 0.8);
+    // 5. Studio Lighting Setup
+    const ambientLight = new THREE.AmbientLight('#ffffff', 1.2);
     scene.add(ambientLight);
 
-    // Key Light (White/neutral main light)
-    const keyLight = new THREE.DirectionalLight('#ffffff', 1.8);
-    keyLight.position.set(120, 200, 150);
-    keyLight.castShadow = true;
-    scene.add(keyLight);
+    const mainKeyLight = new THREE.DirectionalLight('#ffffff', 2.0);
+    mainKeyLight.position.set(120, 200, 150);
+    mainKeyLight.castShadow = true;
+    mainKeyLight.shadow.mapSize.width = 2048;
+    mainKeyLight.shadow.mapSize.height = 2048;
+    mainKeyLight.shadow.bias = -0.0001;
+    scene.add(mainKeyLight);
 
-    // Rim Light (Vibrant violet/fuchsia neon accent)
-    const rimLight = new THREE.DirectionalLight('#d946ef', 2.0);
-    rimLight.position.set(-150, -50, -100);
-    scene.add(rimLight);
-
-    // Fill Light (Cool cyan accent)
-    const fillLight = new THREE.DirectionalLight('#38bdf8', 1.0);
-    fillLight.position.set(80, -100, -80);
+    const fillLight = new THREE.DirectionalLight('#93c5fd', 1.0);
+    fillLight.position.set(-150, 100, -100);
     scene.add(fillLight);
 
-    // 6. Subtle Floor Grid
-    const gridHelper = new THREE.GridHelper(300, 30, '#475569', '#1e293b');
-    gridHelper.position.y = -0.5;
-    scene.add(gridHelper);
-    gridHelperRef.current = gridHelper;
+    const rimLight = new THREE.DirectionalLight('#c084fc', 1.2);
+    rimLight.position.set(0, -100, -150);
+    scene.add(rimLight);
 
-    // Animation Loop
+    // 6. Ground Reference Grid
+    const grid = new THREE.GridHelper(300, 30, '#382bf0', '#1c154a');
+    grid.position.y = -0.01;
+    grid.visible = showGrid;
+    scene.add(grid);
+    gridHelperRef.current = grid;
+
+    // 7. Animation loop
     const animate = () => {
       frameIdRef.current = requestAnimationFrame(animate);
-      if (controlsRef.current) {
-        controlsRef.current.update();
-      }
+      controls.update();
       renderer.render(scene, camera);
     };
     animate();
@@ -167,13 +167,15 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
     }
   }, [autoRotate]);
 
-  // Update wireframe property on current mesh
+  // Update wireframe property on all meshes in current group
   useEffect(() => {
-    if (currentMeshRef.current) {
-      const material = currentMeshRef.current.material as THREE.MeshStandardMaterial;
-      if (material) {
-        material.wireframe = wireframe;
-      }
+    if (currentGroupRef.current) {
+      currentGroupRef.current.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material) {
+          const mat = child.material as THREE.MeshStandardMaterial;
+          mat.wireframe = wireframe;
+        }
+      });
     }
   }, [wireframe]);
 
@@ -190,55 +192,76 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
 
     try {
       const loader = new STLLoader();
-      const geometry = loader.parse(meshData);
+      const group = new THREE.Group();
 
-      // Compute bounding box and center geometry
-      geometry.computeBoundingBox();
-      geometry.computeVertexNormals();
-      const bbox = geometry.boundingBox || new THREE.Box3();
-
-      // Auto-orient: If CAD model was extruded along Z (thin along Z), rotate to lie flat on the Three.js XZ ground grid
-      const rawSize = new THREE.Vector3();
-      bbox.getSize(rawSize);
-      if (rawSize.z < rawSize.x && rawSize.z < rawSize.y) {
-        geometry.rotateX(-Math.PI / 2);
-        geometry.computeBoundingBox();
+      if (meshData instanceof ArrayBuffer) {
+        const geometry = loader.parse(meshData);
+        geometry.computeVertexNormals();
+        const material = new THREE.MeshStandardMaterial({
+          color: '#e2e8f0',
+          roughness: 0.35,
+          metalness: 0.15,
+          wireframe
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        group.add(mesh);
+      } else if (meshData && 'parts' in meshData) {
+        for (const part of meshData.parts) {
+          const geometry = loader.parse(part.buffer);
+          geometry.computeVertexNormals();
+          const material = new THREE.MeshStandardMaterial({
+            color: part.color || '#e2e8f0',
+            roughness: 0.35,
+            metalness: 0.15,
+            wireframe
+          });
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.name = part.name;
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          group.add(mesh);
+        }
       }
 
-      const updatedBbox = geometry.boundingBox || bbox;
+      if (group.children.length === 0) return;
+
+      // Compute bounding box and center geometry
+      const bbox = new THREE.Box3().setFromObject(group);
+      const rawSize = new THREE.Vector3();
+      bbox.getSize(rawSize);
+
+      // Auto-orient: If CAD model was extruded along Z (thin along Z), rotate to lie flat on the Three.js XZ ground grid
+      if (rawSize.z < rawSize.x && rawSize.z < rawSize.y) {
+        group.rotateX(-Math.PI / 2);
+      }
+
+      const updatedBbox = new THREE.Box3().setFromObject(group);
       const center = new THREE.Vector3();
       updatedBbox.getCenter(center);
 
       // Center horizontally on X & Z, and place bottom on ground plane (Y = 0)
-      geometry.translate(-center.x, -updatedBbox.min.y, -center.z);
-      geometry.computeBoundingBox();
+      group.position.set(-center.x, -updatedBbox.min.y, -center.z);
 
-      // Remove existing model mesh if present
-      if (currentMeshRef.current && sceneRef.current) {
-        sceneRef.current.remove(currentMeshRef.current);
-        currentMeshRef.current.geometry.dispose();
-        if (Array.isArray(currentMeshRef.current.material)) {
-          currentMeshRef.current.material.forEach((m) => m.dispose());
-        } else {
-          currentMeshRef.current.material.dispose();
-        }
-        currentMeshRef.current = null;
+      // Remove existing model group if present
+      if (currentGroupRef.current && sceneRef.current) {
+        sceneRef.current.remove(currentGroupRef.current);
+        currentGroupRef.current.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.geometry.dispose();
+            if (Array.isArray(child.material)) {
+              child.material.forEach((m) => m.dispose());
+            } else {
+              child.material.dispose();
+            }
+          }
+        });
+        currentGroupRef.current = null;
       }
 
-      // Material tailored to engineering satin / architectural woodwork
-      const material = new THREE.MeshStandardMaterial({
-        color: '#e2e8f0',
-        roughness: 0.35,
-        metalness: 0.15,
-        wireframe
-      });
-
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-
-      sceneRef.current.add(mesh);
-      currentMeshRef.current = mesh;
+      sceneRef.current.add(group);
+      currentGroupRef.current = group;
 
       // Check if this is a newly switched model or initial load
       const isNewModel = prevModelNameRef.current !== modelName;
@@ -248,10 +271,11 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
       }
 
       // Automatically frame camera around geometry size ONLY on initial load or model change
-      if (cameraRef.current && controlsRef.current && geometry.boundingBox) {
+      if (cameraRef.current && controlsRef.current) {
+        const finalBbox = new THREE.Box3().setFromObject(group);
         if (!hasFramedCameraRef.current) {
           const finalSize = new THREE.Vector3();
-          geometry.boundingBox.getSize(finalSize);
+          finalBbox.getSize(finalSize);
           const maxDim = Math.max(finalSize.x, finalSize.y, finalSize.z, 20);
           const fov = cameraRef.current.fov * (Math.PI / 180);
           const distance = Math.abs(maxDim / Math.sin(fov / 2)) * 0.85;
@@ -262,7 +286,6 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
           controlsRef.current.update();
           hasFramedCameraRef.current = true;
         } else {
-          // Preview regenerated for same model: maintain user's exact camera angle, zoom, and orientation!
           controlsRef.current.update();
         }
       }
@@ -273,21 +296,18 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
 
   // Camera Reset Handler
   const handleResetCamera = useCallback(() => {
-    if (cameraRef.current && controlsRef.current && currentMeshRef.current) {
-      const geometry = currentMeshRef.current.geometry;
-      const bbox = geometry.boundingBox;
-      if (bbox) {
-        const size = new THREE.Vector3();
-        bbox.getSize(size);
-        const maxDim = Math.max(size.x, size.y, size.z, 50);
-        const fov = cameraRef.current.fov * (Math.PI / 180);
-        const distance = Math.abs(maxDim / Math.sin(fov / 2)) * 0.9;
+    if (cameraRef.current && controlsRef.current && currentGroupRef.current) {
+      const bbox = new THREE.Box3().setFromObject(currentGroupRef.current);
+      const size = new THREE.Vector3();
+      bbox.getSize(size);
+      const maxDim = Math.max(size.x, size.y, size.z, 50);
+      const fov = cameraRef.current.fov * (Math.PI / 180);
+      const distance = Math.abs(maxDim / Math.sin(fov / 2)) * 0.9;
 
-        cameraRef.current.position.set(distance * 0.7, distance * 0.7, distance * 0.9);
-        cameraRef.current.lookAt(0, size.y / 2, 0);
-        controlsRef.current.target.set(0, size.y / 2, 0);
-        controlsRef.current.update();
-      }
+      cameraRef.current.position.set(distance * 0.7, distance * 0.7, distance * 0.9);
+      cameraRef.current.lookAt(0, size.y / 2, 0);
+      controlsRef.current.target.set(0, size.y / 2, 0);
+      controlsRef.current.update();
     }
   }, []);
 

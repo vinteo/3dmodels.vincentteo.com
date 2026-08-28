@@ -4,7 +4,7 @@ import {
   buildKumikoKeychainParts,
   ReplicadPart
 } from './models/kumikoKeychain';
-import { ExportOptions } from '../../types/model';
+import { ExportOptions, MultiPartPreview, PreviewPartMesh } from '../../types/model';
 import { AnyShape, exportSTEP } from 'replicad';
 
 /**
@@ -40,23 +40,32 @@ function buildModelShape(
 }
 
 /**
- * Generates an STL mesh ArrayBuffer for Three.js viewport rendering
+ * Generates an STL mesh ArrayBuffer for each distinct part for multi-color Three.js rendering
  */
 export async function generateReplicadPreviewMesh(
   modelId: string,
   parameters: Record<string, number | string | boolean>
-): Promise<ArrayBuffer> {
+): Promise<MultiPartPreview> {
   await ensureReplicadReady();
 
-  const shape = buildModelShape(modelId, parameters);
+  const parts = buildModelParts(modelId, parameters);
+  const previewParts: PreviewPartMesh[] = [];
 
-  // Export as high-speed binary STL blob for Three.js STLLoader
-  const blob = shape.blobSTL({
-    tolerance: 0.1,
-    angularTolerance: 30
-  });
+  for (const part of parts) {
+    // Export as high-speed binary STL blob for Three.js STLLoader
+    const blob = part.shape.blobSTL({
+      tolerance: 0.1,
+      angularTolerance: 30
+    });
+    const buffer = await blob.arrayBuffer();
+    previewParts.push({
+      name: part.name,
+      buffer,
+      color: part.color
+    });
+  }
 
-  return blob.arrayBuffer();
+  return { parts: previewParts };
 }
 
 /**

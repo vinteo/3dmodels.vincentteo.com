@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ModelConfig, ExportOptions } from './types/model';
+import { ModelConfig, ExportOptions, PreviewMeshData } from './types/model';
 import { getModels, fetchModelPreviewMesh, triggerModelExport } from './services/api';
 import { Header } from './components/Header';
 import { ModelSelector } from './components/ModelSelector';
@@ -23,7 +23,7 @@ export const App: React.FC = () => {
   const [appliedValues, setAppliedValues] = useState<Record<string, number | string | boolean>>({});
 
   // 3D Mesh Geometry State
-  const [meshData, setMeshData] = useState<ArrayBuffer | null>(null);
+  const [meshData, setMeshData] = useState<PreviewMeshData | null>(null);
   const [loadingPreview, setLoadingPreview] = useState<boolean>(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
 

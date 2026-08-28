@@ -1,4 +1,4 @@
-import { ExportOptions, ModelConfig, ModelsApiResponse } from '../types/model';
+import { ExportOptions, ModelConfig, ModelsApiResponse, PreviewMeshData } from '../types/model';
 import fallbackModels from '../../../../config/models.config.json';
 import { generateReplicadPreviewMesh, exportReplicadFile } from '../engines/replicad';
 
@@ -25,7 +25,7 @@ export async function getModels(): Promise<{ models: ModelConfig[]; mockMode: bo
 export async function fetchModelPreviewMesh(
   model: ModelConfig,
   parameters: Record<string, number | string | boolean>
-): Promise<ArrayBuffer> {
+): Promise<PreviewMeshData> {
   // If model is powered by in-browser Replicad CAD engine
   if (model.engine === 'replicad') {
     return generateReplicadPreviewMesh(model.id, parameters);

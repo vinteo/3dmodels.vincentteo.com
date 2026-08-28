@@ -55,3 +55,16 @@ export interface ExportOptions {
   stlMode?: 'binary' | 'ascii';
   stepVersion?: 'AP203' | 'AP214' | 'AP242';
 }
+
+export interface PreviewPartMesh {
+  name: string;
+  buffer: ArrayBuffer;
+  color?: string;
+}
+
+export interface MultiPartPreview {
+  parts: PreviewPartMesh[];
+}
+
+export type PreviewMeshData = ArrayBuffer | MultiPartPreview;
+
