@@ -27,36 +27,53 @@ export const App: React.FC = () => {
   const [loadingPreview, setLoadingPreview] = useState<boolean>(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
 
-  // Load models catalog on mount and inspect URL for direct model permalink
+  // Helper to extract model ID from URL path slug (e.g. /kumiko-pattern-keychain) or query string fallback
+  const getModelIdFromUrl = useCallback((loadedModels: ModelConfig[]): string | null => {
+    if (loadedModels.length === 0) return null;
+
+    // 1. Check path slug e.g. /kumiko-pattern-keychain or /models/kumiko-pattern-keychain
+    const rawPath = window.location.pathname.replace(/^\/+/g, '').replace(/\/+$/g, '');
+    if (rawPath) {
+      const slug = rawPath.replace(/^models\//, '');
+      const matched = loadedModels.find((m) => m.id === slug);
+      if (matched) return matched.id;
+    }
+
+    // 2. Query parameter fallback e.g. ?model=kumiko-pattern-keychain
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryModelId = searchParams.get('model');
+    if (queryModelId) {
+      const matched = loadedModels.find((m) => m.id === queryModelId);
+      if (matched) return matched.id;
+    }
+
+    return null;
+  }, []);
+
+  // Load models catalog on mount and inspect URL path slug for direct model routing
   useEffect(() => {
     getModels().then(({ models: loadedModels, mockMode: isMock }) => {
       setModels(loadedModels);
       setMockMode(isMock);
       if (loadedModels.length > 0) {
-        const searchParams = new URLSearchParams(window.location.search);
-        const urlModelId = searchParams.get('model');
-        const matched = loadedModels.find((m) => m.id === urlModelId);
-        setSelectedModelId(matched ? matched.id : loadedModels[0].id);
+        const targetModelId = getModelIdFromUrl(loadedModels);
+        setSelectedModelId(targetModelId || loadedModels[0].id);
       }
     });
-  }, []);
+  }, [getModelIdFromUrl]);
 
   // Listen to browser Back/Forward navigation
   useEffect(() => {
     const handlePopState = () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      const urlModelId = searchParams.get('model');
-      if (urlModelId && urlModelId !== selectedModelId) {
-        const matching = models.find((m) => m.id === urlModelId);
-        if (matching) {
-          setSelectedModelId(matching.id);
-        }
+      const targetModelId = getModelIdFromUrl(models);
+      if (targetModelId && targetModelId !== selectedModelId) {
+        setSelectedModelId(targetModelId);
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [models, selectedModelId]);
+  }, [models, selectedModelId, getModelIdFromUrl]);
 
   // Currently active model
   const activeModel = useMemo(() => {
@@ -108,12 +125,11 @@ export const App: React.FC = () => {
     loadPreview(activeModel, initialValues);
   }, [activeModel?.id, loadPreview]);
 
-  // Sync browser URL with direct model permalink and any non-default parameters
+  // Sync browser address bar with clean path slug (e.g. /kumiko-pattern-keychain) and customized parameters
   useEffect(() => {
     if (!activeModel) return;
 
     const searchParams = new URLSearchParams();
-    searchParams.set('model', activeModel.id);
 
     // Only encode parameters that differ from defaults to keep share links clean
     for (const p of activeModel.parameters) {
@@ -123,8 +139,13 @@ export const App: React.FC = () => {
       }
     }
 
-    const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
-    window.history.replaceState(null, '', newUrl);
+    const queryString = searchParams.toString();
+    const newUrl = `/${activeModel.id}${queryString ? `?${queryString}` : ''}`;
+    const currentRelative = `${window.location.pathname}${window.location.search}`;
+
+    if (currentRelative !== newUrl) {
+      window.history.replaceState(null, '', newUrl);
+    }
   }, [activeModel?.id, appliedValues]);
 
   // Determine if there are unapplied parameter edits
@@ -148,9 +169,7 @@ export const App: React.FC = () => {
   const handleSelectModel = (modelId: string) => {
     if (modelId === selectedModelId) return;
     setSelectedModelId(modelId);
-    const searchParams = new URLSearchParams();
-    searchParams.set('model', modelId);
-    window.history.pushState(null, '', `?${searchParams.toString()}`);
+    window.history.pushState(null, '', `/${modelId}`);
   };
 
   // Trigger file download

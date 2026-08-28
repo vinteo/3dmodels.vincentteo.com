@@ -21,7 +21,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
   const handleCopyModelLink = (e: React.MouseEvent, modelId: string) => {
     e.stopPropagation();
-    const url = `${window.location.origin}${window.location.pathname}?model=${modelId}`;
+    const url = `${window.location.origin}/${modelId}`;
     navigator.clipboard.writeText(url);
     setCopiedId(modelId);
     setTimeout(() => setCopiedId(null), 2000);

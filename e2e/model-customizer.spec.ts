@@ -76,15 +76,15 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await expect(page.locator("text=Export Customized Model")).not.toBeVisible();
   });
 
-  test('should load model directly via permalink URL and synchronize address bar', async ({ page }) => {
-    // Navigate directly using a model permalink
-    await page.goto('/?model=parametric-shelf-bracket');
+  test('should load model directly via clean path slug URL and synchronize address bar', async ({ page }) => {
+    // Navigate directly using a path slug permalink
+    await page.goto('/parametric-shelf-bracket');
 
     // Should load the Shelf Bracket model directly
     await expect(page.locator("aside").locator("text=Heavy-Duty Shelf Bracket")).toBeVisible();
     await expect(page.locator("text=Shelf Depth (Arm)")).toBeVisible();
 
-    // Verify address bar contains ?model=parametric-shelf-bracket
-    expect(page.url()).toContain('model=parametric-shelf-bracket');
+    // Verify address bar contains /parametric-shelf-bracket
+    expect(page.url()).toContain('/parametric-shelf-bracket');
   });
 });
