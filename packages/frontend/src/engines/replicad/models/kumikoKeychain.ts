@@ -26,6 +26,33 @@ export interface ReplicadPart {
   alpha?: number;
 }
 
+export function getCentroid(
+  p1: [number, number],
+  p2: [number, number],
+  p3: [number, number]
+): [number, number] {
+  return [
+    (p1[0] + p2[0] + p3[0]) / 3,
+    (p1[1] + p2[1] + p3[1]) / 3
+  ];
+}
+
+export function getIncenter(
+  A: [number, number],
+  B: [number, number],
+  C: [number, number]
+): [number, number] {
+  // Side lengths opposite to A, B, C
+  const a = Math.hypot(B[0] - C[0], B[1] - C[1]);
+  const b = Math.hypot(A[0] - C[0], A[1] - C[1]);
+  const c = Math.hypot(A[0] - B[0], A[1] - B[1]);
+  const perimeter = a + b + c;
+  return [
+    (a * A[0] + b * B[0] + c * C[0]) / perimeter,
+    (a * A[1] + b * B[1] + c * C[1]) / perimeter
+  ];
+}
+
 /**
  * Creates a 2D rectangular strut drawing between two 2D points with given thickness
  */
@@ -56,6 +83,7 @@ function createStrutDrawing(
  */
 function createSectorPattern(
   patternType: string | number,
+  center: [number, number],
   v1: [number, number],
   v2: [number, number],
   designThick: number
@@ -69,16 +97,13 @@ function createSectorPattern(
   const midOuter: [number, number] = [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
 
   // Centroid Y-junction apex C of the equilateral wedge sub-triangle
-  const C: [number, number] = [
-    (midSpoke1[0] + midSpoke2[0] + midOuter[0]) / 3,
-    (midSpoke1[1] + midSpoke2[1] + midOuter[1]) / 3
-  ];
-
+  const C: [number, number] = getCentroid(midSpoke1, midSpoke2, midOuter);
+  console.log(center)
   const struts: Drawing[] = [];
 
   // 1. Classic Asa-no-ha Y-junction (Tripod branching from apex C):
   // - Branch to center
-  const branchCenter = createStrutDrawing(C, [0, 0], designThick);
+  const branchCenter = createStrutDrawing(C, center, designThick);
   // - Branch to upper spoke vertex
   const branchSpoke1 = createStrutDrawing(C, v1, designThick);
   // - Branch to lower spoke vertex
@@ -122,8 +147,9 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   const fHex = Number(params.hex_fillet ?? 0.2);
   const fRing = Number(params.ring_fillet ?? 0.2);
 
-  const rInner = Math.max(2, rMidpoint - (tHex / 2));
-  const rOuter = rMidpoint + (tHex / 2);
+  const deltaCorner = tHex / Math.sqrt(3);
+  const rOuter = rMidpoint + deltaCorner;
+  const rInner = Math.max(2, rMidpoint - deltaCorner);
 
   // ==========================================
   // Part 1: Hexagonal Perimeter Frame
@@ -156,6 +182,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   // Part 2: 6 Radial Spokes (to Hex Vertices)
   // ==========================================
   let spokes2D: Drawing | null = null;
+  let spokesSolid: AnyShape | null = null;
   const spokeVertices: [number, number][] = [];
 
   for (let i = 0; i < 6; i++) {
@@ -177,13 +204,15 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     const trimmedSpokes2D = spokes2D.intersect(innerHex);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const spokesSketch = trimmedSpokes2D.sketchOnPlane('XY') as any;
-    const spokesSolid = spokesSketch.extrude(h);
+    spokesSolid = spokesSketch.extrude(h);
 
-    parts.push({
-      shape: spokesSolid,
-      name: 'Kumiko_Hex_Spokes',
-      color: '#2563eb'
-    });
+    if (spokesSolid) {
+      parts.push({
+        shape: spokesSolid,
+        name: 'Kumiko_Hex_Spokes',
+        color: '#2563eb'
+      });
+    }
   }
 
   // ==========================================
@@ -204,23 +233,35 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     const patternType = sections[i];
     const v1 = spokeVertices[i];
     const v2 = spokeVertices[(i + 1) % 6];
+    const center = getCentroid(spokeVertices[0], spokeVertices[2], spokeVertices[4])
 
-    const sectorStruts = createSectorPattern(patternType, v1, v2, tDesign);
+    const sectorStruts = createSectorPattern(patternType, center, v1, v2, tDesign);
     for (const strut of sectorStruts) {
       pattern2D = pattern2D ? pattern2D.fuse(strut) : strut;
     }
   }
 
-  // Cut the pattern with innerHex (frame) AND cut with spokes2D (spokes) for zero overlap
+  // 3D Boolean Cut: Extrude pattern solid first, then cut with hex frame and spokes solids
   if (pattern2D) {
-    let trimmedPattern2D = pattern2D.intersect(innerHex);
-    if (spokes2D) {
-      trimmedPattern2D = trimmedPattern2D.cut(spokes2D);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const patternSketch = pattern2D.sketchOnPlane('XY') as any;
+    let patternSolid = patternSketch.extrude(h);
+
+    if (hexSolid) {
+      try {
+        patternSolid = patternSolid.cut(hexSolid);
+      } catch {
+        // Keep uncut if disjoint
+      }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const patternSketch = trimmedPattern2D.sketchOnPlane('XY') as any;
-    const patternSolid = patternSketch.extrude(h);
+    if (spokesSolid) {
+      try {
+        patternSolid = patternSolid.cut(spokesSolid);
+      } catch {
+        // Keep uncut if disjoint
+      }
+    }
 
     parts.push({
       shape: patternSolid,
