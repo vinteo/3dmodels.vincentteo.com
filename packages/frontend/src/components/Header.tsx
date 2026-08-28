@@ -1,16 +1,22 @@
 import React from 'react';
-import { Box, Layers } from 'lucide-react';
+import { Box, Sparkles, Layers } from 'lucide-react';
 
 interface HeaderProps {
   mockMode?: boolean;
   onOpenModelDrawer: () => void;
   activeModelName: string;
+  activeModelEngine?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  mockMode,
   onOpenModelDrawer,
-  activeModelName
+  activeModelName,
+  activeModelEngine
 }) => {
+  // Only show Demo Mode badge if in mock mode and the active model uses the Onshape cloud engine
+  const showDemoBadge = Boolean(mockMode && activeModelEngine === 'onshape');
+
   return (
     <header className="h-14 shrink-0 z-30 w-full border-b border-slate-800/80 bg-[#120e25]/90 backdrop-blur-md px-4 flex items-center justify-between">
       {/* Left: Model Selector Button + Brand */}
@@ -46,12 +52,22 @@ export const Header: React.FC<HeaderProps> = ({
         </a>
       </div>
 
-      {/* Right: Active Model Badge */}
+      {/* Right: Active Model Badge & Mock Status */}
       <div className="flex items-center space-x-2">
         <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-semibold text-slate-300">
           <Box className="w-3.5 h-3.5 text-violet-400" />
           <span className="truncate max-w-[200px]">{activeModelName}</span>
         </div>
+
+        {showDemoBadge && (
+          <span
+            title="Running in local simulation mode with procedural CAD models"
+            className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 border border-amber-500/30"
+          >
+            <Sparkles className="w-3 h-3" />
+            Demo Mode
+          </span>
+        )}
       </div>
     </header>
   );

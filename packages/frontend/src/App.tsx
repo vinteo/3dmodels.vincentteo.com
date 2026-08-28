@@ -187,6 +187,7 @@ export const App: React.FC = () => {
         mockMode={mockMode}
         onOpenModelDrawer={() => setModelDrawerOpen(true)}
         activeModelName={activeModel?.name || ''}
+        activeModelEngine={activeModel?.engine}
       />
 
       {/* 2. Middle Body: Sidebar + Full Viewport 3D Canvas */}
