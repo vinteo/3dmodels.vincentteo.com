@@ -288,8 +288,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
     const ringOuter = drawCircle(ringOuterR).translate(0, ringCenterY);
     const ringInner = drawCircle(ringInnerR).translate(0, ringCenterY);
-    // Cut the ring with outerHex so there is zero volume overlap with the frame
-    const ring2D = ringOuter.cut(ringInner).cut(outerHex);
+    const ring2D = ringOuter.cut(ringInner);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ringSketch = ring2D.sketchOnPlane('XY') as any;
@@ -297,20 +296,18 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
     if (fRing > 0 && fRing < 0.6) {
       try {
-        // Fillet the outer ring loop edges, but preserve sharp mating faces where it touches the hex frame
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ringSolid = ringSolid.fillet(fRing, (ef: any) =>
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ef.when(({ center, element }: any) => {
-            const pt = center || element?.center || element?.startPoint;
-            const x = pt?.x ?? pt?.[0] ?? 0;
-            const y = pt?.y ?? pt?.[1] ?? 0;
-            const distToCenter = Math.hypot(x, y);
-            return distToCenter > rOuter + 0.1;
-          })
-        );
+        ringSolid = ringSolid.fillet(fRing);
       } catch {
         // Keep unfilleted if geometry is non-manifold
+      }
+    }
+
+    // 3D Boolean cut with hexSolid to ensure flush mating with zero gap or ledge overhang
+    if (hexSolid) {
+      try {
+        ringSolid = ringSolid.cut(hexSolid);
+      } catch {
+        // Fallback
       }
     }
 
