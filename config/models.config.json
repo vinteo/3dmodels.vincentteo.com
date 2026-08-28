@@ -121,6 +121,18 @@
         "description": "Lattice pattern for Section 6"
       },
       {
+        "id": "hex_design_thickness",
+        "name": "Design Lattice Thickness",
+        "type": "quantity",
+        "unit": "millimeter",
+        "default": 1,
+        "min": 0.5,
+        "max": 10,
+        "step": 0.5,
+        "group": "Section Patterns",
+        "description": "Thickness of the internal geometric pattern ribs"
+      },
+      {
         "id": "hex_radius",
         "name": "Hexagon Radius",
         "type": "quantity",
@@ -167,18 +179,6 @@
         "step": 0.2,
         "group": "Hexagon Lattice",
         "description": "Internal spoke lattice strip thickness"
-      },
-      {
-        "id": "hex_design_thickness",
-        "name": "Design Lattice Thickness",
-        "type": "quantity",
-        "unit": "millimeter",
-        "default": 1,
-        "min": 0.5,
-        "max": 10,
-        "step": 0.5,
-        "group": "Hexagon Lattice",
-        "description": "Thickness of the internal geometric pattern ribs"
       },
       {
         "id": "height",

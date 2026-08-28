@@ -103,6 +103,7 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
   const sectionParams = model.parameters.filter((p) => p.id.startsWith('section_'));
   const hasSections = sectionParams.length > 0;
   const sectionOptions = sectionParams[0]?.options || [];
+  const designThicknessParam = model.parameters.find((p) => p.id === 'hex_design_thickness');
 
   // Check if all 6 sections share the exact same value
   const firstSectionVal = String(currentValues['section_1'] ?? sectionOptions[0]?.value ?? '1');
@@ -278,12 +279,61 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                     </div>
                   </div>
                 )}
+
+                {/* Design Lattice Thickness */}
+                {designThicknessParam && (
+                  <div className="pt-2.5 border-t border-slate-800/80 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <label
+                        htmlFor={`param-${designThicknessParam.id}`}
+                        className="font-bold flex items-center gap-1.5 text-slate-200"
+                      >
+                        {designThicknessParam.name}
+                        {designThicknessParam.description && (
+                          <span title={designThicknessParam.description} className="text-slate-500 cursor-help">
+                            <Info className="w-3 h-3" />
+                          </span>
+                        )}
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          id={`param-${designThicknessParam.id}`}
+                          min={designThicknessParam.min ?? 0.5}
+                          max={designThicknessParam.max ?? 10}
+                          step={designThicknessParam.step ?? 0.5}
+                          value={Number(currentValues[designThicknessParam.id] ?? designThicknessParam.default)}
+                          onChange={(e) => handleChange(designThicknessParam.id, parseFloat(e.target.value) || (designThicknessParam.min ?? 0.5))}
+                          className="w-16 bg-slate-950 border border-slate-800 rounded-lg px-2 py-0.5 text-right text-xs font-mono font-bold text-fuchsia-300 focus:outline-none focus:border-fuchsia-500"
+                        />
+                        <span className="text-[11px] font-mono text-slate-400 font-semibold">
+                          {designThicknessParam.unit === 'millimeter' ? 'mm' : designThicknessParam.unit || ''}
+                        </span>
+                      </div>
+                    </div>
+
+                    <input
+                      type="range"
+                      min={designThicknessParam.min ?? 0.5}
+                      max={designThicknessParam.max ?? 10}
+                      step={designThicknessParam.step ?? 0.5}
+                      value={Number(currentValues[designThicknessParam.id] ?? designThicknessParam.default)}
+                      onChange={(e) => handleChange(designThicknessParam.id, parseFloat(e.target.value))}
+                      className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                    />
+
+                    <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                      <span>{designThicknessParam.min ?? 0.5} mm</span>
+                      <span>{designThicknessParam.max ?? 10} mm</span>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           }
 
-          // Skip section_2 through section_6 since they are rendered inside the card above
-          if (param.id.startsWith('section_') && param.id !== 'section_1') {
+          // Skip section_2 through section_6 and hex_design_thickness since they are rendered inside the Section Patterns card
+          if ((param.id.startsWith('section_') && param.id !== 'section_1') || (param.id === 'hex_design_thickness' && hasSections)) {
             return null;
           }
 
