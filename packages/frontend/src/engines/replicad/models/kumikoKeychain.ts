@@ -51,64 +51,68 @@ function createStrutDrawing(
 }
 
 /**
- * Generates the 2D lattice pattern drawings for a single 60° Kumiko wedge
+ * Generates the 2D Asa-no-ha lattice pattern drawings for a 60° Kumiko wedge.
+ * Sector is centered along the X-axis (spanning -30° to +30° between adjacent spokes).
  */
 function createWedgePattern(
   patternType: string | number,
-  rInner: number,
+  rOuter: number,
   designThick: number
 ): Drawing[] {
   const pType = String(patternType);
   if (pType === '0') return []; // Empty sector
 
-  const angle1 = 0;
-  const angle2 = Math.PI / 3; // 60 deg
+  // Vertices of the sector triangle (spokes at +30° and -30°)
+  const angle = Math.PI / 6; // 30 deg
+  const v1: [number, number] = [rOuter * Math.cos(angle), rOuter * Math.sin(angle)];
+  const v2: [number, number] = [rOuter * Math.cos(-angle), rOuter * Math.sin(-angle)];
 
-  const v0: [number, number] = [0, 0];
-  const v1: [number, number] = [rInner * Math.cos(angle1), rInner * Math.sin(angle1)];
-  const v2: [number, number] = [rInner * Math.cos(angle2), rInner * Math.sin(angle2)];
+  // Midpoint of the outer flat frame side
+  const midOuter: [number, number] = [(v1[0] + v2[0]) / 2, 0];
 
-  // Midpoint of the outer edge
-  const midOuter: [number, number] = [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
-
-  // Midpoints of radial spokes
+  // Midpoints of the two radial spokes
   const midSpoke1: [number, number] = [v1[0] / 2, v1[1] / 2];
   const midSpoke2: [number, number] = [v2[0] / 2, v2[1] / 2];
 
+  // Centroid / 3-way Y-junction point of the equilateral triangle: C = (2/3) * midOuter
+  const C: [number, number] = [(2 / 3) * midOuter[0], 0];
+
   const struts: Drawing[] = [];
 
-  // Central bisecting line from center to outer midpoint
-  const centralBisector = createStrutDrawing(v0, midOuter, designThick);
-  if (centralBisector) struts.push(centralBisector);
+  // 1. Three-legged Y-tripod branching from centroid C at 120° angles:
+  // - Branch 1: Centroid C to outer flat frame midpoint
+  const branchOuter = createStrutDrawing(C, midOuter, designThick);
+  // - Branch 2: Centroid C to upper spoke midpoint
+  const branchSpoke1 = createStrutDrawing(C, midSpoke1, designThick);
+  // - Branch 3: Centroid C to lower spoke midpoint
+  const branchSpoke2 = createStrutDrawing(C, midSpoke2, designThick);
 
-  // Asa-no-ha diagonal ribs
-  const rib1 = createStrutDrawing(midOuter, midSpoke1, designThick);
-  const rib2 = createStrutDrawing(midOuter, midSpoke2, designThick);
-  if (rib1) struts.push(rib1);
-  if (rib2) struts.push(rib2);
+  if (branchOuter) struts.push(branchOuter);
+  if (branchSpoke1) struts.push(branchSpoke1);
+  if (branchSpoke2) struts.push(branchSpoke2);
 
-  // Additional struts for Ryuso Asa-no-ha (Type '2')
+  // 2. Additional struts for Ryuso Asa-no-ha (Type '2')
   if (pType === '2') {
-    const centerInner: [number, number] = [midOuter[0] / 2, midOuter[1] / 2];
-    const diamond1 = createStrutDrawing(centerInner, midSpoke1, designThick);
-    const diamond2 = createStrutDrawing(centerInner, midSpoke2, designThick);
-    const diamond3 = createStrutDrawing(v1, centerInner, designThick);
-    const diamond4 = createStrutDrawing(v2, centerInner, designThick);
+    const diag1 = createStrutDrawing(midOuter, midSpoke1, designThick);
+    const diag2 = createStrutDrawing(midOuter, midSpoke2, designThick);
+    const diag3 = createStrutDrawing(v1, C, designThick);
+    const diag4 = createStrutDrawing(v2, C, designThick);
 
-    if (diamond1) struts.push(diamond1);
-    if (diamond2) struts.push(diamond2);
-    if (diamond3) struts.push(diamond3);
-    if (diamond4) struts.push(diamond4);
+    if (diag1) struts.push(diag1);
+    if (diag2) struts.push(diag2);
+    if (diag3) struts.push(diag3);
+    if (diag4) struts.push(diag4);
   }
 
   return struts;
 }
 
 /**
- * Builds the 3D Kumiko Keychain assembly with separate non-overlapping parts:
- * 1. Hex Frame
- * 2. Radial Spokes & Kumiko Lattice (cut/bounded by hex frame)
- * 3. Keychain Ring Attachment (cut by hex frame)
+ * Builds the 3D Kumiko Keychain assembly with 4 distinct, non-overlapping parts:
+ * 1. Kumiko_Hex_Frame (outer perimeter border)
+ * 2. Kumiko_Hex_Spokes (6 radial spokes to hex corners, cut by hex frame)
+ * 3. Kumiko_Lattice_Pattern (Asa-no-ha Y-lattice, cut by frame and spokes)
+ * 4. Keychain_Ring_Attachment (keychain ring loop, cut by outer hex)
  */
 export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart[] {
   const rOuter = Number(params.hex_radius ?? 20);
@@ -123,7 +127,9 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
   const rInner = Math.max(2, rOuter - tHex);
 
-  // 1. Hexagonal Perimeter Frame
+  // ==========================================
+  // Part 1: Hexagonal Perimeter Frame
+  // ==========================================
   const outerHex = drawPolysides(rOuter, 6);
   const innerHex = drawPolysides(rInner, 6);
   const frame2D = outerHex.cut(innerHex);
@@ -144,12 +150,14 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     {
       shape: hexSolid,
       name: 'Kumiko_Hex_Frame',
-      color: '#334155'
+      color: '#1e3a8a'
     }
   ];
 
-  // 2. Radial Spokes and Kumiko Lattice Patterns
-  let internal2D: Drawing | null = null;
+  // ==========================================
+  // Part 2: 6 Radial Spokes (to Hex Vertices)
+  // ==========================================
+  let spokes2D: Drawing | null = null;
 
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI) / 3 + Math.PI / 6;
@@ -159,10 +167,27 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     ];
     const spoke = createStrutDrawing([0, 0], spokeEnd, tSpoke);
     if (spoke) {
-      internal2D = internal2D ? internal2D.fuse(spoke) : spoke;
+      spokes2D = spokes2D ? spokes2D.fuse(spoke) : spoke;
     }
   }
 
+  // Cut spokes with innerHex so they stop flush against the inner frame wall with zero overlap
+  if (spokes2D) {
+    const trimmedSpokes2D = spokes2D.intersect(innerHex);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const spokesSketch = trimmedSpokes2D.sketchOnPlane('XY') as any;
+    const spokesSolid = spokesSketch.extrude(h);
+
+    parts.push({
+      shape: spokesSolid,
+      name: 'Kumiko_Hex_Spokes',
+      color: '#2563eb'
+    });
+  }
+
+  // ==========================================
+  // Part 3: Kumiko Lattice Infill Pattern
+  // ==========================================
   const sections = [
     params.section_1 ?? '1',
     params.section_2 ?? '1',
@@ -172,30 +197,38 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     params.section_6 ?? '1'
   ];
 
+  let pattern2D: Drawing | null = null;
+
   for (let i = 0; i < 6; i++) {
     const patternType = sections[i];
-    const wedgeStruts = createWedgePattern(patternType, rInner, tDesign);
+    const wedgeStruts = createWedgePattern(patternType, rOuter, tDesign);
     for (const strut of wedgeStruts) {
-      const rotatedStrut = strut.rotate(i * 60 + 30, [0, 0]);
-      internal2D = internal2D ? internal2D.fuse(rotatedStrut) : rotatedStrut;
+      const rotatedStrut = strut.rotate(i * 60, [0, 0]);
+      pattern2D = pattern2D ? pattern2D.fuse(rotatedStrut) : rotatedStrut;
     }
   }
 
-  // Cut spokes and lattice with the hex frame boundary (strictly innerHex) for zero overlap
-  if (internal2D) {
-    const spokes2D = internal2D.intersect(innerHex);
+  // Cut the pattern with innerHex (frame) AND cut with spokes2D (spokes) for zero overlap
+  if (pattern2D) {
+    let trimmedPattern2D = pattern2D.intersect(innerHex);
+    if (spokes2D) {
+      trimmedPattern2D = trimmedPattern2D.cut(spokes2D);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const spokesSketch = spokes2D.sketchOnPlane('XY') as any;
-    const spokesSolid = spokesSketch.extrude(h);
+    const patternSketch = trimmedPattern2D.sketchOnPlane('XY') as any;
+    const patternSolid = patternSketch.extrude(h);
 
     parts.push({
-      shape: spokesSolid,
-      name: 'Kumiko_Spokes_Lattice',
-      color: '#38bdf8'
+      shape: patternSolid,
+      name: 'Kumiko_Lattice_Pattern',
+      color: '#f59e0b'
     });
   }
 
-  // 3. Keychain Ring Attachment (modeled as a separate part, cut by outerHex)
+  // ==========================================
+  // Part 4: Keychain Ring Attachment
+  // ==========================================
   if (hasRing) {
     const ringInnerR = 3;
     const ringOuterR = ringInnerR + tRing;
@@ -203,7 +236,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
     const ringOuter = drawCircle(ringOuterR).translate(0, ringCenterY);
     const ringInner = drawCircle(ringInnerR).translate(0, ringCenterY);
-    // Cut the ring with outerHex so there are zero overlapping sections between parts
+    // Cut the ring with outerHex so there is zero volume overlap with the frame
     const ring2D = ringOuter.cut(ringInner).cut(outerHex);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -229,7 +262,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 }
 
 /**
- * Builds the composite 3D Kumiko Keychain solid model for meshing
+ * Builds the composite 3D Kumiko Keychain solid model for Three.js meshing & STL export
  */
 export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
   const parts = buildKumikoKeychainParts(params);
