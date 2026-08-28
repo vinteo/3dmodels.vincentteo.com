@@ -12,7 +12,9 @@ import {
   Box,
   Eye,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Share2,
+  Check
 } from 'lucide-react';
 
 interface ModelViewerProps {
@@ -49,6 +51,13 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   const [wireframe, setWireframe] = useState<boolean>(false);
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [copiedShareLink, setCopiedShareLink] = useState<boolean>(false);
+
+  const handleCopyShareLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedShareLink(true);
+    setTimeout(() => setCopiedShareLink(false), 2000);
+  };
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -363,6 +372,19 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
             aria-label="Reset camera"
           >
             <RotateCcw className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={handleCopyShareLink}
+            className={`p-2 rounded-xl text-xs font-bold transition-all ${
+              copiedShareLink
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            }`}
+            title={copiedShareLink ? 'Permalink Copied!' : 'Copy Model Permalink'}
+            aria-label="Copy direct permalink"
+          >
+            {copiedShareLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
           </button>
 
           <button

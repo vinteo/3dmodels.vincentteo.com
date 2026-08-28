@@ -27,16 +27,36 @@ export const App: React.FC = () => {
   const [loadingPreview, setLoadingPreview] = useState<boolean>(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
 
-  // Load models catalog on mount
+  // Load models catalog on mount and inspect URL for direct model permalink
   useEffect(() => {
     getModels().then(({ models: loadedModels, mockMode: isMock }) => {
       setModels(loadedModels);
       setMockMode(isMock);
       if (loadedModels.length > 0) {
-        setSelectedModelId(loadedModels[0].id);
+        const searchParams = new URLSearchParams(window.location.search);
+        const urlModelId = searchParams.get('model');
+        const matched = loadedModels.find((m) => m.id === urlModelId);
+        setSelectedModelId(matched ? matched.id : loadedModels[0].id);
       }
     });
   }, []);
+
+  // Listen to browser Back/Forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const urlModelId = searchParams.get('model');
+      if (urlModelId && urlModelId !== selectedModelId) {
+        const matching = models.find((m) => m.id === urlModelId);
+        if (matching) {
+          setSelectedModelId(matching.id);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [models, selectedModelId]);
 
   // Currently active model
   const activeModel = useMemo(() => {
@@ -60,19 +80,52 @@ export const App: React.FC = () => {
     }
   }, []);
 
-  // Initialize parameters and immediately trigger preview when active model changes or loads
+  // Initialize parameters from URL (if customized in link) or defaults, then load preview
   useEffect(() => {
     if (!activeModel) return;
 
+    const searchParams = new URLSearchParams(window.location.search);
     const initialValues: Record<string, number | string | boolean> = {};
+
     for (const p of activeModel.parameters) {
-      initialValues[p.id] = p.default;
+      if (searchParams.has(p.id)) {
+        const raw = searchParams.get(p.id)!;
+        if (p.type === 'quantity') {
+          const parsed = parseFloat(raw);
+          initialValues[p.id] = isNaN(parsed) ? p.default : parsed;
+        } else if (p.type === 'boolean') {
+          initialValues[p.id] = raw === 'true';
+        } else {
+          initialValues[p.id] = raw;
+        }
+      } else {
+        initialValues[p.id] = p.default;
+      }
     }
 
     setCurrentValues(initialValues);
     setAppliedValues(initialValues);
     loadPreview(activeModel, initialValues);
   }, [activeModel?.id, loadPreview]);
+
+  // Sync browser URL with direct model permalink and any non-default parameters
+  useEffect(() => {
+    if (!activeModel) return;
+
+    const searchParams = new URLSearchParams();
+    searchParams.set('model', activeModel.id);
+
+    // Only encode parameters that differ from defaults to keep share links clean
+    for (const p of activeModel.parameters) {
+      const val = appliedValues[p.id];
+      if (val !== undefined && val !== p.default) {
+        searchParams.set(p.id, String(val));
+      }
+    }
+
+    const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+    window.history.replaceState(null, '', newUrl);
+  }, [activeModel?.id, appliedValues]);
 
   // Determine if there are unapplied parameter edits
   const isDirty = useMemo(() => {
@@ -91,9 +144,13 @@ export const App: React.FC = () => {
     loadPreview(activeModel, currentValues);
   };
 
-  // Switch model handler
+  // Switch model handler with history push for clean navigation
   const handleSelectModel = (modelId: string) => {
+    if (modelId === selectedModelId) return;
     setSelectedModelId(modelId);
+    const searchParams = new URLSearchParams();
+    searchParams.set('model', modelId);
+    window.history.pushState(null, '', `?${searchParams.toString()}`);
   };
 
   // Trigger file download

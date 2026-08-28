@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ModelConfig } from '../types/model';
-import { Box, Layers, Tag, X, Check } from 'lucide-react';
+import { Box, Layers, Tag, X, Check, Share2 } from 'lucide-react';
 
 interface ModelSelectorProps {
   isOpen: boolean;
@@ -17,6 +17,16 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   selectedModelId,
   onSelectModel
 }) => {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopyModelLink = (e: React.MouseEvent, modelId: string) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}${window.location.pathname}?model=${modelId}`;
+    navigator.clipboard.writeText(url);
+    setCopiedId(modelId);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -85,12 +95,28 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                       </span>
                     </div>
 
-                    {isSelected && (
-                      <span className="flex items-center gap-1 text-[11px] font-bold text-fuchsia-400">
-                        <Check className="w-3.5 h-3.5" />
-                        Active
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={(e) => handleCopyModelLink(e, m.id)}
+                        className={`p-1 rounded-lg border text-[10px] flex items-center gap-1 transition-all ${
+                          copiedId === m.id
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                            : 'bg-slate-800/80 text-slate-400 hover:text-white border-slate-700/80'
+                        }`}
+                        title="Copy direct permalink to this model"
+                      >
+                        {copiedId === m.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Share2 className="w-3 h-3 text-violet-400" />}
+                        <span className="hidden sm:inline">{copiedId === m.id ? 'Copied' : 'Link'}</span>
+                      </button>
+
+                      {isSelected && (
+                        <span className="flex items-center gap-1 text-[11px] font-bold text-fuchsia-400">
+                          <Check className="w-3.5 h-3.5" />
+                          Active
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <p className="text-xs text-slate-400 leading-relaxed mb-3 line-clamp-2">

@@ -9,7 +9,8 @@ import {
   Info,
   Layers,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Share2
 } from 'lucide-react';
 
 interface ParameterControlsProps {
@@ -38,6 +39,13 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
   onToggleCollapse
 }) => {
   const [autoUpdate, setAutoUpdate] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleCopyPermalink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
 
   // Debounced auto-update handler
   useEffect(() => {
@@ -156,13 +164,28 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
             </span>
           </div>
 
-          <button
-            onClick={onOpenModelDrawer}
-            className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-fuchsia-400 hover:text-fuchsia-300 px-2 py-1 rounded-lg bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/30 transition-all cursor-pointer"
-          >
-            <Layers className="w-3 h-3" />
-            Change
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={handleCopyPermalink}
+              className={`flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                copiedLink
+                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                  : 'text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border-slate-700/80'
+              }`}
+              title="Copy direct permalink URL with current parameters"
+            >
+              {copiedLink ? <Check className="w-3 h-3 text-emerald-400" /> : <Share2 className="w-3 h-3 text-violet-400" />}
+              <span>{copiedLink ? 'Copied!' : 'Share'}</span>
+            </button>
+
+            <button
+              onClick={onOpenModelDrawer}
+              className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-fuchsia-400 hover:text-fuchsia-300 px-2 py-1 rounded-lg bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/30 transition-all cursor-pointer"
+            >
+              <Layers className="w-3 h-3" />
+              Change
+            </button>
+          </div>
         </div>
       </div>
 
