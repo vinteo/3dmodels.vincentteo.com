@@ -103,6 +103,58 @@ export type Point2D = [number, number];
 export type Triangle2D = [Point2D, Point2D, Point2D];
 
 /**
+ * Creates a 2D hollow triangular frame from 3 outer vertices, with wall thickness offsetting inward
+ */
+export function createTriangleFrame(
+  p1: Point2D,
+  p2: Point2D,
+  p3: Point2D,
+  thickness: number
+): Drawing | null {
+  const outerTriangle = draw(p1).lineTo(p2).lineTo(p3).close();
+
+  // Incenter of the triangle
+  const I = getIncenter(p1, p2, p3);
+
+  // Computes inward offset vertex along the angle bisector towards incenter I
+  function getInwardVertex(V: Point2D, Vprev: Point2D, Vnext: Point2D): Point2D {
+    const v1: Point2D = [Vprev[0] - V[0], Vprev[1] - V[1]];
+    const v2: Point2D = [Vnext[0] - V[0], Vnext[1] - V[1]];
+    const l1 = Math.hypot(v1[0], v1[1]);
+    const l2 = Math.hypot(v2[0], v2[1]);
+    if (l1 < 1e-4 || l2 < 1e-4) return V;
+
+    const dot = (v1[0] * v2[0] + v1[1] * v2[1]) / (l1 * l2);
+    const clampedDot = Math.max(-1, Math.min(1, dot));
+    const halfAngle = Math.acos(clampedDot) / 2;
+    const sinHalf = Math.sin(halfAngle);
+    if (sinHalf < 1e-3) return V;
+
+    const offsetDist = thickness / sinHalf;
+    const toI: Point2D = [I[0] - V[0], I[1] - V[1]];
+    const distI = Math.hypot(toI[0], toI[1]);
+    if (distI <= offsetDist) {
+      return I;
+    }
+
+    const scale = offsetDist / distI;
+    return [V[0] + toI[0] * scale, V[1] + toI[1] * scale];
+  }
+
+  const p1Inner = getInwardVertex(p1, p3, p2);
+  const p2Inner = getInwardVertex(p2, p1, p3);
+  const p3Inner = getInwardVertex(p3, p2, p1);
+
+  const innerTriangle = draw(p1Inner).lineTo(p2Inner).lineTo(p3Inner).close();
+
+  try {
+    return outerTriangle.cut(innerTriangle);
+  } catch {
+    return outerTriangle;
+  }
+}
+
+/**
  * Generates the 3D lattice/motif pattern solid for a 60° Kumiko wedge sector.
  * Provides complete flexibility to construct custom 2D/3D shapes, motifs, or embossed solids.
  *
@@ -138,43 +190,53 @@ export function createSectorPattern(
   // Centroid Y-junction apex C of the equilateral wedge sub-triangle
   const C: Point2D = getCentroid(midSpoke1, midSpoke2, midOuter);
 
-  let sector2D: Drawing | null = null;
-  const struts: (Drawing | null)[] = [];
-
-  // Classic Asa-no-ha tripod branches from apex C
-  const branchCenter = createStrutDrawing(C, center, designThick);
-  const branchSpoke1 = createStrutDrawing(C, v1, designThick);
-  const branchSpoke2 = createStrutDrawing(C, v2, designThick);
-
   switch (pType) {
-    case '1':
+    case '0':
+      return null;
+
+    case '1': {
       // 1: Classic Asa-no-ha (Tripod branching from apex C)
-      struts.push(branchCenter, branchSpoke1, branchSpoke2);
-      break;
+      let sector2D: Drawing | null = null;
+      const branchCenter = createStrutDrawing(C, center, designThick);
+      const branchSpoke1 = createStrutDrawing(C, v1, designThick);
+      const branchSpoke2 = createStrutDrawing(C, v2, designThick);
+
+      for (const strut of [branchCenter, branchSpoke1, branchSpoke2]) {
+        if (strut) sector2D = sector2D ? sector2D.fuse(strut) : strut;
+      }
+
+      if (!sector2D) return null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sketch = sector2D.sketchOnPlane('XY') as any;
+      return sketch.extrude(height);
+    }
 
     case '2': {
-      // 2: Ryuso Asa-no-ha (Classic tripod + secondary framing struts)
-      const diag1 = createStrutDrawing(midInner1, midInnerOuter, designThick, 'outer');
-      const diag2 = createStrutDrawing(midInner2, midInnerOuter, designThick, 'inner');
-      const diag3 = createStrutDrawing(midInner1, midInner2, designThick, 'inner');
-      struts.push(branchCenter, branchSpoke1, branchSpoke2, diag1, diag2, diag3);
-      break;
+      // 2: Ryuso Asa-no-ha (Classic tripod + inward triangular frame)
+      let sector2D: Drawing | null = null;
+      const branchCenter = createStrutDrawing(C, center, designThick);
+      const branchSpoke1 = createStrutDrawing(C, v1, designThick);
+      const branchSpoke2 = createStrutDrawing(C, v2, designThick);
+
+      for (const strut of [branchCenter, branchSpoke1, branchSpoke2]) {
+        if (strut) sector2D = sector2D ? sector2D.fuse(strut) : strut;
+      }
+
+      // Hollow triangular frame between midInner1, midInner2, midInnerOuter with thickness going inwards
+      const triFrame = createTriangleFrame(midInner1, midInner2, midInnerOuter, designThick);
+      if (triFrame) {
+        sector2D = sector2D ? sector2D.fuse(triFrame) : triFrame;
+      }
+
+      if (!sector2D) return null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sketch = sector2D.sketchOnPlane('XY') as any;
+      return sketch.extrude(height);
     }
 
     default:
       return null;
   }
-
-  for (const strut of struts) {
-    if (strut) {
-      sector2D = sector2D ? sector2D.fuse(strut) : strut;
-    }
-  }
-
-  if (!sector2D) return null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sketch = sector2D.sketchOnPlane('XY') as any;
-  return sketch.extrude(height);
 }
 
 /**
