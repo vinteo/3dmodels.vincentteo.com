@@ -117,9 +117,9 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
   const innerHex = drawPolysides(rInner, 6);
   let internal2D: Drawing | null = null;
 
-  // 2. 6 Radial Spokes (rotated 30 degrees)
+  // 2. 6 Radial Spokes (terminating at the middle of the 6 flat frame sides)
   for (let i = 0; i < 6; i++) {
-    const angle = (i * Math.PI) / 3 + Math.PI / 6;
+    const angle = (i * Math.PI) / 3;
     const spokeEnd: [number, number] = [
       rOuter * Math.cos(angle),
       rOuter * Math.sin(angle)
@@ -130,7 +130,7 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
     }
   }
 
-  // 3. 6 Wedge Lattice Patterns (aligned with 30-degree spokes)
+  // 3. 6 Wedge Lattice Patterns (spanning between adjacent spokes)
   const sections = [
     params.section_1 ?? '1',
     params.section_2 ?? '1',
@@ -144,7 +144,7 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
     const patternType = sections[i];
     const wedgeStruts = createWedgePattern(patternType, rInner, tDesign);
     for (const strut of wedgeStruts) {
-      const rotatedStrut = strut.rotate(i * 60 + 30, [0, 0]);
+      const rotatedStrut = strut.rotate(i * 60, [0, 0]);
       internal2D = internal2D ? internal2D.fuse(rotatedStrut) : rotatedStrut;
     }
   }
@@ -153,7 +153,7 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
   const frame2D = outerHex.cut(innerHex);
   let composite2D = internal2D ? frame2D.fuse(internal2D.intersect(outerHex)) : frame2D;
 
-  // 5. Keychain Ring Loop Attachment
+  // 5. Keychain Ring Loop Attachment (anchored to the top 90-degree vertex)
   if (hasRing) {
     const ringInnerR = 3;
     const ringOuterR = ringInnerR + tRing;
