@@ -7,8 +7,8 @@ export function getModelById(id: string): ModelConfig | undefined {
   return MODELS.find((m) => m.id === id);
 }
 
-export function getAllModels(): ModelConfig[] {
-  return MODELS;
+export function getAllModels(includeHidden = false): ModelConfig[] {
+  return includeHidden ? MODELS : MODELS.filter((m) => !m.hidden);
 }
 
 /**

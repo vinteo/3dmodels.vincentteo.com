@@ -52,12 +52,13 @@ export const App: React.FC = () => {
 
   // Load models catalog on mount and inspect URL path slug for direct model routing
   useEffect(() => {
-    getModels().then(({ models: loadedModels, mockMode: isMock }) => {
+    getModels(true).then(({ models: loadedModels, mockMode: isMock }) => {
       setModels(loadedModels);
       setMockMode(isMock);
       if (loadedModels.length > 0) {
         const targetModelId = getModelIdFromUrl(loadedModels);
-        setSelectedModelId(targetModelId || loadedModels[0].id);
+        const visibleModels = loadedModels.filter((m) => !m.hidden);
+        setSelectedModelId(targetModelId || visibleModels[0]?.id || loadedModels[0].id);
       }
     });
   }, [getModelIdFromUrl]);

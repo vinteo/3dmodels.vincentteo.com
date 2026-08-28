@@ -23,9 +23,9 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     // Open left model catalog drawer
     await page.click("button:has-text('Models')");
 
-    // Drawer should appear
+    // Drawer should appear with visible models and exclude hidden models
     await expect(page.locator("button:has-text('Kumiko Keychain (Instant In-Browser)')")).toBeVisible();
-    await expect(page.locator("button:has-text('Kumiko Keychain (Onshape)')")).toBeVisible();
+    await expect(page.locator("button:has-text('Kumiko Keychain (Onshape)')")).not.toBeVisible();
 
     // Select Replicad model from pop-out drawer
     await page.click("button:has-text('Kumiko Keychain (Instant In-Browser)')");

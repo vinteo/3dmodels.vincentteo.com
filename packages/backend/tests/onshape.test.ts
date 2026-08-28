@@ -4,10 +4,14 @@ import { getAllModels, getModelById, buildConfigurationString, parseConfiguratio
 import { generateMockSTL, generateMockSTEP } from '../src/onshape/mock';
 
 describe('Models Configuration and Parsing', () => {
-  it('should load configured models from catalog', () => {
-    const models = getAllModels();
-    expect(models.length).toBeGreaterThan(0);
-    expect(models[0].id).toBe('kumiko-pattern-keychain');
+  it('should load configured models from catalog and filter hidden models', () => {
+    const visibleModels = getAllModels();
+    expect(visibleModels.length).toBeGreaterThan(0);
+    expect(visibleModels[0].id).toBe('kumiko-keychain-replicad');
+
+    const allModels = getAllModels(true);
+    expect(allModels.length).toBeGreaterThanOrEqual(2);
+    expect(allModels.some((m) => m.id === 'kumiko-pattern-keychain')).toBe(true);
   });
 
   it('should retrieve a specific model by ID', () => {

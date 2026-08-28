@@ -25,6 +25,7 @@ export interface ModelConfig {
   name: string;
   description: string;
   engine?: 'onshape' | 'replicad';
+  hidden?: boolean;
   documentId?: string;
   workspaceId?: string;
   elementId?: string;

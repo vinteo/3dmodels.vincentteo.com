@@ -4,9 +4,10 @@ import { generateReplicadPreviewMesh, exportReplicadFile } from '../engines/repl
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
-export async function getModels(): Promise<{ models: ModelConfig[]; mockMode: boolean }> {
+export async function getModels(includeHidden = false): Promise<{ models: ModelConfig[]; mockMode: boolean }> {
   try {
-    const res = await fetch(`${API_BASE}/api/models`);
+    const url = includeHidden ? `${API_BASE}/api/models?includeHidden=true` : `${API_BASE}/api/models`;
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP error ${res.status}`);
     const data = (await res.json()) as ModelsApiResponse;
     return {
@@ -15,8 +16,9 @@ export async function getModels(): Promise<{ models: ModelConfig[]; mockMode: bo
     };
   } catch (err) {
     console.warn('Backend API unreachable, using fallback configuration catalog:', err);
+    const all = fallbackModels as ModelConfig[];
     return {
-      models: fallbackModels as ModelConfig[],
+      models: includeHidden ? all : all.filter((m) => !m.hidden),
       mockMode: true
     };
   }

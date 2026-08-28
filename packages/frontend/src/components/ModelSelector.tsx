@@ -62,87 +62,89 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
         {/* Models List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {models.map((m) => {
-            const isSelected = m.id === selectedModelId;
+          {models
+            .filter((m) => !m.hidden)
+            .map((m) => {
+              const isSelected = m.id === selectedModelId;
 
-            return (
-              <button
-                key={m.id}
-                onClick={() => {
-                  onSelectModel(m.id);
-                  onClose();
-                }}
-                className={`w-full text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
-                  isSelected
-                    ? 'bg-slate-900 border-fuchsia-500 shadow-lg shadow-fuchsia-500/15 ring-1 ring-fuchsia-400'
-                    : 'bg-slate-900/40 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/70'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className={`p-1.5 rounded-lg ${
-                          isSelected
-                            ? 'bg-fuchsia-500/20 text-fuchsia-300'
-                            : 'bg-slate-800 text-slate-400'
-                        }`}
-                      >
-                        <Box className="w-4 h-4" />
-                      </div>
-                      <span className="text-sm font-bold text-white">
-                        {m.name}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={(e) => handleCopyModelLink(e, m.id)}
-                        className={`p-1 rounded-lg border text-[10px] flex items-center gap-1 transition-all ${
-                          copiedId === m.id
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                            : 'bg-slate-800/80 text-slate-400 hover:text-white border-slate-700/80'
-                        }`}
-                        title="Copy direct permalink to this model"
-                      >
-                        {copiedId === m.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Share2 className="w-3 h-3 text-violet-400" />}
-                        <span className="hidden sm:inline">{copiedId === m.id ? 'Copied' : 'Link'}</span>
-                      </button>
-
-                      {isSelected && (
-                        <span className="flex items-center gap-1 text-[11px] font-bold text-fuchsia-400">
-                          <Check className="w-3.5 h-3.5" />
-                          Active
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => {
+                    onSelectModel(m.id);
+                    onClose();
+                  }}
+                  className={`w-full text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                    isSelected
+                      ? 'bg-slate-900 border-fuchsia-500 shadow-lg shadow-fuchsia-500/15 ring-1 ring-fuchsia-400'
+                      : 'bg-slate-900/40 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/70'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center space-x-2">
+                        <div
+                          className={`p-1.5 rounded-lg ${
+                            isSelected
+                              ? 'bg-fuchsia-500/20 text-fuchsia-300'
+                              : 'bg-slate-800 text-slate-400'
+                          }`}
+                        >
+                          <Box className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-bold text-white">
+                          {m.name}
                         </span>
-                      )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => handleCopyModelLink(e, m.id)}
+                          className={`p-1 rounded-lg border text-[10px] flex items-center gap-1 transition-all ${
+                            copiedId === m.id
+                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                              : 'bg-slate-800/80 text-slate-400 hover:text-white border-slate-700/80'
+                          }`}
+                          title="Copy direct permalink to this model"
+                        >
+                          {copiedId === m.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Share2 className="w-3 h-3 text-violet-400" />}
+                          <span className="hidden sm:inline">{copiedId === m.id ? 'Copied' : 'Link'}</span>
+                        </button>
+
+                        {isSelected && (
+                          <span className="flex items-center gap-1 text-[11px] font-bold text-fuchsia-400">
+                            <Check className="w-3.5 h-3.5" />
+                            Active
+                          </span>
+                        )}
+                      </div>
                     </div>
+
+                    <p className="text-xs text-slate-400 leading-relaxed mb-3 line-clamp-2">
+                      {m.description}
+                    </p>
                   </div>
 
-                  <p className="text-xs text-slate-400 leading-relaxed mb-3 line-clamp-2">
-                    {m.description}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 pt-2 border-t border-slate-800/60">
-                  {m.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/50"
-                    >
-                      <Tag className="w-2.5 h-2.5 text-pink-400" />
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </button>
-            );
-          })}
+                  <div className="flex flex-wrap gap-1.5 pt-2 border-t border-slate-800/60">
+                    {m.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/50"
+                      >
+                        <Tag className="w-2.5 h-2.5 text-pink-400" />
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              );
+            })}
         </div>
 
         {/* Drawer Footer Info */}
         <div className="p-4 border-t border-slate-800/80 bg-slate-950/60 text-[11px] text-slate-400 flex items-center justify-between">
-          <span>{models.length} CAD Models Configured</span>
+          <span>{models.filter((m) => !m.hidden).length} CAD Models Configured</span>
           <span className="font-mono text-slate-500">config/models.config.json</span>
         </div>
       </div>

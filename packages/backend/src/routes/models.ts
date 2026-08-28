@@ -11,7 +11,8 @@ export const modelsRouter = new Hono<{ Bindings: Env }>();
  */
 modelsRouter.get('/', (c) => {
   const client = new OnshapeClient(c.env);
-  const models = getAllModels();
+  const includeHidden = c.req.query('includeHidden') === 'true';
+  const models = getAllModels(includeHidden);
 
   return c.json({
     success: true,

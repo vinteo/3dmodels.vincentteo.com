@@ -4,6 +4,7 @@
     "name": "Kumiko Keychain (Onshape)",
     "description": "Geometric Japanese Kumiko lattice keychain rendered via Onshape Cloud CAD engine.",
     "engine": "onshape",
+    "hidden": true,
     "documentId": "2df95888f1ccf2ebe511e5ce",
     "workspaceId": "c6b29a76d27afd2301c0bb88",
     "elementId": "0d5d97d3dc742d1e76ff657d",
