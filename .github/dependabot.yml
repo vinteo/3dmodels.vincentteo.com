@@ -9,6 +9,10 @@ updates:
       time: "03:00"
       timezone: "Australia/Sydney"
     open-pull-requests-limit: 10
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     commit-message:
       prefix: "ci"
       include: "scope"
@@ -26,13 +30,9 @@ updates:
       timezone: "Australia/Sydney"
     open-pull-requests-limit: 10
     groups:
-      dev-dependencies:
+      npm-dependencies:
         patterns:
           - "*"
-        update-types:
-          - "minor"
-          - "patch"
-        dependency-type: "development"
     commit-message:
       prefix: "deps"
       include: "scope"
