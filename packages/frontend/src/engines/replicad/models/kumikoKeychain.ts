@@ -112,10 +112,10 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
 
   const rInner = Math.max(2, rOuter - tHex);
 
-  // 1. Outer Hexagonal Perimeter Frame
+  // 1. Outer & Inner Hexagonal Perimeter Frame
   const outerHex = drawPolysides(rOuter, 6);
   const innerHex = drawPolysides(rInner, 6);
-  let composite2D = outerHex.cut(innerHex);
+  let internal2D: Drawing | null = null;
 
   // 2. 6 Radial Spokes (rotated 30 degrees)
   for (let i = 0; i < 6; i++) {
@@ -126,7 +126,7 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
     ];
     const spoke = createStrutDrawing([0, 0], spokeEnd, tSpoke);
     if (spoke) {
-      composite2D = composite2D.fuse(spoke);
+      internal2D = internal2D ? internal2D.fuse(spoke) : spoke;
     }
   }
 
@@ -145,11 +145,15 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
     const wedgeStruts = createWedgePattern(patternType, rInner, tDesign);
     for (const strut of wedgeStruts) {
       const rotatedStrut = strut.rotate(i * 60 + 30, [0, 0]);
-      composite2D = composite2D.fuse(rotatedStrut);
+      internal2D = internal2D ? internal2D.fuse(rotatedStrut) : rotatedStrut;
     }
   }
 
-  // 4. Keychain Ring Loop Attachment
+  // 4. Clip all internal geometry strictly to outerHex so spokes never protrude outside the frame
+  const frame2D = outerHex.cut(innerHex);
+  let composite2D = internal2D ? frame2D.fuse(internal2D.intersect(outerHex)) : frame2D;
+
+  // 5. Keychain Ring Loop Attachment
   if (hasRing) {
     const ringInnerR = 3;
     const ringOuterR = ringInnerR + tRing;
