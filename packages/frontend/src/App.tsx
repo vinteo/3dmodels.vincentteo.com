@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ModelConfig, ExportOptions, PreviewMeshData } from './types/model';
 import { getModels, fetchModelPreviewMesh, triggerModelExport } from './services/api';
+import { trackModelView } from './services/analytics';
 import { Header } from './components/Header';
 import { ModelSelector } from './components/ModelSelector';
 import { ModelViewer } from './components/ModelViewer';
@@ -125,7 +126,8 @@ export const App: React.FC = () => {
     setCurrentValues(initialValues);
     setAppliedValues(initialValues);
     loadPreview(activeModel, initialValues);
-  }, [activeModel?.id, loadPreview]);
+    trackModelView(activeModel.id, activeModel.name, activeModel.engine);
+  }, [activeModel?.id, activeModel?.name, activeModel?.engine, loadPreview]);
 
   // Sync browser address bar with clean path slug (e.g. /kumiko-pattern-keychain) and customized parameters
   useEffect(() => {
