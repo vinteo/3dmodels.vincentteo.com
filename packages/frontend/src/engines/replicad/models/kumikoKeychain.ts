@@ -160,9 +160,13 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   const hexSketch = frame2D.sketchOnPlane('XY') as any;
   let hexSolid = hexSketch.extrude(h);
 
+  const ringInnerR = 3;
+  const ringOuterR = ringInnerR + tRing;
+  const ringCenterY = rOuter + ringOuterR - 1.5;
+
   if (fHex > 0 && fHex < 0.6) {
     try {
-      // Fillet only the outer perimeter edges, keeping all inner frame edges sharp
+      // Fillet only the outer perimeter edges, keeping inner frame edges and ring contact zone sharp
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hexSolid = hexSolid.fillet(fHex, (ef: any) =>
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -171,7 +175,8 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
           const x = pt?.x ?? pt?.[0] ?? 0;
           const y = pt?.y ?? pt?.[1] ?? 0;
           const dist = Math.hypot(x, y);
-          return dist >= rMidpoint - 0.1;
+          const isRingContact = hasRing && Math.hypot(x, y - ringCenterY) <= ringOuterR + 0.5;
+          return dist >= rMidpoint - 0.1 && !isRingContact;
         })
       );
     } catch {
@@ -297,7 +302,18 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
     if (fRing > 0 && fRing < 0.6) {
       try {
-        ringSolid = ringSolid.fillet(fRing);
+        // Fillet the outer ring loop edges, but preserve sharp mating faces where it touches the hex frame
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ringSolid = ringSolid.fillet(fRing, (ef: any) =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ef.when(({ center, element }: any) => {
+            const pt = center || element?.center || element?.startPoint;
+            const x = pt?.x ?? pt?.[0] ?? 0;
+            const y = pt?.y ?? pt?.[1] ?? 0;
+            const distToCenter = Math.hypot(x, y);
+            return distToCenter > rOuter + 0.3;
+          })
+        );
       } catch {
         // Keep unfilleted if geometry is non-manifold
       }
