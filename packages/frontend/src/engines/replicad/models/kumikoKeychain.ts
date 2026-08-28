@@ -190,53 +190,41 @@ export function createSectorPattern(
   // Centroid Y-junction apex C of the equilateral wedge sub-triangle
   const C: Point2D = getCentroid(midSpoke1, midSpoke2, midOuter);
 
+  // 1. Common Asa-no-ha tripod branches from apex C
+  let sector2D: Drawing | null = null;
+  const branchCenter = createStrutDrawing(C, center, designThick);
+  const branchSpoke1 = createStrutDrawing(C, v1, designThick);
+  const branchSpoke2 = createStrutDrawing(C, v2, designThick);
+
+  for (const strut of [branchCenter, branchSpoke1, branchSpoke2]) {
+    if (strut) sector2D = sector2D ? sector2D.fuse(strut) : strut;
+  }
+
+  // 2. Pattern-specific augmentations
   switch (pType) {
-    case '0':
-      return null;
-
-    case '1': {
-      // 1: Classic Asa-no-ha (Tripod branching from apex C)
-      let sector2D: Drawing | null = null;
-      const branchCenter = createStrutDrawing(C, center, designThick);
-      const branchSpoke1 = createStrutDrawing(C, v1, designThick);
-      const branchSpoke2 = createStrutDrawing(C, v2, designThick);
-
-      for (const strut of [branchCenter, branchSpoke1, branchSpoke2]) {
-        if (strut) sector2D = sector2D ? sector2D.fuse(strut) : strut;
-      }
-
-      if (!sector2D) return null;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sketch = sector2D.sketchOnPlane('XY') as any;
-      return sketch.extrude(height);
-    }
+    case '1':
+      // 1: Classic Asa-no-ha (Tripod only)
+      break;
 
     case '2': {
-      // 2: Ryuso Asa-no-ha (Classic tripod + inward triangular frame)
-      let sector2D: Drawing | null = null;
-      const branchCenter = createStrutDrawing(C, center, designThick);
-      const branchSpoke1 = createStrutDrawing(C, v1, designThick);
-      const branchSpoke2 = createStrutDrawing(C, v2, designThick);
-
-      for (const strut of [branchCenter, branchSpoke1, branchSpoke2]) {
-        if (strut) sector2D = sector2D ? sector2D.fuse(strut) : strut;
-      }
-
-      // Hollow triangular frame between midInner1, midInner2, midInnerOuter with thickness going inwards
+      // 2: Ryuso Asa-no-ha (Tripod + inward triangular frame)
       const triFrame = createTriangleFrame(midInner1, midInner2, midInnerOuter, designThick);
       if (triFrame) {
         sector2D = sector2D ? sector2D.fuse(triFrame) : triFrame;
       }
-
-      if (!sector2D) return null;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sketch = sector2D.sketchOnPlane('XY') as any;
-      return sketch.extrude(height);
+      break;
     }
 
     default:
       return null;
   }
+
+  if (!sector2D) return null;
+
+  // 3. Extrude to 3D Solid
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sketch = sector2D.sketchOnPlane('XY') as any;
+  return sketch.extrude(height);
 }
 
 /**
