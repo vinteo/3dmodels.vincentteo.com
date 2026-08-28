@@ -12,7 +12,7 @@
       "3D Print",
       "Keychain"
     ],
-    "defaultConfiguration": "include_keychain_ring=true;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter;hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=2+millimeter",
+    "defaultConfiguration": "include_keychain_ring=true;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter;hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=2+millimeter;section_1=1;section_2=1;section_3=1;section_4=1;section_5=1;section_6=1",
     "parameters": [
       {
         "id": "include_keychain_ring",
@@ -28,7 +28,7 @@
         "type": "quantity",
         "unit": "millimeter",
         "default": 2,
-        "min": 0,
+        "min": 1,
         "max": 10,
         "step": 0.5,
         "group": "Keychain Ring",
@@ -47,6 +47,78 @@
         "group": "Keychain Ring",
         "dependsOn": "include_keychain_ring",
         "description": "Fillet radius on the keychain ring attachment"
+      },
+      {
+        "id": "section_1",
+        "name": "Section 1 (0°–60°)",
+        "type": "enum",
+        "default": "1",
+        "group": "Section Patterns",
+        "options": [
+          { "value": "0", "label": "Empty" },
+          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+        ],
+        "description": "Lattice pattern for Section 1"
+      },
+      {
+        "id": "section_2",
+        "name": "Section 2 (60°–120°)",
+        "type": "enum",
+        "default": "1",
+        "group": "Section Patterns",
+        "options": [
+          { "value": "0", "label": "Empty" },
+          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+        ],
+        "description": "Lattice pattern for Section 2"
+      },
+      {
+        "id": "section_3",
+        "name": "Section 3 (120°–180°)",
+        "type": "enum",
+        "default": "1",
+        "group": "Section Patterns",
+        "options": [
+          { "value": "0", "label": "Empty" },
+          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+        ],
+        "description": "Lattice pattern for Section 3"
+      },
+      {
+        "id": "section_4",
+        "name": "Section 4 (180°–240°)",
+        "type": "enum",
+        "default": "1",
+        "group": "Section Patterns",
+        "options": [
+          { "value": "0", "label": "Empty" },
+          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+        ],
+        "description": "Lattice pattern for Section 4"
+      },
+      {
+        "id": "section_5",
+        "name": "Section 5 (240°–300°)",
+        "type": "enum",
+        "default": "1",
+        "group": "Section Patterns",
+        "options": [
+          { "value": "0", "label": "Empty" },
+          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+        ],
+        "description": "Lattice pattern for Section 5"
+      },
+      {
+        "id": "section_6",
+        "name": "Section 6 (300°–360°)",
+        "type": "enum",
+        "default": "1",
+        "group": "Section Patterns",
+        "options": [
+          { "value": "0", "label": "Empty" },
+          { "value": "1", "label": "Asa-no-ha (Hemp Leaf)" }
+        ],
+        "description": "Lattice pattern for Section 6"
       },
       {
         "id": "hex_radius",

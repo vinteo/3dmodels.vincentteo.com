@@ -89,6 +89,19 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
     );
   }
 
+  // Check if model has section parameters (section_1 to section_6)
+  const sectionParams = model.parameters.filter((p) => p.id.startsWith('section_'));
+  const hasSections = sectionParams.length > 0;
+  const sectionOptions = sectionParams[0]?.options || [];
+
+  const handleSetAllSections = (designValue: string) => {
+    const updated = { ...currentValues };
+    for (let i = 1; i <= 6; i++) {
+      updated[`section_${i}`] = designValue;
+    }
+    onChangeValues(updated);
+  };
+
   return (
     <aside className="w-80 sm:w-96 shrink-0 h-full bg-[#120e25]/95 border-r border-slate-800/80 flex flex-col justify-between z-20 backdrop-blur-xl">
       {/* Sidebar Header */}
@@ -147,6 +160,78 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
       {/* Scrollable Parameters Form */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5">
         {model.parameters.map((param) => {
+          // If this is a section parameter, render all 6 in a unified Section Patterns card at section_1
+          if (param.id === 'section_1' && hasSections) {
+            return (
+              <div
+                key="section-patterns-group"
+                className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800/90 space-y-3 shadow-inner"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Layers className="w-3.5 h-3.5 text-pink-400" />
+                    <span className="text-xs font-bold text-white">Section Patterns (6 Wedges)</span>
+                  </div>
+                </div>
+
+                {/* Batch Action: Apply to All 6 Sections */}
+                <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-300">
+                    <span>Apply to All 6 Sections:</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {sectionOptions.map((opt) => (
+                      <button
+                        key={`batch-${opt.value}`}
+                        type="button"
+                        onClick={() => handleSetAllSections(opt.value)}
+                        className={`playful-btn px-2 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer truncate text-center ${
+                          opt.value === '1'
+                            ? 'bg-fuchsia-500/15 hover:bg-fuchsia-500/25 text-fuchsia-300 border border-fuchsia-500/30'
+                            : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
+                        }`}
+                      >
+                        All: {opt.label.split(' ')[0]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Individual 6 Sections in a neat 2-column grid */}
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                    Individual Sectors (1–6)
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {sectionParams.map((sp, idx) => (
+                      <div key={sp.id} className="space-y-1">
+                        <label className="text-[10px] font-semibold text-slate-400 truncate block">
+                          S{idx + 1} ({idx * 60}°–{(idx + 1) * 60}°)
+                        </label>
+                        <select
+                          value={String(currentValues[sp.id] ?? sp.default)}
+                          onChange={(e) => handleChange(sp.id, e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-fuchsia-500 cursor-pointer"
+                        >
+                          {sp.options?.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          // Skip section_2 through section_6 since they are rendered inside the card above
+          if (param.id.startsWith('section_') && param.id !== 'section_1') {
+            return null;
+          }
+
           const val = currentValues[param.id] ?? param.default;
           const isEnabled = param.dependsOn ? Boolean(currentValues[param.dependsOn]) : true;
           const isDependent = Boolean(param.dependsOn);
