@@ -1,4 +1,4 @@
-import { draw, drawCircle, drawPolysides, Drawing, AnyShape } from 'replicad';
+import { draw, drawCircle, drawPolysides, Drawing, AnyShape, makeCompound } from 'replicad';
 
 export interface KumikoParameters {
   hex_radius?: number;
@@ -98,7 +98,7 @@ function createWedgePattern(
 }
 
 /**
- * Builds the complete 3D Kumiko Keychain solid model in Replicad
+ * Builds the 3D Kumiko Keychain model with the keychain ring as a separate solid part
  */
 export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
   const rOuter = Number(params.hex_radius ?? 20);
@@ -109,6 +109,7 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
   const hasRing = Boolean(params.include_keychain_ring ?? true);
   const tRing = Number(params.ring_thickness ?? 2);
   const fHex = Number(params.hex_fillet ?? 0.2);
+  const fRing = Number(params.ring_fillet ?? 0.2);
 
   const rInner = Math.max(2, rOuter - tHex);
 
@@ -117,9 +118,9 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
   const innerHex = drawPolysides(rInner, 6);
   let internal2D: Drawing | null = null;
 
-  // 2. 6 Radial Spokes (terminating at the middle of the 6 flat frame sides)
+  // 2. 6 Radial Spokes (rotated 30 degrees)
   for (let i = 0; i < 6; i++) {
-    const angle = (i * Math.PI) / 3;
+    const angle = (i * Math.PI) / 3 + Math.PI / 6;
     const spokeEnd: [number, number] = [
       rOuter * Math.cos(angle),
       rOuter * Math.sin(angle)
@@ -130,7 +131,7 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
     }
   }
 
-  // 3. 6 Wedge Lattice Patterns (spanning between adjacent spokes)
+  // 3. 6 Wedge Lattice Patterns (aligned with 30-degree spokes)
   const sections = [
     params.section_1 ?? '1',
     params.section_2 ?? '1',
@@ -144,16 +145,29 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
     const patternType = sections[i];
     const wedgeStruts = createWedgePattern(patternType, rInner, tDesign);
     for (const strut of wedgeStruts) {
-      const rotatedStrut = strut.rotate(i * 60, [0, 0]);
+      const rotatedStrut = strut.rotate(i * 60 + 30, [0, 0]);
       internal2D = internal2D ? internal2D.fuse(rotatedStrut) : rotatedStrut;
     }
   }
 
   // 4. Clip all internal geometry strictly to outerHex so spokes never protrude outside the frame
   const frame2D = outerHex.cut(innerHex);
-  let composite2D = internal2D ? frame2D.fuse(internal2D.intersect(outerHex)) : frame2D;
+  const composite2D = internal2D ? frame2D.fuse(internal2D.intersect(outerHex)) : frame2D;
 
-  // 5. Keychain Ring Loop Attachment (anchored to the top 90-degree vertex)
+  // 5. Extrude Kumiko Hexagon Part
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hexSketch = composite2D.sketchOnPlane('XY') as any;
+  let hexSolid = hexSketch.extrude(h);
+
+  if (fHex > 0 && fHex < 0.6) {
+    try {
+      hexSolid = hexSolid.fillet(fHex);
+    } catch {
+      // Keep unfilleted if geometry is non-manifold
+    }
+  }
+
+  // 6. Keychain Ring Loop Attachment (modeled as a separate part)
   if (hasRing) {
     const ringInnerR = 3;
     const ringOuterR = ringInnerR + tRing;
@@ -161,24 +175,22 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
 
     const ringOuter = drawCircle(ringOuterR).translate(0, ringCenterY);
     const ringInner = drawCircle(ringInnerR).translate(0, ringCenterY);
-    const ringDrawing = ringOuter.cut(ringInner);
+    const ring2D = ringOuter.cut(ringInner);
 
-    composite2D = composite2D.fuse(ringDrawing);
-  }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ringSketch = ring2D.sketchOnPlane('XY') as any;
+    let ringSolid = ringSketch.extrude(h);
 
-  // 5. Extrude 2D drawing to 3D solid
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sketch = composite2D.sketchOnPlane('XY') as any;
-  let solid = sketch.extrude(h);
-
-  // 6. Apply 3D Fillet if configured
-  if (fHex > 0 && fHex < 0.6) {
-    try {
-      solid = solid.fillet(fHex);
-    } catch {
-      // Return solid if boundary fillet is topologically non-manifold
+    if (fRing > 0 && fRing < 0.6) {
+      try {
+        ringSolid = ringSolid.fillet(fRing);
+      } catch {
+        // Keep unfilleted if geometry is non-manifold
+      }
     }
+
+    return makeCompound([hexSolid, ringSolid]);
   }
 
-  return solid;
+  return hexSolid;
 }
