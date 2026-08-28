@@ -53,27 +53,49 @@ export function getIncenter(
   ];
 }
 
+export type StrutAlignment = 'symmetrical' | 'inner' | 'outer';
+
 /**
- * Creates a 2D rectangular strut drawing between two 2D points with given thickness
+ * Creates a 2D rectangular strut drawing between two 2D points with given thickness and alignment direction
+ * - 'symmetrical' (default): Strut thickness is evenly centered along the centerline p1 -> p2 (+t/2, -t/2)
+ * - 'outer': Strut thickness is offset entirely in the positive normal direction (0 to +t)
+ * - 'inner': Strut thickness is offset entirely in the negative normal direction (0 to -t)
  */
-function createStrutDrawing(
+export function createStrutDrawing(
   p1: [number, number],
   p2: [number, number],
-  thickness: number
+  thickness: number,
+  alignment: StrutAlignment = 'symmetrical'
 ): Drawing | null {
   const dx = p2[0] - p1[0];
   const dy = p2[1] - p1[1];
   const length = Math.hypot(dx, dy);
   if (length < 0.001) return null;
 
-  // Normal unit vector
-  const nx = (-dy / length) * (thickness / 2);
-  const ny = (dx / length) * (thickness / 2);
+  // Perpendicular unit normal vector (points 90° CCW / left of p1 -> p2)
+  const unx = -dy / length;
+  const uny = dx / length;
 
-  return draw([p1[0] + nx, p1[1] + ny])
-    .lineTo([p2[0] + nx, p2[1] + ny])
-    .lineTo([p2[0] - nx, p2[1] - ny])
-    .lineTo([p1[0] - nx, p1[1] - ny])
+  let o1 = -thickness / 2;
+  let o2 = thickness / 2;
+
+  if (alignment === 'outer') {
+    o1 = 0;
+    o2 = thickness;
+  } else if (alignment === 'inner') {
+    o1 = -thickness;
+    o2 = 0;
+  }
+
+  const p1a: [number, number] = [p1[0] + unx * o2, p1[1] + uny * o2];
+  const p2a: [number, number] = [p2[0] + unx * o2, p2[1] + uny * o2];
+  const p2b: [number, number] = [p2[0] + unx * o1, p2[1] + uny * o1];
+  const p1b: [number, number] = [p1[0] + unx * o1, p1[1] + uny * o1];
+
+  return draw(p1a)
+    .lineTo(p2a)
+    .lineTo(p2b)
+    .lineTo(p1b)
     .close();
 }
 
@@ -85,6 +107,8 @@ function createSectorPattern(
   patternType: string | number,
   v1: [number, number],
   v2: [number, number],
+  inner1: [number, number], // inner vertex 1 at hex frame edge
+  inner2: [number, number], // inner vertex 2 at hex frame edge
   designThick: number
 ): Drawing[] {
   const pType = String(patternType);
@@ -94,6 +118,11 @@ function createSectorPattern(
   const midSpoke1: [number, number] = [v1[0] / 2, v1[1] / 2];
   const midSpoke2: [number, number] = [v2[0] / 2, v2[1] / 2];
   const midOuter: [number, number] = [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
+
+  // Midpoints of inner boundary geometry
+  const midInner1: [number, number] = [inner1[0] / 2, inner1[1] / 2];
+  const midInner2: [number, number] = [inner2[0] / 2, inner2[1] / 2];
+  const midInnerOuter: [number, number] = [(inner1[0] + inner2[0]) / 2, (inner1[1] + inner2[1]) / 2];
 
   // Centroid Y-junction apex C of the equilateral wedge sub-triangle
   const C: [number, number] = getCentroid(midSpoke1, midSpoke2, midOuter);
@@ -125,15 +154,13 @@ function createSectorPattern(
       if (branchSpoke1) struts.push(branchSpoke1);
       if (branchSpoke2) struts.push(branchSpoke2);
 
-      const diag1 = createStrutDrawing(midSpoke1, midOuter, designThick);
-      const diag2 = createStrutDrawing(midSpoke2, midOuter, designThick);
-      const diag3 = createStrutDrawing(v1, C, designThick);
-      const diag4 = createStrutDrawing(v2, C, designThick);
+      const diag1 = createStrutDrawing(midInner1, midInnerOuter, designThick);
+      const diag2 = createStrutDrawing(midInner2, midInnerOuter, designThick);
+      const diag3 = createStrutDrawing(midInner1, midInner2, designThick);
 
       if (diag1) struts.push(diag1);
       if (diag2) struts.push(diag2);
       if (diag3) struts.push(diag3);
-      if (diag4) struts.push(diag4);
       break;
     }
 
@@ -210,6 +237,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   let spokes2D: Drawing | null = null;
   let spokesSolid: AnyShape | null = null;
   const spokeVertices: [number, number][] = [];
+  const innerSpokeVertices: [number, number][] = [];
 
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI) / 3 + Math.PI / 6;
@@ -217,7 +245,12 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
       rMidpoint * Math.cos(angle),
       rMidpoint * Math.sin(angle)
     ];
+    const innerVertex: [number, number] = [
+      rInner * Math.cos(angle),
+      rInner * Math.sin(angle)
+    ];
     spokeVertices.push(vertex);
+    innerSpokeVertices.push(innerVertex);
 
     const spoke = createStrutDrawing([0, 0], vertex, tSpoke);
     if (spoke) {
@@ -259,8 +292,10 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     const patternType = sections[i];
     const v1 = spokeVertices[i];
     const v2 = spokeVertices[(i + 1) % 6];
+    const inner1 = innerSpokeVertices[i];
+    const inner2 = innerSpokeVertices[(i + 1) % 6];
 
-    const sectorStruts = createSectorPattern(patternType, v1, v2, tDesign);
+    const sectorStruts = createSectorPattern(patternType, v1, v2, inner1, inner2, tDesign);
     for (const strut of sectorStruts) {
       pattern2D = pattern2D ? pattern2D.fuse(strut) : strut;
     }
