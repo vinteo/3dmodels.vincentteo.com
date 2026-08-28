@@ -89,10 +89,19 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
     );
   }
 
+  const [customizeIndividual, setCustomizeIndividual] = useState<boolean>(false);
+
   // Check if model has section parameters (section_1 to section_6)
   const sectionParams = model.parameters.filter((p) => p.id.startsWith('section_'));
   const hasSections = sectionParams.length > 0;
   const sectionOptions = sectionParams[0]?.options || [];
+
+  // Check if all 6 sections share the exact same value
+  const firstSectionVal = String(currentValues['section_1'] ?? sectionOptions[0]?.value ?? '1');
+  const allSectionsSame = hasSections && sectionParams.every(
+    (sp) => String(currentValues[sp.id] ?? sp.default) === firstSectionVal
+  );
+  const masterSectionValue = allSectionsSame ? firstSectionVal : 'mixed';
 
   const handleSetAllSections = (designValue: string) => {
     const updated = { ...currentValues };
@@ -174,55 +183,78 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                   </div>
                 </div>
 
-                {/* Batch Action: Apply to All 6 Sections */}
-                <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-2">
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-300">
-                    <span>Apply to All 6 Sections:</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
+                {/* Default: All Sections Pattern Dropdown */}
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="all-sections-pattern-select"
+                    className="block text-xs font-bold text-slate-200"
+                  >
+                    Lattice Pattern (All Sections)
+                  </label>
+                  <select
+                    id="all-sections-pattern-select"
+                    value={masterSectionValue}
+                    onChange={(e) => handleSetAllSections(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-fuchsia-500 cursor-pointer"
+                  >
+                    {!allSectionsSame && (
+                      <option value="mixed" disabled>
+                        — Mixed / Individual Pattern Selection —
+                      </option>
+                    )}
                     {sectionOptions.map((opt) => (
-                      <button
-                        key={`batch-${opt.value}`}
-                        type="button"
-                        onClick={() => handleSetAllSections(opt.value)}
-                        className={`playful-btn px-2 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer truncate text-center ${
-                          opt.value === '1'
-                            ? 'bg-fuchsia-500/15 hover:bg-fuchsia-500/25 text-fuchsia-300 border border-fuchsia-500/30'
-                            : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
-                        }`}
-                      >
-                        All: {opt.label.split(' ')[0]}
-                      </button>
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
 
-                {/* Individual 6 Sections in a neat 2-column grid */}
-                <div className="space-y-1.5 pt-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                    Individual Sectors (1–6)
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
-                    {sectionParams.map((sp, idx) => (
-                      <div key={sp.id} className="space-y-1">
-                        <label className="text-[10px] font-semibold text-slate-400 truncate block">
-                          S{idx + 1} ({idx * 60}°–{(idx + 1) * 60}°)
-                        </label>
-                        <select
-                          value={String(currentValues[sp.id] ?? sp.default)}
-                          onChange={(e) => handleChange(sp.id, e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-fuchsia-500 cursor-pointer"
-                        >
-                          {sp.options?.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    ))}
-                  </div>
+                {/* Checkbox Toggle to Customize Sections Individually */}
+                <div className="pt-1">
+                  <label
+                    htmlFor="customize-individual-checkbox"
+                    className="flex items-center space-x-2.5 text-xs font-medium text-slate-300 hover:text-white cursor-pointer select-none"
+                  >
+                    <input
+                      type="checkbox"
+                      id="customize-individual-checkbox"
+                      checked={customizeIndividual}
+                      onChange={(e) => setCustomizeIndividual(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-fuchsia-500 focus:ring-fuchsia-400 focus:ring-offset-0 cursor-pointer"
+                    />
+                    <span>Customize each section individually</span>
+                  </label>
                 </div>
+
+                {/* Individual 6 Sections (Hidden if checkbox is unchecked) */}
+                {customizeIndividual && (
+                  <div className="space-y-2 pt-2.5 border-t border-slate-800/80 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                      Individual Sectors (1–6)
+                    </span>
+                    <div className="grid grid-cols-2 gap-2">
+                      {sectionParams.map((sp, idx) => (
+                        <div key={sp.id} className="space-y-1">
+                          <label className="text-[10px] font-semibold text-slate-400 truncate block">
+                            S{idx + 1} ({idx * 60}°–{(idx + 1) * 60}°)
+                          </label>
+                          <select
+                            value={String(currentValues[sp.id] ?? sp.default)}
+                            onChange={(e) => handleChange(sp.id, e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-fuchsia-500 cursor-pointer"
+                          >
+                            {sp.options?.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           }
