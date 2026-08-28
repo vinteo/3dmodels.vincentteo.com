@@ -88,7 +88,7 @@ function createSectorPattern(
   designThick: number
 ): Drawing[] {
   const pType = String(patternType);
-  if (pType === '0') return []; // Empty sector
+  const struts: Drawing[] = [];
 
   // Midpoints of boundary geometry
   const midSpoke1: [number, number] = [v1[0] / 2, v1[1] / 2];
@@ -97,31 +97,48 @@ function createSectorPattern(
 
   // Centroid Y-junction apex C of the equilateral wedge sub-triangle
   const C: [number, number] = getCentroid(midSpoke1, midSpoke2, midOuter);
-  const struts: Drawing[] = [];
 
-  // 1. Classic Asa-no-ha Y-junction (Tripod branching from apex C):
-  // - Branch to center
-  const branchCenter = createStrutDrawing(C, [0, 0], designThick);
-  // - Branch to upper spoke vertex
-  const branchSpoke1 = createStrutDrawing(C, v1, designThick);
-  // - Branch to lower spoke vertex
-  const branchSpoke2 = createStrutDrawing(C, v2, designThick);
+  switch (pType) {
+    case '0':
+      // 0: Empty sector
+      return [];
 
-  if (branchCenter) struts.push(branchCenter);
-  if (branchSpoke1) struts.push(branchSpoke1);
-  if (branchSpoke2) struts.push(branchSpoke2);
+    case '1': {
+      // 1: Classic Asa-no-ha (Tripod branching from apex C)
+      const branchCenter = createStrutDrawing(C, [0, 0], designThick);
+      const branchSpoke1 = createStrutDrawing(C, v1, designThick);
+      const branchSpoke2 = createStrutDrawing(C, v2, designThick);
 
-  // 2. Secondary sub-struts for Ryuso Asa-no-ha (Type '2')
-  if (pType === '2') {
-    const diag1 = createStrutDrawing(midSpoke1, midOuter, designThick);
-    const diag2 = createStrutDrawing(midSpoke2, midOuter, designThick);
-    const diag3 = createStrutDrawing(v1, C, designThick);
-    const diag4 = createStrutDrawing(v2, C, designThick);
+      if (branchCenter) struts.push(branchCenter);
+      if (branchSpoke1) struts.push(branchSpoke1);
+      if (branchSpoke2) struts.push(branchSpoke2);
+      break;
+    }
 
-    if (diag1) struts.push(diag1);
-    if (diag2) struts.push(diag2);
-    if (diag3) struts.push(diag3);
-    if (diag4) struts.push(diag4);
+    case '2': {
+      // 2: Ryuso Asa-no-ha (Classic tripod + secondary framing struts)
+      const branchCenter = createStrutDrawing(C, [0, 0], designThick);
+      const branchSpoke1 = createStrutDrawing(C, v1, designThick);
+      const branchSpoke2 = createStrutDrawing(C, v2, designThick);
+
+      if (branchCenter) struts.push(branchCenter);
+      if (branchSpoke1) struts.push(branchSpoke1);
+      if (branchSpoke2) struts.push(branchSpoke2);
+
+      const diag1 = createStrutDrawing(midSpoke1, midOuter, designThick);
+      const diag2 = createStrutDrawing(midSpoke2, midOuter, designThick);
+      const diag3 = createStrutDrawing(v1, C, designThick);
+      const diag4 = createStrutDrawing(v2, C, designThick);
+
+      if (diag1) struts.push(diag1);
+      if (diag2) struts.push(diag2);
+      if (diag3) struts.push(diag3);
+      if (diag4) struts.push(diag4);
+      break;
+    }
+
+    default:
+      break;
   }
 
   return struts;
