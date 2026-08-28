@@ -51,49 +51,44 @@ function createStrutDrawing(
 }
 
 /**
- * Generates the authentic 2D Asa-no-ha lattice pattern drawings for a 60° Kumiko wedge.
- * Base sector is centered along the positive X-axis (bounded by spokes at -30° and +30°).
+ * Generates the authentic 2D Asa-no-ha lattice pattern drawings for a 60° Kumiko wedge sector.
+ * Directly constructed between the two sector vertices v1 and v2 for flawless geometric alignment.
  */
-function createWedgePattern(
+function createSectorPattern(
   patternType: string | number,
-  rOuter: number,
-  rInner: number,
+  v1: [number, number],
+  v2: [number, number],
   designThick: number
 ): Drawing[] {
   const pType = String(patternType);
   if (pType === '0') return []; // Empty sector
 
-  const angle = Math.PI / 6; // 30 deg
-  const v1: [number, number] = [rOuter * Math.cos(angle), rOuter * Math.sin(angle)];
-  const v2: [number, number] = [rOuter * Math.cos(-angle), rOuter * Math.sin(-angle)];
+  // Midpoints of boundary geometry
+  const midSpoke1: [number, number] = [v1[0] / 2, v1[1] / 2];
+  const midSpoke2: [number, number] = [v2[0] / 2, v2[1] / 2];
+  const midOuter: [number, number] = [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
 
-  // Midpoint of the outer flat frame side
-  const midOuter: [number, number] = [(v1[0] + v2[0]) / 2, 0];
-
-  // Midpoints of the two radial spokes (at distance rInner / 2)
-  const rMid = rInner / 2;
-  const midSpoke1: [number, number] = [rMid * Math.cos(angle), rMid * Math.sin(angle)];
-  const midSpoke2: [number, number] = [rMid * Math.cos(-angle), rMid * Math.sin(-angle)];
-
-  // The 3-way Y-junction apex C on the bisector line: x_C = rMid / sqrt(3)
-  // This makes the two diagonal branches connect to midSpoke1 and midSpoke2 at exact 60° angles
-  const xC = rMid / Math.sqrt(3);
-  const C: [number, number] = [xC, 0];
+  // Centroid Y-junction apex C of the equilateral wedge sub-triangle
+  const C: [number, number] = [
+    (midSpoke1[0] + midSpoke2[0] + midOuter[0]) / 3,
+    (midSpoke1[1] + midSpoke2[1] + midOuter[1]) / 3
+  ];
 
   const struts: Drawing[] = [];
 
-  // 1. Central branch: from apex C forwards to the outer flat frame midpoint
+  // 1. Classic Asa-no-ha Y-junction (Tripod branching from apex C):
+  // - Branch to outer frame midpoint
   const branchOuter = createStrutDrawing(C, midOuter, designThick);
-  // 2. Upper diagonal branch: from apex C forwards-upwards at +60° to upper spoke midpoint
+  // - Branch to upper spoke midpoint
   const branchSpoke1 = createStrutDrawing(C, midSpoke1, designThick);
-  // 3. Lower diagonal branch: from apex C forwards-downwards at -60° to lower spoke midpoint
+  // - Branch to lower spoke midpoint
   const branchSpoke2 = createStrutDrawing(C, midSpoke2, designThick);
 
   if (branchOuter) struts.push(branchOuter);
   if (branchSpoke1) struts.push(branchSpoke1);
   if (branchSpoke2) struts.push(branchSpoke2);
 
-  // 4. Secondary sub-struts for Ryuso Asa-no-ha (Type '2')
+  // 2. Secondary sub-struts for Ryuso Asa-no-ha (Type '2')
   if (pType === '2') {
     const diag1 = createStrutDrawing(midSpoke1, midOuter, designThick);
     const diag2 = createStrutDrawing(midSpoke2, midOuter, designThick);
@@ -160,14 +155,17 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   // Part 2: 6 Radial Spokes (to Hex Vertices)
   // ==========================================
   let spokes2D: Drawing | null = null;
+  const spokeVertices: [number, number][] = [];
 
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI) / 3 + Math.PI / 6;
-    const spokeEnd: [number, number] = [
+    const vertex: [number, number] = [
       rOuter * Math.cos(angle),
       rOuter * Math.sin(angle)
     ];
-    const spoke = createStrutDrawing([0, 0], spokeEnd, tSpoke);
+    spokeVertices.push(vertex);
+
+    const spoke = createStrutDrawing([0, 0], vertex, tSpoke);
     if (spoke) {
       spokes2D = spokes2D ? spokes2D.fuse(spoke) : spoke;
     }
@@ -203,11 +201,12 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
   for (let i = 0; i < 6; i++) {
     const patternType = sections[i];
-    const wedgeStruts = createWedgePattern(patternType, rOuter, rInner, tDesign);
-    for (const strut of wedgeStruts) {
-      // Rotate by i * 60 + 60 degrees to place in sector between spoke i and spoke i+1
-      const rotatedStrut = strut.rotate(i * 60 + 60, [0, 0]);
-      pattern2D = pattern2D ? pattern2D.fuse(rotatedStrut) : rotatedStrut;
+    const v1 = spokeVertices[i];
+    const v2 = spokeVertices[(i + 1) % 6];
+
+    const sectorStruts = createSectorPattern(patternType, v1, v2, tDesign);
+    for (const strut of sectorStruts) {
+      pattern2D = pattern2D ? pattern2D.fuse(strut) : strut;
     }
   }
 
