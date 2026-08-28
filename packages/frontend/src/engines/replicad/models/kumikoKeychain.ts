@@ -190,7 +190,8 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
     const ringOuter = drawCircle(ringOuterR).translate(0, ringCenterY);
     const ringInner = drawCircle(ringInnerR).translate(0, ringCenterY);
-    const ring2D = ringOuter.cut(ringInner);
+    // Cut the ring with outerHex so there are zero overlapping sections between parts
+    const ring2D = ringOuter.cut(ringInner).cut(outerHex);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ringSketch = ring2D.sketchOnPlane('XY') as any;
