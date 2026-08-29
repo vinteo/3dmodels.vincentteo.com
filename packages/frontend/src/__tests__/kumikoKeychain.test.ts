@@ -1,0 +1,130 @@
+import { describe, it, expect, beforeAll } from 'vitest';
+import {
+  getMidpoint,
+  getOneThirdPoint,
+  getPointAtFraction,
+  rotatePoint2D,
+  createSectorPattern,
+  buildKumikoKeychainParts,
+  Triangle2D,
+  Point2D
+} from '../engines/replicad/models/kumikoKeychain';
+import { ensureReplicadReady } from '../engines/replicad/occt';
+
+describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {
+  beforeAll(async () => {
+    await ensureReplicadReady();
+  });
+
+  it('calculates the midpoint between two 2D points accurately', () => {
+    const p1: Point2D = [0, 10];
+    const p2: Point2D = [20, 30];
+    const mid = getMidpoint(p1, p2);
+    expect(mid[0]).toBe(10);
+    expect(mid[1]).toBe(20);
+  });
+
+  it('calculates the 1/3 distance between two 2D points accurately', () => {
+    const p1: Point2D = [0, 0];
+    const p2: Point2D = [30, 60];
+    const oneThird = getOneThirdPoint(p1, p2);
+    expect(oneThird[0]).toBeCloseTo(10, 4);
+    expect(oneThird[1]).toBeCloseTo(20, 4);
+
+    const fraction = getPointAtFraction(p1, p2, 1 / 3);
+    expect(fraction[0]).toBeCloseTo(10, 4);
+    expect(fraction[1]).toBeCloseTo(20, 4);
+  });
+
+  it('rotates a 2D point around a center point accurately', () => {
+    const center: Point2D = [10, 10];
+    const point: Point2D = [20, 10]; // 10 units to the right
+
+    // 0° rotation
+    const rot0 = rotatePoint2D(point, center, 0);
+    expect(rot0[0]).toBeCloseTo(20, 4);
+    expect(rot0[1]).toBeCloseTo(10, 4);
+
+    // 120° rotation (2π/3)
+    const rot120 = rotatePoint2D(point, center, (2 * Math.PI) / 3);
+    expect(rot120[0]).toBeCloseTo(10 + 10 * Math.cos((2 * Math.PI) / 3), 4);
+    expect(rot120[1]).toBeCloseTo(10 + 10 * Math.sin((2 * Math.PI) / 3), 4);
+
+    // 360° rotation (2π) brings it back
+    const rot360 = rotatePoint2D(point, center, 2 * Math.PI);
+    expect(rot360[0]).toBeCloseTo(20, 4);
+    expect(rot360[1]).toBeCloseTo(10, 4);
+  });
+
+  it('generates rotated 3D pattern solids for 0°, 120°, and 240° rotations', () => {
+    const spokeTriangle: Triangle2D = [
+      [0, 0],
+      [20 * Math.cos(Math.PI / 6), 20 * Math.sin(Math.PI / 6)],
+      [20 * Math.cos(Math.PI / 2), 20 * Math.sin(Math.PI / 2)]
+    ];
+
+    const innerTriangle: Triangle2D = [
+      [2 * Math.cos(Math.PI / 3), 2 * Math.sin(Math.PI / 3)],
+      [18 * Math.cos(Math.PI / 6), 18 * Math.sin(Math.PI / 6)],
+      [18 * Math.cos(Math.PI / 2), 18 * Math.sin(Math.PI / 2)]
+    ];
+
+    // Test Asa-no-ha (Pattern 1) under 0, 120, 240
+    for (const rot of ['0', '120', '240']) {
+      const solid = createSectorPattern('1', spokeTriangle, innerTriangle, 1.0, 2.0, rot);
+      expect(solid).not.toBeNull();
+    }
+
+    // Test Ryuso Asa-no-ha (Pattern 2) under 0, 120, 240
+    for (const rot of ['0', '120', '240']) {
+      const solid = createSectorPattern('2', spokeTriangle, innerTriangle, 1.0, 2.0, rot);
+      expect(solid).not.toBeNull();
+    }
+
+    // Test Asa-no-ha Variant (Pattern 3) under 0, 120, 240
+    for (const rot of ['0', '120', '240']) {
+      const solid = createSectorPattern('3', spokeTriangle, innerTriangle, 1.0, 2.0, rot);
+      expect(solid).not.toBeNull();
+    }
+
+    // Test Rindo Asa-no-ha (Pattern 4) under 0, 120, 240
+    for (const rot of ['0', '120', '240']) {
+      const solid = createSectorPattern('4', spokeTriangle, innerTriangle, 1.0, 2.0, rot);
+      expect(solid).not.toBeNull();
+    }
+
+    // Pattern 0 (Empty) returns null
+    const emptySolid = createSectorPattern('0', spokeTriangle, innerTriangle, 1.0, 2.0, 0);
+    expect(emptySolid).toBeNull();
+  });
+
+  it('builds complete watertight Kumiko Keychain assembly with distinct rotated sections', () => {
+    const parts = buildKumikoKeychainParts({
+      hex_radius: 20,
+      hex_thickness: 2,
+      hex_spoke_thickness: 2,
+      hex_design_thickness: 1,
+      height: 2,
+      include_keychain_ring: true,
+      section_1: '1',
+      section_1_rotation: '0',
+      section_2: '2',
+      section_2_rotation: '120',
+      section_3: '1',
+      section_3_rotation: '240',
+      section_4: '2',
+      section_4_rotation: '0',
+      section_5: '1',
+      section_5_rotation: '120',
+      section_6: '2',
+      section_6_rotation: '240'
+    });
+
+    expect(parts.length).toBeGreaterThanOrEqual(3);
+    const names = parts.map((p) => p.name);
+    expect(names).toContain('Kumiko_Hex_Frame');
+    expect(names).toContain('Kumiko_Hex_Spokes');
+    expect(names).toContain('Kumiko_Lattice_Pattern');
+    expect(names).toContain('Keychain_Ring_Attachment');
+  });
+});

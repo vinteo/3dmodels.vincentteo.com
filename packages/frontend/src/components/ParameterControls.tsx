@@ -3,6 +3,7 @@ import { ModelConfig } from '../types/model';
 import {
   Sliders,
   RotateCcw,
+  RotateCw,
   Sparkles,
   Download,
   Check,
@@ -101,7 +102,7 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
   const [customizeIndividual, setCustomizeIndividual] = useState<boolean>(false);
 
   // Check if model has section parameters (section_1 to section_6)
-  const sectionParams = model.parameters.filter((p) => p.id.startsWith('section_'));
+  const sectionParams = model.parameters.filter((p) => /^section_[1-6]$/.test(p.id));
   const hasSections = sectionParams.length > 0;
   const sectionOptions = sectionParams[0]?.options || [];
   const designThicknessParam = model.parameters.find((p) => p.id === 'hex_design_thickness');
@@ -119,6 +120,41 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
       updated[`section_${i}`] = designValue;
     }
     onChangeValues(updated);
+  };
+
+  // Section rotation state and cycling handlers (0° -> 120° -> 240° -> 0°)
+  const firstRotationVal = String(currentValues['section_1_rotation'] ?? '0');
+  const allRotationsSame = [1, 2, 3, 4, 5, 6].every(
+    (i) => String(currentValues[`section_${i}_rotation`] ?? '0') === firstRotationVal
+  );
+  const masterRotationValue = allRotationsSame ? firstRotationVal : 'mixed';
+
+  const handleSetAllRotations = (rotValue: string) => {
+    const updated = { ...currentValues };
+    for (let i = 1; i <= 6; i++) {
+      updated[`section_${i}_rotation`] = rotValue;
+    }
+    onChangeValues(updated);
+  };
+
+  const cycleAllRotations = () => {
+    const currentRot = allRotationsSame ? firstRotationVal : '0';
+    let nextRot = '0';
+    if (currentRot === '0') nextRot = '120';
+    else if (currentRot === '120') nextRot = '240';
+    else nextRot = '0';
+
+    handleSetAllRotations(nextRot);
+  };
+
+  const cycleSectionRotation = (sectionIdx: number) => {
+    const currentRot = String(currentValues[`section_${sectionIdx}_rotation`] ?? '0');
+    let nextRot = '0';
+    if (currentRot === '0') nextRot = '120';
+    else if (currentRot === '120') nextRot = '240';
+    else nextRot = '0';
+
+    handleChange(`section_${sectionIdx}_rotation`, nextRot);
   };
 
   return (
@@ -372,6 +408,41 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                   </select>
                 </div>
 
+                {/* All Sections: Pattern Rotation Cycle & Selector */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <label className="font-bold text-slate-200">
+                      Pattern Rotation (All Sections)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={cycleAllRotations}
+                      className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[11px] font-bold transition-all cursor-pointer"
+                      title="Cycle rotation by 120° around inner triangle center"
+                    >
+                      <RotateCw className="w-3 h-3" />
+                      <span>Cycle +120°</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-950 border border-slate-800 rounded-xl">
+                    {['0', '120', '240'].map((deg) => (
+                      <button
+                        key={deg}
+                        type="button"
+                        onClick={() => handleSetAllRotations(deg)}
+                        className={`py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                          masterRotationValue === deg
+                            ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        {deg}°
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Checkbox Toggle to Customize Sections Individually */}
                 <div className="pt-1">
                   <label
@@ -391,29 +462,66 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
 
                 {/* Individual 6 Sections (Hidden if checkbox is unchecked) */}
                 {customizeIndividual && (
-                  <div className="space-y-2 pt-2.5 border-t border-slate-800/80 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <div className="space-y-2.5 pt-2.5 border-t border-slate-800/80 animate-in fade-in slide-in-from-top-1 duration-200">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                       Individual Sectors (1–6)
                     </span>
-                    <div className="grid grid-cols-2 gap-2">
-                      {sectionParams.map((sp, idx) => (
-                        <div key={sp.id} className="space-y-1">
-                          <label className="text-[10px] font-semibold text-slate-400 truncate block">
-                            S{idx + 1} ({idx * 60}°–{(idx + 1) * 60}°)
-                          </label>
-                          <select
-                            value={String(currentValues[sp.id] ?? sp.default)}
-                            onChange={(e) => handleChange(sp.id, e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-fuchsia-500 cursor-pointer"
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {sectionParams.map((sp, idx) => {
+                        const secIdx = idx + 1;
+                        const currentRot = String(currentValues[`section_${secIdx}_rotation`] ?? '0');
+
+                        return (
+                          <div
+                            key={sp.id}
+                            className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-2"
                           >
-                            {sp.options?.map((opt) => (
-                              <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      ))}
+                            <div className="flex items-center justify-between">
+                              <label className="text-[10px] font-bold text-slate-300 truncate block">
+                                S{secIdx} ({idx * 60}°–{secIdx * 60}°)
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => cycleSectionRotation(secIdx)}
+                                className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/30 text-[10px] font-bold transition-all cursor-pointer"
+                                title={`Cycle S${secIdx} rotation (+120°)`}
+                              >
+                                <RotateCw className="w-2.5 h-2.5" />
+                                <span>{currentRot}°</span>
+                              </button>
+                            </div>
+
+                            <select
+                              value={String(currentValues[sp.id] ?? sp.default)}
+                              onChange={(e) => handleChange(sp.id, e.target.value)}
+                              className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-fuchsia-500 cursor-pointer"
+                            >
+                              {sp.options?.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+
+                            <div className="grid grid-cols-3 gap-1">
+                              {['0', '120', '240'].map((deg) => (
+                                <button
+                                  key={deg}
+                                  type="button"
+                                  onClick={() => handleChange(`section_${secIdx}_rotation`, deg)}
+                                  className={`py-0.5 rounded text-[10px] font-mono font-bold transition-colors cursor-pointer ${
+                                    currentRot === deg
+                                      ? 'bg-pink-500/25 text-pink-300 border border-pink-500/50'
+                                      : 'bg-slate-900 text-slate-500 hover:text-slate-300 border border-slate-800/60'
+                                  }`}
+                                >
+                                  {deg}°
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

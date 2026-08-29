@@ -69,6 +69,14 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 1"
@@ -91,6 +99,14 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 2"
@@ -113,6 +129,14 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 3"
@@ -135,6 +159,14 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 4"
@@ -157,6 +189,14 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 5"
@@ -179,9 +219,149 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 6"
+      },
+      {
+        "id": "section_1_rotation",
+        "name": "Section 1 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 1"
+      },
+      {
+        "id": "section_2_rotation",
+        "name": "Section 2 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 2"
+      },
+      {
+        "id": "section_3_rotation",
+        "name": "Section 3 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 3"
+      },
+      {
+        "id": "section_4_rotation",
+        "name": "Section 4 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 4"
+      },
+      {
+        "id": "section_5_rotation",
+        "name": "Section 5 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 5"
+      },
+      {
+        "id": "section_6_rotation",
+        "name": "Section 6 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 6"
       },
       {
         "id": "hex_design_thickness",
@@ -323,6 +503,14 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 1"
@@ -345,6 +533,14 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 2"
@@ -367,6 +563,14 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 3"
@@ -389,6 +593,14 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 4"
@@ -411,6 +623,14 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 5"
@@ -433,9 +653,149 @@
           {
             "value": "2",
             "label": "Ryuso Asa-no-ha"
+          },
+          {
+            "value": "3",
+            "label": "Asa-no-ha Variant"
+          },
+          {
+            "value": "4",
+            "label": "Rindo Asa-no-ha (Bellflower)"
           }
         ],
         "description": "Geometric Kumiko pattern for wedge section 6"
+      },
+      {
+        "id": "section_1_rotation",
+        "name": "Section 1 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 1"
+      },
+      {
+        "id": "section_2_rotation",
+        "name": "Section 2 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 2"
+      },
+      {
+        "id": "section_3_rotation",
+        "name": "Section 3 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 3"
+      },
+      {
+        "id": "section_4_rotation",
+        "name": "Section 4 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 4"
+      },
+      {
+        "id": "section_5_rotation",
+        "name": "Section 5 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 5"
+      },
+      {
+        "id": "section_6_rotation",
+        "name": "Section 6 Rotation",
+        "type": "enum",
+        "default": "0",
+        "group": "Section Patterns",
+        "options": [
+          {
+            "value": "0",
+            "label": "0°"
+          },
+          {
+            "value": "120",
+            "label": "120°"
+          },
+          {
+            "value": "240",
+            "label": "240°"
+          }
+        ],
+        "description": "Pattern rotation angle around inner triangle center for section 6"
       },
       {
         "id": "hex_design_thickness",

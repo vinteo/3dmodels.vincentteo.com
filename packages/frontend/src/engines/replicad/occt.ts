@@ -13,11 +13,17 @@ export async function ensureReplicadReady(): Promise<void> {
 
   if (!occtPromise) {
     occtPromise = (async () => {
-      // Initialize OpenCASCADE WebAssembly with explicit Vite wasm asset URL
+      // In real browser, Vite serves the wasm URL via HTTP (/@fs/ in dev, /assets/ in prod)
+      // In Node.js / jsdom test environment, strip /@fs so Node fs can read the file directly
+      const isRealBrowser = typeof window !== 'undefined' && typeof navigator !== 'undefined' && !navigator.userAgent.includes('jsdom');
+      const resolvedWasm = isRealBrowser
+        ? wasmUrl
+        : (typeof wasmUrl === 'string' && wasmUrl.startsWith('/@fs/') ? wasmUrl.replace('/@fs', '') : wasmUrl);
+
       const OC = await opencascade({
         locateFile: (path: string) => {
           if (path.endsWith('.wasm')) {
-            return wasmUrl;
+            return resolvedWasm;
           }
           return path;
         }

@@ -1,13 +1,29 @@
 import { test, expect } from '@playwright/test';
+import modelsConfig from '../config/models.config.json';
 
 test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
   test.beforeEach(async ({ page }) => {
-    // Intercept preview API for fast, deterministic E2E test execution
-    await page.route('**/api/models/*/preview', async (route) => {
+    // Intercept catalog API for fast, deterministic E2E test execution
+    await page.route('**/api/models*', async (route) => {
+      const url = route.request().url();
+      if (url.includes('/preview')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'model/stl',
+          body: Buffer.from('solid test\nfacet normal 0 0 0\nouter loop\nvertex 0 0 0\nvertex 1 0 0\nvertex 0 1 0\nendloop\nendfacet\nendsolid test')
+        });
+        return;
+      }
+
+      const includeHidden = url.includes('includeHidden=true');
       await route.fulfill({
         status: 200,
-        contentType: 'model/stl',
-        body: Buffer.from('solid test\nfacet normal 0 0 0\nouter loop\nvertex 0 0 0\nvertex 1 0 0\nvertex 0 1 0\nendloop\nendfacet\nendsolid test')
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: includeHidden ? modelsConfig : (modelsConfig as Array<{ hidden?: boolean }>).filter((m) => !m.hidden),
+          mockMode: true
+        })
       });
     });
     await page.goto('/');

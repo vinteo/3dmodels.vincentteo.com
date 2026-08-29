@@ -16,6 +16,12 @@ export interface KumikoParameters {
   section_4?: string | number;
   section_5?: string | number;
   section_6?: string | number;
+  section_1_rotation?: string | number;
+  section_2_rotation?: string | number;
+  section_3_rotation?: string | number;
+  section_4_rotation?: string | number;
+  section_5_rotation?: string | number;
+  section_6_rotation?: string | number;
   [key: string]: unknown;
 }
 
@@ -37,6 +43,30 @@ export function getCentroid(
   ];
 }
 
+export function getMidpoint(p1: Point2D, p2: Point2D): Point2D {
+  return [
+    (p1[0] + p2[0]) / 2,
+    (p1[1] + p2[1]) / 2
+  ];
+}
+
+/**
+ * Calculates the point located at a fractional distance (t) from p1 towards p2
+ */
+export function getPointAtFraction(p1: Point2D, p2: Point2D, fraction: number): Point2D {
+  return [
+    p1[0] + (p2[0] - p1[0]) * fraction,
+    p1[1] + (p2[1] - p1[1]) * fraction
+  ];
+}
+
+/**
+ * Calculates the point located at 1/3 the distance from p1 towards p2
+ */
+export function getOneThirdPoint(p1: Point2D, p2: Point2D): Point2D {
+  return getPointAtFraction(p1, p2, 1 / 3);
+}
+
 export function getIncenter(
   A: [number, number],
   B: [number, number],
@@ -50,6 +80,18 @@ export function getIncenter(
   return [
     (a * A[0] + b * B[0] + c * C[0]) / perimeter,
     (a * A[1] + b * B[1] + c * C[1]) / perimeter
+  ];
+}
+
+export function rotatePoint2D(p: Point2D, center: Point2D, angleRad: number): Point2D {
+  if (Math.abs(angleRad) < 1e-5) return p;
+  const cosA = Math.cos(angleRad);
+  const sinA = Math.sin(angleRad);
+  const dx = p[0] - center[0];
+  const dy = p[1] - center[1];
+  return [
+    center[0] + dx * cosA - dy * sinA,
+    center[1] + dx * sinA + dy * cosA
   ];
 }
 
@@ -155,76 +197,196 @@ export function createTriangleFrame(
 }
 
 /**
+ * Geometric context provided to pattern generator functions.
+ * Contains both raw wedge boundary triangles and precalculated reference points.
+ */
+export interface SectorGeometryContext {
+  spokeTriangle: Triangle2D;
+  innerTriangle: Triangle2D;
+  designThick: number;
+  height: number;
+  C_inner: Point2D;
+  C_spoke: Point2D;
+  innerCenter: Point2D;
+  inner1: Point2D;
+  inner2: Point2D;
+  spokeCenter: Point2D;
+  spoke1: Point2D;
+  spoke2: Point2D;
+  midInner1: Point2D;
+  midInner2: Point2D;
+  midInnerOuter: Point2D;
+  midSpoke1: Point2D;
+  midSpoke2: Point2D;
+  midSpokeOuter: Point2D;
+}
+
+/**
+ * A PatternGenerator produces a 2D Drawing or 3D AnyShape for a wedge sector.
+ */
+export type PatternGenerator = (ctx: SectorGeometryContext) => Drawing | AnyShape | null;
+
+/**
+ * 0. Empty Pattern (no infill)
+ */
+export const generateEmptyPattern: PatternGenerator = () => null;
+
+/**
+ * 1. Classic Asa-no-ha (Hemp Leaf tripod lattice)
+ */
+export const generateAsaNoHaPattern: PatternGenerator = (ctx: SectorGeometryContext): Drawing | null => {
+  const branch0 = createStrutDrawing(ctx.C_spoke, ctx.spokeCenter, ctx.designThick);
+  const branch1 = createStrutDrawing(ctx.C_spoke, ctx.spoke1, ctx.designThick);
+  const branch2 = createStrutDrawing(ctx.C_spoke, ctx.spoke2, ctx.designThick);
+
+  let drawing: Drawing | null = null;
+  for (const strut of [branch0, branch1, branch2]) {
+    if (strut) drawing = drawing ? drawing.fuse(strut) : strut;
+  }
+  return drawing;
+};
+
+/**
+ * 2. Ryuso Asa-no-ha (Classic tripod + inward triangular frame)
+ */
+export const generateRyusoAsaNoHaPattern: PatternGenerator = (ctx: SectorGeometryContext): Drawing | null => {
+  const tripod = generateAsaNoHaPattern(ctx);
+  const triFrame = createTriangleFrame(ctx.midInner1, ctx.midInner2, ctx.midInnerOuter, ctx.designThick);
+
+  if (tripod && triFrame) return (tripod as Drawing).fuse(triFrame);
+  return (tripod as Drawing) || triFrame || null;
+};
+
+/**
+ * 3. Asa-no-ha Variant
+ */
+export const generateAsaNoHaVariantPattern: PatternGenerator = (ctx: SectorGeometryContext): Drawing | null => {
+  const center = getOneThirdPoint(ctx.C_spoke, ctx.midSpokeOuter);
+  const branch0 = createStrutDrawing(center, ctx.spokeCenter, ctx.designThick);
+  const branch1 = createStrutDrawing(center, ctx.spoke1, ctx.designThick);
+  const branch2 = createStrutDrawing(center, ctx.spoke2, ctx.designThick);
+
+  let drawing: Drawing | null = null;
+  for (const strut of [branch0, branch1, branch2]) {
+    if (strut) drawing = drawing ? drawing.fuse(strut) : strut;
+  }
+  return drawing;
+};
+
+/**
+ * 4. Rindo Asa-no-ha (Bellflower)
+ */
+export const generateRindoAsaNoHaPattern: PatternGenerator = (ctx: SectorGeometryContext): Drawing | null => {
+  const branch0 = createStrutDrawing(ctx.spokeCenter, ctx.midSpokeOuter, ctx.designThick);
+  const branch1 = createStrutDrawing(ctx.innerCenter, getMidpoint(ctx.spoke1, ctx.midSpokeOuter), ctx.designThick);
+  const branch2 = createStrutDrawing(ctx.innerCenter, getMidpoint(ctx.spoke2, ctx.midSpokeOuter), ctx.designThick);
+
+  let drawing: Drawing | null = null;
+  for (const strut of [branch0, branch1, branch2]) {
+    if (strut) drawing = drawing ? drawing.fuse(strut) : strut;
+  }
+  return drawing;
+};
+
+/**
+ * Central registry mapping pattern identifiers to generator implementations.
+ * New patterns can be registered dynamically using registerKumikoPattern().
+ */
+export const KUMIKO_PATTERN_REGISTRY: Map<string, PatternGenerator> = new Map([
+  ['0', generateEmptyPattern],
+  ['empty', generateEmptyPattern],
+  ['1', generateAsaNoHaPattern],
+  ['asa-no-ha', generateAsaNoHaPattern],
+  ['2', generateRyusoAsaNoHaPattern],
+  ['ryuso-asa-no-ha', generateRyusoAsaNoHaPattern],
+  ['3', generateAsaNoHaVariantPattern],
+  ['asa-no-ha-variant', generateAsaNoHaVariantPattern],
+  ['4', generateRindoAsaNoHaPattern],
+  ['rindo-asa-no-ha', generateRindoAsaNoHaPattern]
+]);
+
+/**
+ * Register a new custom Kumiko pattern generator.
+ */
+export function registerKumikoPattern(id: string, generator: PatternGenerator): void {
+  KUMIKO_PATTERN_REGISTRY.set(id.toLowerCase().trim(), generator);
+}
+
+/**
  * Generates the 3D lattice/motif pattern solid for a 60° Kumiko wedge sector.
- * Provides complete flexibility to construct custom 2D/3D shapes, motifs, or embossed solids.
+ * Resolves the pattern generator from KUMIKO_PATTERN_REGISTRY, extrudes to 3D, and rotates around C_inner.
  *
  * @param patternType Pattern identifier ('0' = empty, '1' = classic Asa-no-ha, '2' = Ryuso Asa-no-ha, etc.)
  * @param spokeTriangle [center, spoke1, spoke2] - Vertices of the outer spoke wedge triangle
  * @param innerTriangle [innerCenter, inner1, inner2] - Vertices of the inner hex frame wedge triangle
  * @param designThick Infill strut thickness
  * @param height Extrusion height / thickness in Z
+ * @param rotation Rotation in degrees (0, 120, 240) around the center of the inner triangle
  */
 export function createSectorPattern(
   patternType: string | number,
   spokeTriangle: Triangle2D,
   innerTriangle: Triangle2D,
   designThick: number,
-  height: number
+  height: number,
+  rotation: string | number = 0
 ): AnyShape | null {
-  const pType = String(patternType);
-  if (pType === '0') return null;
+  const pKey = String(patternType).toLowerCase().trim();
+  if (!KUMIKO_PATTERN_REGISTRY.has(pKey)) {
+    return null;
+  }
+  const generator = KUMIKO_PATTERN_REGISTRY.get(pKey);
+  if (typeof generator !== 'function') {
+    return null;
+  }
 
-  const [center, v1, v2] = spokeTriangle;
   const [innerCenter, inner1, inner2] = innerTriangle;
+  const [spokeCenter, spoke1, spoke2] = spokeTriangle;
 
-  // Midpoints of spoke boundary geometry
-  const midSpoke1: Point2D = [(center[0] + v1[0]) / 2, (center[1] + v1[1]) / 2];
-  const midSpoke2: Point2D = [(center[0] + v2[0]) / 2, (center[1] + v2[1]) / 2];
-  const midOuter: Point2D = [(v1[0] + v2[0]) / 2, (v1[1] + v2[1]) / 2];
+  const ctx: SectorGeometryContext = {
+    spokeTriangle,
+    innerTriangle,
+    designThick,
+    height,
+    C_inner: getCentroid(innerCenter, inner1, inner2),
+    C_spoke: getCentroid(spokeCenter, spoke1, spoke2),
+    innerCenter,
+    inner1,
+    inner2,
+    spokeCenter,
+    spoke1,
+    spoke2,
+    midInner1: getMidpoint(innerCenter, inner1),
+    midInner2: getMidpoint(innerCenter, inner2),
+    midInnerOuter: getMidpoint(inner1, inner2),
+    midSpoke1: getMidpoint(spokeCenter, spoke1),
+    midSpoke2: getMidpoint(spokeCenter, spoke2),
+    midSpokeOuter: getMidpoint(spoke1, spoke2)
+  };
 
-  // Midpoints of inner boundary geometry (relative to innerCenter)
-  const midInner1: Point2D = [(innerCenter[0] + inner1[0]) / 2, (innerCenter[1] + inner1[1]) / 2];
-  const midInner2: Point2D = [(innerCenter[0] + inner2[0]) / 2, (innerCenter[1] + inner2[1]) / 2];
-  const midInnerOuter: Point2D = [(inner1[0] + inner2[0]) / 2, (inner1[1] + inner2[1]) / 2];
+  const pattern2Dor3D = generator(ctx);
+  if (!pattern2Dor3D) return null;
 
-  // Centroid Y-junction apex C of the equilateral wedge sub-triangle
-  const C: Point2D = getCentroid(midSpoke1, midSpoke2, midOuter);
-
-  // 1. Common Asa-no-ha tripod branches from apex C
-  let sector2D: Drawing | null = null;
-  const branchCenter = createStrutDrawing(C, center, designThick);
-  const branchSpoke1 = createStrutDrawing(C, v1, designThick);
-  const branchSpoke2 = createStrutDrawing(C, v2, designThick);
-
-  for (const strut of [branchCenter, branchSpoke1, branchSpoke2]) {
-    if (strut) sector2D = sector2D ? sector2D.fuse(strut) : strut;
+  // 1. Extrude 2D Drawing to 3D Solid if needed
+  let sectorSolid: AnyShape;
+  if ('sketchOnPlane' in pattern2Dor3D) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sketch = (pattern2Dor3D as Drawing).sketchOnPlane('XY') as any;
+    sectorSolid = sketch.extrude(height);
+  } else {
+    sectorSolid = pattern2Dor3D as AnyShape;
   }
 
-  // 2. Pattern-specific augmentations
-  switch (pType) {
-    case '1':
-      // 1: Classic Asa-no-ha (Tripod only)
-      break;
-
-    case '2': {
-      // 2: Ryuso Asa-no-ha (Tripod + inward triangular frame)
-      const triFrame = createTriangleFrame(midInner1, midInner2, midInnerOuter, designThick);
-      if (triFrame) {
-        sector2D = sector2D ? sector2D.fuse(triFrame) : triFrame;
-      }
-      break;
-    }
-
-    default:
-      return null;
+  // 2. Rotate the entire pattern solid around the center of the inner triangle (Z axis)
+  let rotDeg = typeof rotation === 'number' ? rotation : parseFloat(String(rotation)) || 0;
+  if (rotDeg === 1 || rotDeg === 2) {
+    rotDeg = rotDeg * 120;
+  }
+  if (Math.abs(rotDeg) > 1e-4) {
+    sectorSolid = sectorSolid.rotate(rotDeg, [ctx.C_inner[0], ctx.C_inner[1], 0], [0, 0, 1]);
   }
 
-  if (!sector2D) return null;
-
-  // 3. Extrude to 3D Solid
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sketch = sector2D.sketchOnPlane('XY') as any;
-  return sketch.extrude(height);
+  return sectorSolid;
 }
 
 /**
@@ -336,6 +498,15 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     params.section_6 ?? '1'
   ];
 
+  const rotations = [
+    params.section_1_rotation ?? '0',
+    params.section_2_rotation ?? '0',
+    params.section_3_rotation ?? '0',
+    params.section_4_rotation ?? '0',
+    params.section_5_rotation ?? '0',
+    params.section_6_rotation ?? '0'
+  ];
+
   let patternSolid: AnyShape | null = null;
 
   const center: Point2D = [0, 0];
@@ -369,7 +540,14 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
     const spokeTriangle: Triangle2D = [center, spokeVertices[i], spokeVertices[(i + 1) % 6]];
     const innerTriangle: Triangle2D = [innerCenter, innerCorner1, innerCorner2];
 
-    const sectorSolid = createSectorPattern(patternType, spokeTriangle, innerTriangle, tDesign, h);
+    const sectorSolid = createSectorPattern(
+      patternType,
+      spokeTriangle,
+      innerTriangle,
+      tDesign,
+      h,
+      rotations[i]
+    );
     if (sectorSolid) {
       patternSolid = patternSolid ? (patternSolid as any).fuse(sectorSolid) : sectorSolid;
     }
