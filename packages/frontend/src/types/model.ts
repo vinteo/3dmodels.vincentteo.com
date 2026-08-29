@@ -20,6 +20,12 @@ export interface ParameterDefinition {
   dependsOn?: string;
 }
 
+export interface ModelLink {
+  label: string;
+  url: string;
+  site?: 'printables' | 'qidimaker' | 'makerworld' | 'thingiverse' | 'github' | string;
+}
+
 export interface ModelConfig {
   id: string;
   name: string;
@@ -34,6 +40,7 @@ export interface ModelConfig {
   defaultConfiguration: string;
   parameters: ParameterDefinition[];
   thumbnail?: string;
+  links?: ModelLink[];
 }
 
 export interface ModelsApiResponse {

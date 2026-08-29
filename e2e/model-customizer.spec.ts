@@ -52,6 +52,23 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await expect(page.locator("text=Hexagon Radius")).toBeVisible();
   });
 
+  test('should display external model repository links for Printables and QIDI Maker', async ({ page }) => {
+    // Check links in left sidebar
+    const printablesLink = page.locator("a[title='Open model page on Printables']");
+    await expect(printablesLink).toBeVisible();
+    await expect(printablesLink).toHaveAttribute(
+      'href',
+      'https://www.printables.com/model/1826573-simple-kumiko-inspired-keychain-customisable'
+    );
+
+    const qidiLink = page.locator("a[title='Open model page on QIDI Maker']");
+    await expect(qidiLink).toBeVisible();
+    await expect(qidiLink).toHaveAttribute(
+      'href',
+      'https://www.qidimaker.com/en/models/detail/2093595266801807362'
+    );
+  });
+
   test('should render full viewport 3D WebGL canvas with controls', async ({ page }) => {
     // Verify 3D canvas element fills viewport
     const canvas = page.locator('canvas');

@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Share2,
-  CircleDot
+  CircleDot,
+  ExternalLink
 } from 'lucide-react';
 
 interface ParameterControlsProps {
@@ -225,6 +226,34 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Community & Original Model Links */}
+        {model.links && model.links.length > 0 && (
+          <div className="mt-2.5 pt-2.5 border-t border-slate-800/60 flex items-center gap-1.5 flex-wrap">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mr-1">
+              Model Pages:
+            </span>
+            {model.links.map((link) => (
+              <a
+                key={link.url}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border shadow-sm ${
+                  link.site === 'printables'
+                    ? 'bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/25 hover:border-orange-500/50'
+                    : link.site === 'qidimaker'
+                    ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/25 hover:border-sky-500/50'
+                    : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white'
+                }`}
+                title={`Open model page on ${link.label}`}
+              >
+                <span>{link.label}</span>
+                <ExternalLink className="w-3 h-3 opacity-70" />
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Scrollable Parameters Form */}

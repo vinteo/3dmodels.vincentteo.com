@@ -16,6 +16,18 @@
       "Onshape"
     ],
     "defaultConfiguration": "include_keychain_ring=true;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter;hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=3+millimeter;section_1=1;section_2=1;section_3=1;section_4=1;section_5=1;section_6=1",
+    "links": [
+      {
+        "label": "Printables",
+        "url": "https://www.printables.com/model/1826573-simple-kumiko-inspired-keychain-customisable",
+        "site": "printables"
+      },
+      {
+        "label": "QIDI Maker",
+        "url": "https://www.qidimaker.com/en/models/detail/2093595266801807362",
+        "site": "qidimaker"
+      }
+    ],
     "parameters": [
       {
         "id": "include_keychain_ring",
@@ -450,6 +462,18 @@
       "Instant CAD"
     ],
     "defaultConfiguration": "include_keychain_ring=true;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter;hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=3+millimeter;section_1=1;section_2=1;section_3=1;section_4=1;section_5=1;section_6=1",
+    "links": [
+      {
+        "label": "Printables",
+        "url": "https://www.printables.com/model/1826573-simple-kumiko-inspired-keychain-customisable",
+        "site": "printables"
+      },
+      {
+        "label": "QIDI Maker",
+        "url": "https://www.qidimaker.com/en/models/detail/2093595266801807362",
+        "site": "qidimaker"
+      }
+    ],
     "parameters": [
       {
         "id": "include_keychain_ring",
