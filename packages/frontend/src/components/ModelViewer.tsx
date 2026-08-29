@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
@@ -14,9 +14,19 @@ import {
   RefreshCw,
   AlertCircle,
   Share2,
-  Check
+  Check,
+  Palette,
+  X,
+  Sparkles
 } from 'lucide-react';
 import { PreviewMeshData } from '../types/model';
+import {
+  PRESET_SWATCHES,
+  THEME_PALETTES,
+  ThemePalette,
+  formatPartName,
+  resolveThemeColorForPart
+} from '../utils/partColors';
 
 interface ModelViewerProps {
   meshData: PreviewMeshData | null;
@@ -53,6 +63,93 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [copiedShareLink, setCopiedShareLink] = useState<boolean>(false);
+  const [showColorStudio, setShowColorStudio] = useState<boolean>(false);
+  const [customPartColors, setCustomPartColors] = useState<Record<string, string>>({});
+
+  // Active parts in current model
+  const activeParts = useMemo(() => {
+    if (!meshData) return [];
+    if (meshData instanceof ArrayBuffer) {
+      return [
+        {
+          name: 'Main Body',
+          displayName: 'Main Body',
+          defaultColor: '#e2e8f0',
+          currentColor: customPartColors['Main Body'] || '#e2e8f0'
+        }
+      ];
+    }
+    if ('parts' in meshData) {
+      return meshData.parts.map((p) => ({
+        name: p.name,
+        displayName: formatPartName(p.name),
+        defaultColor: p.color || '#3b82f6',
+        currentColor: customPartColors[p.name] || p.color || '#3b82f6'
+      }));
+    }
+    return [];
+  }, [meshData, customPartColors]);
+
+  const handleSetPartColor = (partName: string, newColor: string) => {
+    setCustomPartColors((prev) => ({
+      ...prev,
+      [partName]: newColor
+    }));
+
+    if (currentGroupRef.current) {
+      currentGroupRef.current.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material) {
+          if (child.name === partName || (!child.name && partName === 'Main Body')) {
+            const mat = child.material as THREE.MeshStandardMaterial;
+            mat.color.set(newColor);
+          }
+        }
+      });
+    }
+  };
+
+  const handleApplyTheme = (theme: ThemePalette) => {
+    const updated: Record<string, string> = { ...customPartColors };
+    activeParts.forEach((part, index) => {
+      const color = resolveThemeColorForPart(theme, part.name, index);
+      updated[part.name] = color;
+    });
+
+    setCustomPartColors(updated);
+
+    if (currentGroupRef.current) {
+      currentGroupRef.current.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material) {
+          const partKey = child.name || 'Main Body';
+          if (updated[partKey]) {
+            const mat = child.material as THREE.MeshStandardMaterial;
+            mat.color.set(updated[partKey]);
+          }
+        }
+      });
+    }
+  };
+
+  const handleResetColors = () => {
+    setCustomPartColors({});
+    if (currentGroupRef.current && meshData) {
+      if (meshData instanceof ArrayBuffer) {
+        currentGroupRef.current.traverse((child) => {
+          if (child instanceof THREE.Mesh && child.material) {
+            (child.material as THREE.MeshStandardMaterial).color.set('#e2e8f0');
+          }
+        });
+      } else if ('parts' in meshData) {
+        const defaultMap = new Map(meshData.parts.map((p) => [p.name, p.color || '#e2e8f0']));
+        currentGroupRef.current.traverse((child) => {
+          if (child instanceof THREE.Mesh && child.material) {
+            const defaultCol = defaultMap.get(child.name) || '#e2e8f0';
+            (child.material as THREE.MeshStandardMaterial).color.set(defaultCol);
+          }
+        });
+      }
+    }
+  };
 
   const handleCopyShareLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -198,12 +295,13 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
         const geometry = loader.parse(meshData);
         geometry.computeVertexNormals();
         const material = new THREE.MeshStandardMaterial({
-          color: '#e2e8f0',
+          color: customPartColors['Main Body'] || '#e2e8f0',
           roughness: 0.35,
           metalness: 0.15,
           wireframe
         });
         const mesh = new THREE.Mesh(geometry, material);
+        mesh.name = 'Main Body';
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         group.add(mesh);
@@ -211,8 +309,9 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
         for (const part of meshData.parts) {
           const geometry = loader.parse(part.buffer);
           geometry.computeVertexNormals();
+          const partColor = customPartColors[part.name] || part.color || '#e2e8f0';
           const material = new THREE.MeshStandardMaterial({
-            color: part.color || '#e2e8f0',
+            color: partColor,
             roughness: 0.35,
             metalness: 0.15,
             wireframe
@@ -373,6 +472,19 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
           </button>
 
           <button
+            onClick={() => setShowColorStudio(!showColorStudio)}
+            className={`p-2 rounded-xl text-xs font-bold transition-all ${
+              showColorStudio
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-lg shadow-amber-500/10'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            }`}
+            title={showColorStudio ? 'Close Part Colors' : 'Part Colors & Materials Studio'}
+            aria-label="Toggle part color studio"
+          >
+            <Palette className="w-4 h-4" />
+          </button>
+
+          <button
             onClick={() => setShowGrid(!showGrid)}
             className={`p-2 rounded-xl text-xs font-bold transition-all ${
               showGrid
@@ -417,6 +529,145 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Floating Part Color Studio Overlay Panel */}
+      {showColorStudio && (
+        <div
+          className="absolute top-16 right-4 z-30 w-80 sm:w-96 max-h-[calc(100vh-140px)] flex flex-col bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+          role="dialog"
+          aria-label="Part Color Studio"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950/40">
+            <div className="flex items-center gap-2">
+              <Palette className="w-4 h-4 text-fuchsia-400" />
+              <span className="text-xs font-bold text-white tracking-wide">
+                Part Materials & Colors
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                {activeParts.length} {activeParts.length === 1 ? 'part' : 'parts'}
+              </span>
+            </div>
+            <button
+              onClick={() => setShowColorStudio(false)}
+              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              title="Close Panel"
+              aria-label="Close part color studio"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Theme Presets */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  1-Click Theme Palettes
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {THEME_PALETTES.map((theme) => (
+                  <button
+                    key={theme.id}
+                    onClick={() => handleApplyTheme(theme)}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 hover:border-violet-500/50 transition-all text-left group"
+                  >
+                    <span className="text-sm">{theme.icon}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-semibold text-slate-200 group-hover:text-white truncate">
+                        {theme.name}
+                      </div>
+                      <div className="flex gap-1 mt-1">
+                        {theme.fallback.slice(0, 4).map((c, i) => (
+                          <div
+                            key={i}
+                            className="w-2.5 h-2.5 rounded-full border border-slate-900/50"
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Individual Parts Customization */}
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                Component Parts
+              </div>
+              <div className="space-y-2.5">
+                {activeParts.map((part) => (
+                  <div
+                    key={part.name}
+                    className="p-3 rounded-xl bg-slate-950/40 border border-slate-800/80 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <label className="relative cursor-pointer group">
+                          <input
+                            type="color"
+                            value={part.currentColor}
+                            onChange={(e) => handleSetPartColor(part.name, e.target.value)}
+                            className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                            aria-label={`Select color for ${part.displayName}`}
+                          />
+                          <div
+                            className="w-6 h-6 rounded-lg border-2 border-white/20 shadow-sm group-hover:scale-110 transition-transform"
+                            style={{ backgroundColor: part.currentColor }}
+                          />
+                        </label>
+                        <span className="text-xs font-semibold text-slate-200 truncate">
+                          {part.displayName}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">
+                        {part.currentColor.toUpperCase()}
+                      </span>
+                    </div>
+
+                    {/* Quick Swatches */}
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {PRESET_SWATCHES.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => handleSetPartColor(part.name, color)}
+                          className={`w-5 h-5 rounded-md border transition-all ${
+                            part.currentColor.toLowerCase() === color.toLowerCase()
+                              ? 'border-white scale-110 shadow-sm'
+                              : 'border-transparent hover:scale-105 opacity-80 hover:opacity-100'
+                          }`}
+                          style={{ backgroundColor: color }}
+                          title={color}
+                          aria-label={`Set color to ${color}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="p-3 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between">
+            <button
+              onClick={handleResetColors}
+              className="text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset to Defaults
+            </button>
+            <span className="text-[10px] text-slate-500">
+              Live Real-Time Preview
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Overlay Instructions */}
       <div className="relative z-10 p-4 flex items-center justify-between pointer-events-none">

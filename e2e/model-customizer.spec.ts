@@ -60,8 +60,27 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     // Verify viewport control buttons
     await expect(page.locator("button[title='Pause Rotation'], button[title='Auto-Rotate']")).toBeVisible();
     await expect(page.locator("button[title='Toggle Wireframe']")).toBeVisible();
+    await expect(page.locator("button[aria-label='Toggle part color studio']")).toBeVisible();
     await expect(page.locator("button[title='Toggle Ground Grid']")).toBeVisible();
     await expect(page.locator("button[title='Reset Camera View']")).toBeVisible();
+  });
+
+  test('should open Part Colors Studio and toggle theme palettes', async ({ page }) => {
+    // Click Part Colors Palette button
+    await page.click("button[aria-label='Toggle part color studio']");
+
+    // Part Color Studio dialog should appear
+    await expect(page.locator("text=Part Materials & Colors")).toBeVisible();
+    await expect(page.locator("text=1-Click Theme Palettes")).toBeVisible();
+    await expect(page.locator("button:has-text('Classic Kumiko')")).toBeVisible();
+    await expect(page.locator("button:has-text('Cyberpunk Neon')")).toBeVisible();
+
+    // Click Cyberpunk theme preset
+    await page.click("button:has-text('Cyberpunk Neon')");
+
+    // Close Part Color Studio
+    await page.click("button[aria-label='Close part color studio']");
+    await expect(page.locator("text=Part Materials & Colors")).not.toBeVisible();
   });
 
   test('should adjust parameter in left sidebar and detect dirty state', async ({ page }) => {
