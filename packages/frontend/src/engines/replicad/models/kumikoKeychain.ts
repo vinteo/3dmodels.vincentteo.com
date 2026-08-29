@@ -10,6 +10,8 @@ export interface KumikoParameters {
   include_keychain_ring?: boolean;
   ring_thickness?: number;
   ring_fillet?: number;
+  single_part?: boolean | string;
+  fuse_all_parts?: boolean | string;
   section_1?: string | number;
   section_2?: string | number;
   section_3?: string | number;
@@ -618,6 +620,33 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
       name: 'Keychain_Ring_Attachment',
       color: '#a855f7'
     });
+  }
+
+  // ==========================================
+  // Part 5: Single Part Fusion (if enabled)
+  // ==========================================
+  const shouldFuse =
+    params.single_part === true ||
+    params.single_part === 'true' ||
+    params.fuse_all_parts === true ||
+    params.fuse_all_parts === 'true';
+
+  if (shouldFuse && parts.length > 0) {
+    let fusedSolid = parts[0].shape;
+    for (let i = 1; i < parts.length; i++) {
+      try {
+        fusedSolid = (fusedSolid as any).fuse(parts[i].shape);
+      } catch {
+        // Keep existing solid if boolean fusion fails
+      }
+    }
+    return [
+      {
+        shape: fusedSolid,
+        name: 'Kumiko_Keychain_Fused',
+        color: '#6366f1'
+      }
+    ];
   }
 
   return parts;

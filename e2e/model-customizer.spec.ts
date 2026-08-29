@@ -40,11 +40,11 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await page.click("button:has-text('Models')");
 
     // Drawer should appear with visible models and exclude hidden models
-    await expect(page.locator("button:has-text('Kumiko Keychain (Instant In-Browser)')")).toBeVisible();
+    await expect(page.locator("button:has-text('Kumiko Keychain')").first()).toBeVisible();
     await expect(page.locator("button:has-text('Kumiko Keychain (Onshape)')")).not.toBeVisible();
 
     // Select Replicad model from pop-out drawer
-    await page.click("button:has-text('Kumiko Keychain (Instant In-Browser)')");
+    await page.click("button:has-text('Kumiko Keychain')");
 
     // Drawer closes and left sidebar shows parameters
     await expect(page.locator("text=Model Catalog")).not.toBeVisible();
@@ -108,7 +108,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await page.goto('/kumiko-keychain-replicad');
 
     // Should display Replicad model in sidebar
-    await expect(page.locator("aside").locator("text=Kumiko Keychain (Instant In-Browser)")).toBeVisible();
+    await expect(page.locator("aside").locator("text=Kumiko Keychain").first()).toBeVisible();
     await expect(page.locator("text=Section Patterns (6 Wedges)")).toBeVisible();
 
     // Verify address bar contains /kumiko-keychain-replicad

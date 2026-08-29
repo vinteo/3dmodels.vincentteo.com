@@ -439,7 +439,7 @@
   },
   {
     "id": "kumiko-keychain-replicad",
-    "name": "Kumiko Keychain (Instant In-Browser)",
+    "name": "Kumiko Keychain",
     "description": "Fast in-browser parametric Japanese Kumiko lattice keychain powered by Replicad & OpenCASCADE.js (zero API limits).",
     "engine": "replicad",
     "tags": [
@@ -868,6 +868,14 @@
         "step": 0.5,
         "group": "Hexagon Lattice",
         "description": "Total extruded depth of the Kumiko woodwork"
+      },
+      {
+        "id": "single_part",
+        "name": "Single Part (Fuse Solids)",
+        "type": "boolean",
+        "default": false,
+        "group": "Assembly & Output",
+        "description": "Fuse all solid components into a single unified part at the end (uncheck to keep separate multi-color parts)"
       }
     ]
   }

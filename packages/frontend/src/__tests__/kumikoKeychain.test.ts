@@ -127,4 +127,26 @@ describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {
     expect(names).toContain('Kumiko_Lattice_Pattern');
     expect(names).toContain('Keychain_Ring_Attachment');
   });
+
+  it('fuses all solids into a single part when single_part is true', () => {
+    const parts = buildKumikoKeychainParts({
+      hex_radius: 20,
+      hex_thickness: 2,
+      hex_spoke_thickness: 2,
+      hex_design_thickness: 1,
+      height: 2,
+      include_keychain_ring: true,
+      single_part: true,
+      section_1: '1',
+      section_2: '2',
+      section_3: '3',
+      section_4: '4',
+      section_5: '1',
+      section_6: '2'
+    });
+
+    expect(parts.length).toBe(1);
+    expect(parts[0].name).toBe('Kumiko_Keychain_Fused');
+    expect(parts[0].shape).toBeDefined();
+  });
 });
