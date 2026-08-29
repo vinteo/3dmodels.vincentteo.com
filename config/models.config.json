@@ -434,6 +434,14 @@
         "step": 0.5,
         "group": "Hexagon Lattice",
         "description": "Total extruded depth of the Kumiko woodwork"
+      },
+      {
+        "id": "single_part",
+        "name": "Single Part (Fuse Solids)",
+        "type": "boolean",
+        "default": false,
+        "group": "Assembly & Output",
+        "description": "Fuse all solid components into a single unified part at the end (uncheck to keep separate multi-color parts)"
       }
     ]
   },
@@ -868,6 +876,14 @@
         "step": 0.5,
         "group": "Hexagon Lattice",
         "description": "Total extruded depth of the Kumiko woodwork"
+      },
+      {
+        "id": "single_part",
+        "name": "Single Part (Fuse Solids)",
+        "type": "boolean",
+        "default": false,
+        "group": "Assembly & Output",
+        "description": "Fuse all solid components into a single unified part at the end (uncheck to keep separate multi-color parts)"
       }
     ]
   }
