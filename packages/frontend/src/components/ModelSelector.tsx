@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ModelConfig } from '../types/model';
-import { Box, Layers, Tag, X, Check, Share2 } from 'lucide-react';
+import { Box, Layers, Tag, X, Check, Share2, ExternalLink } from 'lucide-react';
 
 interface ModelSelectorProps {
   isOpen: boolean;
@@ -30,31 +30,23 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex animate-in fade-in duration-200">
-      {/* Backdrop */}
+    <div
+      className="fixed inset-0 z-50 flex bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Pop-out Drawer from the Left */}
-      <div className="relative z-10 w-full max-w-sm sm:max-w-md h-full bg-[#120e25] border-r border-slate-800 shadow-2xl flex flex-col justify-between animate-in slide-in-from-left duration-300">
+        className="w-full max-w-md bg-[#120e25]/95 h-full border-r border-slate-800 shadow-2xl flex flex-col justify-between"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Drawer Header */}
-        <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/30">
-              <Layers className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-white">Model Catalog</h3>
-              <p className="text-xs text-slate-400">Select an Onshape CAD Part Studio</p>
-            </div>
+        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Layers className="w-5 h-5 text-fuchsia-400" />
+            <h2 className="text-base font-bold text-white">Model Catalog</h2>
           </div>
-
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            aria-label="Close drawer"
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -124,6 +116,32 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                     <p className="text-xs text-slate-400 leading-relaxed mb-3 line-clamp-2">
                       {m.description}
                     </p>
+
+                    {/* External Model Page Links */}
+                    {m.links && m.links.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {m.links.map((link) => (
+                          <a
+                            key={link.url}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border ${
+                              link.site === 'printables'
+                                ? 'bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/30'
+                                : link.site === 'qidimaker'
+                                ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/30'
+                                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                            }`}
+                            title={`Open on ${link.label}`}
+                          >
+                            <span>{link.label}</span>
+                            <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap gap-1.5 pt-2 border-t border-slate-800/60">

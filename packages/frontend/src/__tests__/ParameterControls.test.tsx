@@ -205,4 +205,49 @@ describe('ParameterControls Component', () => {
       })
     );
   });
+
+  it('renders external model repository links when provided in model schema', () => {
+    const modelWithLinks: ModelConfig = {
+      ...mockModel,
+      links: [
+        {
+          label: 'Printables',
+          url: 'https://www.printables.com/model/1826573-simple-kumiko-inspired-keychain-customisable',
+          site: 'printables'
+        },
+        {
+          label: 'QIDI Maker',
+          url: 'https://www.qidimaker.com/en/models/detail/2093595266801807362',
+          site: 'qidimaker'
+        }
+      ]
+    };
+
+    render(
+      <ParameterControls
+        model={modelWithLinks}
+        currentValues={{ Length: 120, Dividers: '2', Chamfer: true }}
+        onChangeValues={vi.fn()}
+        onApply={vi.fn()}
+        onOpenExport={vi.fn()}
+        onOpenModelDrawer={vi.fn()}
+        isDirty={false}
+        loading={false}
+      />
+    );
+
+    const printablesLink = screen.getByTitle('Open model page on Printables');
+    expect(printablesLink).toBeInTheDocument();
+    expect(printablesLink).toHaveAttribute(
+      'href',
+      'https://www.printables.com/model/1826573-simple-kumiko-inspired-keychain-customisable'
+    );
+
+    const qidiLink = screen.getByTitle('Open model page on QIDI Maker');
+    expect(qidiLink).toBeInTheDocument();
+    expect(qidiLink).toHaveAttribute(
+      'href',
+      'https://www.qidimaker.com/en/models/detail/2093595266801807362'
+    );
+  });
 });
