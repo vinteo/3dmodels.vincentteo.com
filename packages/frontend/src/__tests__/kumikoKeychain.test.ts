@@ -7,8 +7,14 @@ import {
   createSectorPattern,
   buildKumikoKeychainParts,
   defaultKumikoParameters,
+  kumikoParameters,
   calculateKumikoDimensions,
   kumikoKeychainModel,
+  KUMIKO_PATTERNS,
+  KUMIKO_PATTERN_OPTIONS,
+  KUMIKO_ROTATION_OPTIONS,
+  getKumikoPatternOptions,
+  registerKumikoPattern,
   Triangle2D,
   Point2D
 } from '../engines/replicad/models/kumikoKeychain';
@@ -198,5 +204,61 @@ describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {
     });
     const fullLengthWithoutRing = dimensionsWithoutRing.find((d) => d.id === 'full_length');
     expect(fullLengthWithoutRing?.value).toBe(40);
+  });
+
+  it('derives section parameter options from KUMIKO_PATTERN_REGISTRY', () => {
+    expect(KUMIKO_PATTERNS.length).toBeGreaterThanOrEqual(5);
+
+    const patternOptions = getKumikoPatternOptions();
+    expect(patternOptions).toEqual(KUMIKO_PATTERN_OPTIONS);
+    expect(patternOptions.map((o) => o.value)).toEqual(['0', '1', '2', '3', '4']);
+    expect(patternOptions.map((o) => o.label)).toEqual([
+      'Empty',
+      'Asa-no-ha (Hemp Leaf)',
+      'Ryuso Asa-no-ha',
+      'Asa-no-ha Variant',
+      'Rindo Asa-no-ha (Bellflower)'
+    ]);
+
+    // Check that section parameters (1 to 6) all use the registry options
+    for (let s = 1; s <= 6; s++) {
+      const sectionParam = kumikoParameters.find((p) => p.id === `section_${s}`);
+      expect(sectionParam).toBeDefined();
+      expect(sectionParam?.options).toBe(KUMIKO_PATTERN_OPTIONS);
+
+      const rotParam = kumikoParameters.find((p) => p.id === `section_${s}_rotation`);
+      expect(rotParam).toBeDefined();
+      expect(rotParam?.options).toBe(KUMIKO_ROTATION_OPTIONS);
+    }
+  });
+
+  it('allows registering new custom patterns dynamically into the registry', () => {
+    const dummyGenerator = () => null;
+
+    registerKumikoPattern({
+      id: 'custom-flower',
+      name: 'Custom Flower Pattern',
+      generator: dummyGenerator,
+      aliases: ['flower']
+    });
+
+    const spokeTriangle: Triangle2D = [
+      [0, 0],
+      [20, 0],
+      [20, 20]
+    ];
+    const innerTriangle: Triangle2D = [
+      [2, 2],
+      [18, 2],
+      [18, 18]
+    ];
+
+    // createSectorPattern should find and execute custom-flower without error
+    const result = createSectorPattern('custom-flower', spokeTriangle, innerTriangle, 1, 2, 0);
+    expect(result).toBeNull(); // dummyGenerator returns null
+
+    // Alias lookup
+    const aliasResult = createSectorPattern('flower', spokeTriangle, innerTriangle, 1, 2, 0);
+    expect(aliasResult).toBeNull();
   });
 });
