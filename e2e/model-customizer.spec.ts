@@ -142,13 +142,13 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
   test('should load in-browser Replicad model directly via clean path slug URL', async ({ page }) => {
     // Navigate directly to the Replicad model slug
-    await page.goto('/kumiko-keychain-replicad');
+    await page.goto('/kumiko-keychain');
 
     // Should display Replicad model in sidebar
     await expect(page.locator("aside").locator("text=Kumiko Keychain").first()).toBeVisible();
     await expect(page.locator("text=Section Patterns")).toBeVisible();
 
-    // Verify address bar contains /kumiko-keychain-replicad
-    expect(page.url()).toContain('/kumiko-keychain-replicad');
+    // Verify address bar contains /kumiko-keychain
+    expect(page.url()).toContain('/kumiko-keychain');
   });
 });
