@@ -6,6 +6,8 @@ import {
   rotatePoint2D,
   createSectorPattern,
   buildKumikoKeychainParts,
+  defaultKumikoParameters,
+  kumikoKeychainModel,
   Triangle2D,
   Point2D
 } from '../engines/replicad/models/kumikoKeychain';
@@ -14,6 +16,17 @@ import { ensureReplicadReady } from '../engines/replicad/occt';
 describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {
   beforeAll(async () => {
     await ensureReplicadReady();
+  });
+
+  it('builds complete assembly from defaultKumikoParameters and model definition', () => {
+    expect(defaultKumikoParameters).toBeDefined();
+    expect(defaultKumikoParameters.hex_radius).toBe(20);
+
+    const partsFromDefaults = buildKumikoKeychainParts(defaultKumikoParameters);
+    expect(partsFromDefaults.length).toBeGreaterThanOrEqual(3);
+
+    const partsFromModel = kumikoKeychainModel.buildParts(defaultKumikoParameters);
+    expect(partsFromModel.length).toBe(partsFromDefaults.length);
   });
 
   it('calculates the midpoint between two 2D points accurately', () => {

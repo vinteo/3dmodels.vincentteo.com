@@ -1,11 +1,16 @@
 import { ensureReplicadReady } from './occt';
-import {
-  buildKumikoKeychain,
-  buildKumikoKeychainParts,
-  ReplicadPart
-} from './models/kumikoKeychain';
 import { ExportOptions, MultiPartPreview, PreviewPartMesh } from '../../types/model';
-import { AnyShape, exportSTEP } from 'replicad';
+import { AnyShape, exportSTEP, makeCompound } from 'replicad';
+import { getReplicadModel, getAllReplicadModels, isReplicadModel, registerReplicadModel } from './registry';
+import { ReplicadPart, ReplicadModelDefinition } from './types';
+
+export {
+  getReplicadModel,
+  getAllReplicadModels,
+  isReplicadModel,
+  registerReplicadModel
+};
+export type { ReplicadPart, ReplicadModelDefinition };
 
 /**
  * Dispatcher mapping model IDs to Replicad named part components
@@ -14,13 +19,11 @@ function buildModelParts(
   modelId: string,
   parameters: Record<string, number | string | boolean>
 ): ReplicadPart[] {
-  switch (modelId) {
-    case 'kumiko-keychain-replicad':
-    case 'kumiko-pattern-keychain':
-      return buildKumikoKeychainParts(parameters);
-    default:
-      return buildKumikoKeychainParts(parameters);
+  const modelDef = getReplicadModel(modelId);
+  if (!modelDef) {
+    throw new Error(`Replicad model not found: ${modelId}`);
   }
+  return modelDef.buildParts(parameters);
 }
 
 /**
@@ -30,13 +33,16 @@ function buildModelShape(
   modelId: string,
   parameters: Record<string, number | string | boolean>
 ): AnyShape {
-  switch (modelId) {
-    case 'kumiko-keychain-replicad':
-    case 'kumiko-pattern-keychain':
-      return buildKumikoKeychain(parameters);
-    default:
-      return buildKumikoKeychain(parameters);
+  const modelDef = getReplicadModel(modelId);
+  if (!modelDef) {
+    throw new Error(`Replicad model not found: ${modelId}`);
   }
+  if (modelDef.buildShape) {
+    return modelDef.buildShape(parameters);
+  }
+  const parts = modelDef.buildParts(parameters);
+  if (parts.length === 1) return parts[0].shape;
+  return makeCompound(parts.map((p) => p.shape));
 }
 
 /**

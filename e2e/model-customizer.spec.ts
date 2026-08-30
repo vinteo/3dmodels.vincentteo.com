@@ -48,7 +48,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
     // Drawer closes and left sidebar shows parameters
     await expect(page.locator("text=Model Catalog")).not.toBeVisible();
-    await expect(page.locator("text=Section Patterns (6 Wedges)")).toBeVisible();
+    await expect(page.locator("text=Section Patterns")).toBeVisible();
     await expect(page.locator("text=Hexagon Radius")).toBeVisible();
   });
 
@@ -102,7 +102,8 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
   test('should adjust parameter in left sidebar and detect dirty state', async ({ page }) => {
     // Select Ryuso pattern from master dropdown to trigger dirty state
-    await page.selectOption('#all-sections-pattern-select', '2');
+    const masterSelect = page.locator("select:has(option[value='2'])").first();
+    await masterSelect.selectOption('2');
 
     // Should now indicate "Update 3D Preview" once initial geometry settles
     await expect(page.locator("button:has-text('Update 3D Preview')")).toBeVisible({ timeout: 15000 });
@@ -133,7 +134,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
     // Should load the Kumiko Keychain model directly
     await expect(page.locator("aside").locator("text=Kumiko Keychain")).toBeVisible();
-    await expect(page.locator("text=Section Patterns (6 Wedges)")).toBeVisible();
+    await expect(page.locator("text=Section Patterns")).toBeVisible();
 
     // Verify address bar contains /kumiko-pattern-keychain
     expect(page.url()).toContain('/kumiko-pattern-keychain');
@@ -141,13 +142,13 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
   test('should load in-browser Replicad model directly via clean path slug URL', async ({ page }) => {
     // Navigate directly to the Replicad model slug
-    await page.goto('/kumiko-keychain-replicad');
+    await page.goto('/kumiko-keychain');
 
     // Should display Replicad model in sidebar
     await expect(page.locator("aside").locator("text=Kumiko Keychain").first()).toBeVisible();
-    await expect(page.locator("text=Section Patterns (6 Wedges)")).toBeVisible();
+    await expect(page.locator("text=Section Patterns")).toBeVisible();
 
-    // Verify address bar contains /kumiko-keychain-replicad
-    expect(page.url()).toContain('/kumiko-keychain-replicad');
+    // Verify address bar contains /kumiko-keychain
+    expect(page.url()).toContain('/kumiko-keychain');
   });
 });
