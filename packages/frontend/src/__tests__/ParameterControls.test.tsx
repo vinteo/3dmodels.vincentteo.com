@@ -22,13 +22,15 @@ const mockModel: ModelConfig = {
       default: 120,
       min: 50,
       max: 200,
-      step: 5
+      step: 5,
+      group: 'Dimensions'
     },
     {
       id: 'Dividers',
       name: 'Dividers',
       type: 'enum',
       default: '2',
+      group: 'Compartments',
       options: [
         { value: '1', label: '1 Divider' },
         { value: '2', label: '2 Dividers' }
@@ -38,13 +40,14 @@ const mockModel: ModelConfig = {
       id: 'Chamfer',
       name: 'Chamfer Base',
       type: 'boolean',
-      default: true
+      default: true,
+      group: 'Finishing'
     }
   ]
 };
 
-describe('ParameterControls Component', () => {
-  it('renders all parameter input fields from model schema', () => {
+describe('ParameterControls Component (Schema-Driven)', () => {
+  it('renders all grouped parameter input fields from model schema', () => {
     const currentValues = { Length: 120, Dividers: '2', Chamfer: true };
     const onChangeValues = vi.fn();
     const onApply = vi.fn();
@@ -64,9 +67,11 @@ describe('ParameterControls Component', () => {
     );
 
     expect(screen.getByText('Parameters')).toBeInTheDocument();
+    expect(screen.getByText('Dimensions')).toBeInTheDocument();
+    expect(screen.getByText('Compartments')).toBeInTheDocument();
+    expect(screen.getByText('Finishing')).toBeInTheDocument();
     expect(screen.getByLabelText('Length')).toBeInTheDocument();
     expect(screen.getByLabelText('Dividers')).toBeInTheDocument();
-    expect(screen.getByText('Chamfer Base')).toBeInTheDocument();
   });
 
   it('calls onChangeValues when a quantity slider or input changes', () => {
@@ -96,31 +101,59 @@ describe('ParameterControls Component', () => {
     );
   });
 
-  it('calls onOpenExport when Export button is clicked', () => {
-    const onOpenExport = vi.fn();
+  it('renders segmented button controls and triggers change when clicked', () => {
+    const modelWithSegmented: ModelConfig = {
+      ...mockModel,
+      parameters: [
+        {
+          id: 'rotation_angle',
+          name: 'Rotation Angle',
+          type: 'enum',
+          default: '0',
+          widget: 'segmented',
+          group: 'Section Patterns',
+          options: [
+            { value: '0', label: '0°' },
+            { value: '120', label: '120°' },
+            { value: '240', label: '240°' }
+          ]
+        }
+      ]
+    };
+
+    const onChangeValues = vi.fn();
 
     render(
       <ParameterControls
-        model={mockModel}
-        currentValues={{ Length: 120, Dividers: '2', Chamfer: true }}
-        onChangeValues={vi.fn()}
+        model={modelWithSegmented}
+        currentValues={{ rotation_angle: '0' }}
+        onChangeValues={onChangeValues}
         onApply={vi.fn()}
-        onOpenExport={onOpenExport}
+        onOpenExport={vi.fn()}
         onOpenModelDrawer={vi.fn()}
         isDirty={false}
         loading={false}
       />
     );
 
-    const exportBtn = screen.getByText('Export STL / STEP Files');
-    fireEvent.click(exportBtn);
-    expect(onOpenExport).toHaveBeenCalled();
+    expect(screen.getByText('Section Patterns')).toBeInTheDocument();
+    expect(screen.getByText('Rotation Angle')).toBeInTheDocument();
+
+    const deg120Btn = screen.getByText('120°');
+    expect(deg120Btn).toBeInTheDocument();
+    fireEvent.click(deg120Btn);
+
+    expect(onChangeValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rotation_angle: '120'
+      })
+    );
   });
 
-  it('renders section pattern controls and cycles rotation by 120 degrees', () => {
-    const kumikoMockModel: ModelConfig = {
+  it('renders repeated parameter clusters with master batch controls and expands individual items', () => {
+    const kumikoModel: ModelConfig = {
       ...mockModel,
-      id: 'kumiko-keychain-replicad',
+      id: 'kumiko-keychain',
       name: 'Kumiko Keychain',
       parameters: [
         {
@@ -128,6 +161,7 @@ describe('ParameterControls Component', () => {
           name: 'Section 1 (0°–60°)',
           type: 'enum',
           default: '1',
+          group: 'Section Patterns',
           options: [
             { value: '0', label: 'Empty' },
             { value: '1', label: 'Asa-no-ha (Hemp Leaf)' },
@@ -139,9 +173,23 @@ describe('ParameterControls Component', () => {
           name: 'Section 2 (60°–120°)',
           type: 'enum',
           default: '1',
+          group: 'Section Patterns',
           options: [
             { value: '0', label: 'Empty' },
-            { value: '1', label: 'Asa-no-ha' }
+            { value: '1', label: 'Asa-no-ha (Hemp Leaf)' },
+            { value: '2', label: 'Ryuso Asa-no-ha' }
+          ]
+        },
+        {
+          id: 'section_3',
+          name: 'Section 3 (120°–180°)',
+          type: 'enum',
+          default: '1',
+          group: 'Section Patterns',
+          options: [
+            { value: '0', label: 'Empty' },
+            { value: '1', label: 'Asa-no-ha (Hemp Leaf)' },
+            { value: '2', label: 'Ryuso Asa-no-ha' }
           ]
         },
         {
@@ -149,6 +197,8 @@ describe('ParameterControls Component', () => {
           name: 'Section 1 Rotation',
           type: 'enum',
           default: '0',
+          widget: 'segmented',
+          group: 'Section Patterns',
           options: [
             { value: '0', label: '0°' },
             { value: '120', label: '120°' },
@@ -160,6 +210,21 @@ describe('ParameterControls Component', () => {
           name: 'Section 2 Rotation',
           type: 'enum',
           default: '0',
+          widget: 'segmented',
+          group: 'Section Patterns',
+          options: [
+            { value: '0', label: '0°' },
+            { value: '120', label: '120°' },
+            { value: '240', label: '240°' }
+          ]
+        },
+        {
+          id: 'section_3_rotation',
+          name: 'Section 3 Rotation',
+          type: 'enum',
+          default: '0',
+          widget: 'segmented',
+          group: 'Section Patterns',
           options: [
             { value: '0', label: '0°' },
             { value: '120', label: '120°' },
@@ -172,14 +237,16 @@ describe('ParameterControls Component', () => {
     const currentValues = {
       section_1: '1',
       section_2: '1',
+      section_3: '1',
       section_1_rotation: '0',
-      section_2_rotation: '0'
+      section_2_rotation: '0',
+      section_3_rotation: '0'
     };
     const onChangeValues = vi.fn();
 
     render(
       <ParameterControls
-        model={kumikoMockModel}
+        model={kumikoModel}
         currentValues={currentValues}
         onChangeValues={onChangeValues}
         onApply={vi.fn()}
@@ -190,20 +257,103 @@ describe('ParameterControls Component', () => {
       />
     );
 
-    expect(screen.getByText('Section Patterns (6 Wedges)')).toBeInTheDocument();
+    // Master controls rendered
+    expect(screen.getByText('Lattice Pattern (All Sections)')).toBeInTheDocument();
     expect(screen.getByText('Pattern Rotation (All Sections)')).toBeInTheDocument();
+    expect(screen.getByText('Cycle +120°')).toBeInTheDocument();
 
-    const cycleAllBtn = screen.getByTitle('Cycle rotation by 120° around inner triangle center');
-    expect(cycleAllBtn).toBeInTheDocument();
+    // Cycling rotation advances all 3 rotations simultaneously
+    const cycleBtn = screen.getByTitle('Cycle through rotation options for all sections');
+    fireEvent.click(cycleBtn);
 
-    // Clicking Cycle +120° advances from 0° to 120° for all sections
-    fireEvent.click(cycleAllBtn);
     expect(onChangeValues).toHaveBeenCalledWith(
       expect.objectContaining({
         section_1_rotation: '120',
-        section_2_rotation: '120'
+        section_2_rotation: '120',
+        section_3_rotation: '120'
       })
     );
+
+    // Customize each section individually checkbox
+    const customizeCheckbox = screen.getByLabelText('Customize each section individually');
+    expect(customizeCheckbox).toBeInTheDocument();
+    expect(customizeCheckbox).not.toBeChecked();
+
+    // Check individual customization checkbox
+    fireEvent.click(customizeCheckbox);
+    expect(screen.getByText('Individual Sectors (1–6)')).toBeInTheDocument();
+  });
+
+  it('renders primary toggle in group header and manages dependent sub-parameters', () => {
+    const modelWithGroupToggle: ModelConfig = {
+      ...mockModel,
+      parameters: [
+        {
+          id: 'include_keychain_ring',
+          name: 'Keychain Ring Attachment',
+          type: 'boolean',
+          default: true,
+          group: 'Keychain Ring',
+          description: 'Include top mounting loop'
+        },
+        {
+          id: 'ring_thickness',
+          name: 'Ring Thickness',
+          type: 'quantity',
+          unit: 'millimeter',
+          default: 2,
+          min: 1,
+          max: 10,
+          group: 'Keychain Ring',
+          dependsOn: 'include_keychain_ring'
+        }
+      ]
+    };
+
+    const onChangeValues = vi.fn();
+
+    const { rerender } = render(
+      <ParameterControls
+        model={modelWithGroupToggle}
+        currentValues={{ include_keychain_ring: true, ring_thickness: 2 }}
+        onChangeValues={onChangeValues}
+        onApply={vi.fn()}
+        onOpenExport={vi.fn()}
+        onOpenModelDrawer={vi.fn()}
+        isDirty={false}
+        loading={false}
+      />
+    );
+
+    expect(screen.getByText('Keychain Ring')).toBeInTheDocument();
+    expect(screen.getByText('Include top mounting loop')).toBeInTheDocument();
+    expect(screen.getByLabelText('Ring Thickness')).toBeInTheDocument();
+
+    // Toggle switch off
+    const switchBtn = screen.getByRole('switch', { checked: true });
+    fireEvent.click(switchBtn);
+
+    expect(onChangeValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        include_keychain_ring: false
+      })
+    );
+
+    // When toggled off, dependent parameter is hidden
+    rerender(
+      <ParameterControls
+        model={modelWithGroupToggle}
+        currentValues={{ include_keychain_ring: false, ring_thickness: 2 }}
+        onChangeValues={onChangeValues}
+        onApply={vi.fn()}
+        onOpenExport={vi.fn()}
+        onOpenModelDrawer={vi.fn()}
+        isDirty={false}
+        loading={false}
+      />
+    );
+
+    expect(screen.queryByLabelText('Ring Thickness')).not.toBeInTheDocument();
   });
 
   it('renders external model repository links when provided in model schema', () => {

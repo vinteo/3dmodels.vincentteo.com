@@ -1,4 +1,8 @@
 import { draw, drawCircle, drawPolysides, Drawing, AnyShape, makeCompound } from 'replicad';
+import { ParameterDefinition } from '../../../types/model';
+import { extractDefaultParameters, type ReplicadPart, type ReplicadModelDefinition } from '../types';
+
+export type { ReplicadPart };
 
 export interface KumikoParameters {
   hex_radius?: number;
@@ -27,12 +31,310 @@ export interface KumikoParameters {
   [key: string]: unknown;
 }
 
-export interface ReplicadPart {
-  shape: AnyShape;
-  name: string;
-  color?: string;
-  alpha?: number;
-}
+export const kumikoParameters: ParameterDefinition[] = [
+  {
+    id: 'include_keychain_ring',
+    name: 'Keychain Ring Attachment',
+    type: 'boolean',
+    default: true,
+    group: 'Keychain Ring',
+    description: 'Include top mounting loop for keychain hardware'
+  },
+  {
+    id: 'ring_thickness',
+    name: 'Keychain Ring Thickness',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 2,
+    min: 1,
+    max: 10,
+    step: 0.5,
+    group: 'Keychain Ring',
+    dependsOn: 'include_keychain_ring',
+    description: 'Thickness of the keychain ring'
+  },
+  {
+    id: 'ring_fillet',
+    name: 'Keychain Ring Fillet',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0.2,
+    min: 0,
+    max: 1,
+    step: 0.05,
+    group: 'Keychain Ring',
+    dependsOn: 'include_keychain_ring',
+    description: 'Fillet radius on the keychain ring attachment'
+  },
+  {
+    id: 'section_1',
+    name: 'Section 1 (0°–60°)',
+    type: 'enum',
+    default: '1',
+    group: 'Section Patterns',
+    layout: 'half',
+    options: [
+      { value: '0', label: 'Empty' },
+      { value: '1', label: 'Asa-no-ha (Hemp Leaf)' },
+      { value: '2', label: 'Ryuso Asa-no-ha' },
+      { value: '3', label: 'Asa-no-ha Variant' },
+      { value: '4', label: 'Rindo Asa-no-ha (Bellflower)' }
+    ],
+    description: 'Geometric Kumiko pattern for wedge section 1'
+  },
+  {
+    id: 'section_1_rotation',
+    name: 'Section 1 Rotation',
+    type: 'enum',
+    default: '0',
+    group: 'Section Patterns',
+    widget: 'segmented',
+    layout: 'half',
+    options: [
+      { value: '0', label: '0°' },
+      { value: '120', label: '120°' },
+      { value: '240', label: '240°' }
+    ],
+    description: 'Pattern rotation angle for section 1'
+  },
+  {
+    id: 'section_2',
+    name: 'Section 2 (60°–120°)',
+    type: 'enum',
+    default: '1',
+    group: 'Section Patterns',
+    layout: 'half',
+    options: [
+      { value: '0', label: 'Empty' },
+      { value: '1', label: 'Asa-no-ha (Hemp Leaf)' },
+      { value: '2', label: 'Ryuso Asa-no-ha' },
+      { value: '3', label: 'Asa-no-ha Variant' },
+      { value: '4', label: 'Rindo Asa-no-ha (Bellflower)' }
+    ],
+    description: 'Geometric Kumiko pattern for wedge section 2'
+  },
+  {
+    id: 'section_2_rotation',
+    name: 'Section 2 Rotation',
+    type: 'enum',
+    default: '0',
+    group: 'Section Patterns',
+    widget: 'segmented',
+    layout: 'half',
+    options: [
+      { value: '0', label: '0°' },
+      { value: '120', label: '120°' },
+      { value: '240', label: '240°' }
+    ],
+    description: 'Pattern rotation angle for section 2'
+  },
+  {
+    id: 'section_3',
+    name: 'Section 3 (120°–180°)',
+    type: 'enum',
+    default: '1',
+    group: 'Section Patterns',
+    layout: 'half',
+    options: [
+      { value: '0', label: 'Empty' },
+      { value: '1', label: 'Asa-no-ha (Hemp Leaf)' },
+      { value: '2', label: 'Ryuso Asa-no-ha' },
+      { value: '3', label: 'Asa-no-ha Variant' },
+      { value: '4', label: 'Rindo Asa-no-ha (Bellflower)' }
+    ],
+    description: 'Geometric Kumiko pattern for wedge section 3'
+  },
+  {
+    id: 'section_3_rotation',
+    name: 'Section 3 Rotation',
+    type: 'enum',
+    default: '0',
+    group: 'Section Patterns',
+    widget: 'segmented',
+    layout: 'half',
+    options: [
+      { value: '0', label: '0°' },
+      { value: '120', label: '120°' },
+      { value: '240', label: '240°' }
+    ],
+    description: 'Pattern rotation angle for section 3'
+  },
+  {
+    id: 'section_4',
+    name: 'Section 4 (180°–240°)',
+    type: 'enum',
+    default: '1',
+    group: 'Section Patterns',
+    layout: 'half',
+    options: [
+      { value: '0', label: 'Empty' },
+      { value: '1', label: 'Asa-no-ha (Hemp Leaf)' },
+      { value: '2', label: 'Ryuso Asa-no-ha' },
+      { value: '3', label: 'Asa-no-ha Variant' },
+      { value: '4', label: 'Rindo Asa-no-ha (Bellflower)' }
+    ],
+    description: 'Geometric Kumiko pattern for wedge section 4'
+  },
+  {
+    id: 'section_4_rotation',
+    name: 'Section 4 Rotation',
+    type: 'enum',
+    default: '0',
+    group: 'Section Patterns',
+    widget: 'segmented',
+    layout: 'half',
+    options: [
+      { value: '0', label: '0°' },
+      { value: '120', label: '120°' },
+      { value: '240', label: '240°' }
+    ],
+    description: 'Pattern rotation angle for section 4'
+  },
+  {
+    id: 'section_5',
+    name: 'Section 5 (240°–300°)',
+    type: 'enum',
+    default: '1',
+    group: 'Section Patterns',
+    layout: 'half',
+    options: [
+      { value: '0', label: 'Empty' },
+      { value: '1', label: 'Asa-no-ha (Hemp Leaf)' },
+      { value: '2', label: 'Ryuso Asa-no-ha' },
+      { value: '3', label: 'Asa-no-ha Variant' },
+      { value: '4', label: 'Rindo Asa-no-ha (Bellflower)' }
+    ],
+    description: 'Geometric Kumiko pattern for wedge section 5'
+  },
+  {
+    id: 'section_5_rotation',
+    name: 'Section 5 Rotation',
+    type: 'enum',
+    default: '0',
+    group: 'Section Patterns',
+    widget: 'segmented',
+    layout: 'half',
+    options: [
+      { value: '0', label: '0°' },
+      { value: '120', label: '120°' },
+      { value: '240', label: '240°' }
+    ],
+    description: 'Pattern rotation angle for section 5'
+  },
+  {
+    id: 'section_6',
+    name: 'Section 6 (300°–360°)',
+    type: 'enum',
+    default: '1',
+    group: 'Section Patterns',
+    layout: 'half',
+    options: [
+      { value: '0', label: 'Empty' },
+      { value: '1', label: 'Asa-no-ha (Hemp Leaf)' },
+      { value: '2', label: 'Ryuso Asa-no-ha' },
+      { value: '3', label: 'Asa-no-ha Variant' },
+      { value: '4', label: 'Rindo Asa-no-ha (Bellflower)' }
+    ],
+    description: 'Geometric Kumiko pattern for wedge section 6'
+  },
+  {
+    id: 'section_6_rotation',
+    name: 'Section 6 Rotation',
+    type: 'enum',
+    default: '0',
+    group: 'Section Patterns',
+    widget: 'segmented',
+    layout: 'half',
+    options: [
+      { value: '0', label: '0°' },
+      { value: '120', label: '120°' },
+      { value: '240', label: '240°' }
+    ],
+    description: 'Pattern rotation angle for section 6'
+  },
+  {
+    id: 'hex_design_thickness',
+    name: 'Design Lattice Thickness',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 1,
+    min: 0.5,
+    max: 10,
+    step: 0.1,
+    group: 'Section Patterns',
+    description: 'Thickness of the delicate inner kumiko lattice design lines'
+  },
+  {
+    id: 'hex_radius',
+    name: 'Hexagon Radius',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 20,
+    min: 10,
+    max: 45,
+    step: 1,
+    group: 'Hexagon Lattice',
+    description: 'Outer radius of the hexagonal Kumiko boundary'
+  },
+  {
+    id: 'hex_thickness',
+    name: 'Hex Frame Thickness',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 2,
+    min: 1,
+    max: 10,
+    step: 0.5,
+    group: 'Hexagon Lattice',
+    description: 'Outer perimeter border frame thickness'
+  },
+  {
+    id: 'hex_fillet',
+    name: 'Hex Corner Fillet',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0.2,
+    min: 0,
+    max: 1,
+    step: 0.05,
+    group: 'Hexagon Lattice',
+    description: 'Corner fillet radius on the outer hexagon'
+  },
+  {
+    id: 'hex_spoke_thickness',
+    name: 'Spoke Thickness',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 2,
+    min: 1,
+    max: 10,
+    step: 0.2,
+    group: 'Hexagon Lattice',
+    description: 'Internal spoke lattice strip thickness'
+  },
+  {
+    id: 'height',
+    name: 'Pattern Height / Depth',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 3,
+    min: 1,
+    max: 5,
+    step: 0.5,
+    group: 'Hexagon Lattice',
+    description: 'Total extruded depth of the item'
+  },
+  {
+    id: 'single_part',
+    name: 'Single Part (Fuse Solids)',
+    type: 'boolean',
+    default: false,
+    group: 'Assembly & Output',
+    description: 'Fuse all solid components into a single unified part at the end (uncheck to keep separate multi-color parts)'
+  }
+];
+
+export const defaultKumikoParameters: KumikoParameters = extractDefaultParameters<KumikoParameters>(kumikoParameters);
 
 export function getCentroid(
   p1: [number, number],
@@ -399,7 +701,7 @@ export function createSectorPattern(
  * 4. Keychain_Ring_Attachment (keychain ring loop, cut by outer hex)
  */
 export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart[] {
-  const rMidpoint = Number(params.hex_radius ?? 20);
+  const rOuter = Number(params.hex_radius ?? 20);
   const tHex = Number(params.hex_thickness ?? 2);
   const tSpoke = Number(params.hex_spoke_thickness ?? 2);
   const tDesign = Number(params.hex_design_thickness ?? 1);
@@ -410,7 +712,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
   const fRing = Number(params.ring_fillet ?? 0.2);
 
   const deltaCorner = tHex / Math.sqrt(3);
-  const rOuter = rMidpoint + deltaCorner;
+  const rMidpoint = rOuter - deltaCorner;
   const rInner = Math.max(2, rMidpoint - deltaCorner);
 
   // ==========================================
@@ -660,3 +962,17 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
   if (parts.length === 1) return parts[0].shape;
   return makeCompound(parts.map((p) => p.shape));
 }
+
+/**
+ * Replicad Model Definition bundle for Kumiko Keychain
+ */
+export const kumikoKeychainModel: ReplicadModelDefinition<KumikoParameters> = {
+  id: 'kumiko-keychain',
+  name: 'Kumiko Keychain',
+  description: 'Customisable Simple Kumiko Inspired Keychain powered by Replicad & OpenCASCADE.js (zero API limits).',
+  tags: ['Kumiko', '3D Print', 'Keychain', 'Replicad', 'Instant CAD'],
+  parameters: kumikoParameters,
+  buildParts: (params: KumikoParameters) => buildKumikoKeychainParts(params),
+  buildShape: (params: KumikoParameters) => buildKumikoKeychain(params)
+};
+

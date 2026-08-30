@@ -1,4 +1,6 @@
 export type ParameterType = 'quantity' | 'enum' | 'boolean' | 'string';
+export type ParameterWidget = 'slider' | 'stepper' | 'segmented' | 'switch' | 'select';
+export type ParameterLayout = 'full' | 'half' | 'inline';
 
 export interface ParameterOption {
   value: string;
@@ -18,6 +20,8 @@ export interface ParameterDefinition {
   description?: string;
   group?: string;
   dependsOn?: string;
+  widget?: ParameterWidget;
+  layout?: ParameterLayout;
 }
 
 export interface ModelLink {
