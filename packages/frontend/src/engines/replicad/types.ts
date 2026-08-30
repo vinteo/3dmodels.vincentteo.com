@@ -8,6 +8,15 @@ export interface ReplicadPart {
   alpha?: number;
 }
 
+export interface ModelDimensionItem {
+  id: string;
+  label: string;
+  value: number;
+  unit: string;
+  formatted?: string;
+  description?: string;
+}
+
 export interface ReplicadModelDefinition<TParams = Record<string, number | string | boolean>> {
   id: string;
   name: string;
@@ -18,6 +27,7 @@ export interface ReplicadModelDefinition<TParams = Record<string, number | strin
   links?: ModelLink[];
   parameters: ParameterDefinition[];
   defaultConfiguration?: string;
+  calculateDimensions?: (params: TParams) => ModelDimensionItem[];
   buildParts: (params: TParams) => ReplicadPart[];
   buildShape?: (params: TParams) => AnyShape;
 }

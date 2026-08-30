@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ModelConfig, ExportOptions, PreviewMeshData } from './types/model';
 import { getModels, fetchModelPreviewMesh, triggerModelExport } from './services/api';
 import { trackModelView } from './services/analytics';
+import { getReplicadModel } from './engines/replicad/registry';
 import { Header } from './components/Header';
 import { ModelSelector } from './components/ModelSelector';
 import { ModelViewer } from './components/ModelViewer';
@@ -81,6 +82,16 @@ export const App: React.FC = () => {
   const activeModel = useMemo(() => {
     return models.find((m) => m.id === selectedModelId) || models[0];
   }, [models, selectedModelId]);
+
+  // Live computed model dimensions for 3D overlay HUD
+  const liveDimensions = useMemo(() => {
+    if (!activeModel) return [];
+    const replicadDef = getReplicadModel(activeModel.id);
+    if (replicadDef?.calculateDimensions) {
+      return replicadDef.calculateDimensions(currentValues);
+    }
+    return [];
+  }, [activeModel, currentValues]);
 
   // Load 3D preview mesh for given model & parameters
   const loadPreview = useCallback(async (model: ModelConfig, params: Record<string, number | string | boolean>) => {
@@ -218,6 +229,7 @@ export const App: React.FC = () => {
               loading={loadingPreview}
               error={previewError}
               modelName={activeModel.name}
+              dimensions={liveDimensions}
               onRefresh={handleApplyParameters}
             />
           ) : (

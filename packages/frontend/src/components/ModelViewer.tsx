@@ -20,6 +20,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import { PreviewMeshData } from '../types/model';
+import { ModelDimensionItem } from '../engines/replicad/types';
+import { ModelDimensionsHUD } from './ModelDimensionsHUD';
 import {
   PRESET_SWATCHES,
   THEME_PALETTES,
@@ -33,6 +35,7 @@ interface ModelViewerProps {
   loading: boolean;
   error?: string | null;
   modelName: string;
+  dimensions?: ModelDimensionItem[];
   onRefresh?: () => void;
 }
 
@@ -41,6 +44,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   loading,
   error,
   modelName,
+  dimensions,
   onRefresh
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -65,6 +69,10 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   const [copiedShareLink, setCopiedShareLink] = useState<boolean>(false);
   const [showColorStudio, setShowColorStudio] = useState<boolean>(false);
   const [customPartColors, setCustomPartColors] = useState<Record<string, string>>({});
+  const [computedBoundingDims, setComputedBoundingDims] = useState<ModelDimensionItem[]>([]);
+
+  // Effective dimensions to show in HUD (prefers domain-calculated dimensions if provided, falls back to bounding box)
+  const effectiveDimensions = dimensions && dimensions.length > 0 ? dimensions : computedBoundingDims;
 
   // Active parts in current model
   const activeParts = useMemo(() => {
@@ -372,9 +380,35 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
       // Automatically frame camera around geometry size ONLY on initial load or model change
       if (cameraRef.current && controlsRef.current) {
         const finalBbox = new THREE.Box3().setFromObject(group);
+        const finalSize = new THREE.Vector3();
+        finalBbox.getSize(finalSize);
+
+        // Record 3D bounding box dimensions as fallback
+        setComputedBoundingDims([
+          {
+            id: 'width',
+            label: 'Width (X)',
+            value: Number(finalSize.x.toFixed(1)),
+            unit: 'mm',
+            formatted: `${finalSize.x.toFixed(1)} mm`
+          },
+          {
+            id: 'depth',
+            label: 'Depth (Y)',
+            value: Number(finalSize.z.toFixed(1)),
+            unit: 'mm',
+            formatted: `${finalSize.z.toFixed(1)} mm`
+          },
+          {
+            id: 'height',
+            label: 'Height (Z)',
+            value: Number(finalSize.y.toFixed(1)),
+            unit: 'mm',
+            formatted: `${finalSize.y.toFixed(1)} mm`
+          }
+        ]);
+
         if (!hasFramedCameraRef.current) {
-          const finalSize = new THREE.Vector3();
-          finalBbox.getSize(finalSize);
           const maxDim = Math.max(finalSize.x, finalSize.y, finalSize.z, 20);
           const fov = cameraRef.current.fov * (Math.PI / 180);
           const distance = Math.abs(maxDim / Math.sin(fov / 2)) * 0.85;
@@ -677,6 +711,9 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
           <span className="font-semibold text-slate-400">Scroll:</span> Zoom
         </div>
       </div>
+
+      {/* Floating Model Dimensions HUD in Bottom-Right */}
+      <ModelDimensionsHUD dimensions={effectiveDimensions} />
 
       {/* Loading Overlay */}
       {loading && (
