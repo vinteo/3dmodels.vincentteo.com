@@ -206,6 +206,7 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
                 );
                 const masterVal = allSame ? firstVal : 'mixed';
                 const isSegmented = cluster.sampleParam.widget === 'segmented';
+                const selectedOpt = cluster.sampleParam.options?.find((opt) => opt.value === masterVal);
 
                 return (
                   <div key={cluster.id} className="space-y-1.5">
@@ -232,6 +233,7 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
                           <button
                             key={opt.value}
                             type="button"
+                            title={opt.description || opt.label}
                             onClick={() => handleBatchUpdate(cluster, opt.value)}
                             className={`py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                               masterVal === opt.value
@@ -255,11 +257,17 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
                           </option>
                         )}
                         {cluster.sampleParam.options?.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
+                          <option key={opt.value} value={opt.value} title={opt.description}>
                             {opt.label}
                           </option>
                         ))}
                       </select>
+                    )}
+
+                    {selectedOpt?.description && (
+                      <p className="text-[11px] text-slate-400 italic leading-snug">
+                        {selectedOpt.description}
+                      </p>
                     )}
                   </div>
                 );

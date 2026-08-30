@@ -400,4 +400,52 @@ describe('ParameterControls Component (Schema-Driven)', () => {
       'https://www.qidimaker.com/en/models/detail/2093595266801807362'
     );
   });
+
+  it('renders pattern option descriptions in both standalone controls and cluster cards', () => {
+    const modelWithOptions: ModelConfig = {
+      ...mockModel,
+      parameters: [
+        {
+          id: 'pattern_choice',
+          name: 'Pattern Choice',
+          type: 'enum',
+          default: '1',
+          options: [
+            { value: '0', label: 'Empty', description: 'No infill lattice' },
+            { value: '1', label: 'Asa-no-ha', description: 'Classic hemp leaf tripod lattice' }
+          ]
+        }
+      ]
+    };
+
+    const { rerender } = render(
+      <ParameterControls
+        model={modelWithOptions}
+        currentValues={{ pattern_choice: '1' }}
+        onChangeValues={vi.fn()}
+        onApply={vi.fn()}
+        onOpenExport={vi.fn()}
+        onOpenModelDrawer={vi.fn()}
+        isDirty={false}
+        loading={false}
+      />
+    );
+
+    expect(screen.getByText('Classic hemp leaf tripod lattice')).toBeInTheDocument();
+
+    rerender(
+      <ParameterControls
+        model={modelWithOptions}
+        currentValues={{ pattern_choice: '0' }}
+        onChangeValues={vi.fn()}
+        onApply={vi.fn()}
+        onOpenExport={vi.fn()}
+        onOpenModelDrawer={vi.fn()}
+        isDirty={false}
+        loading={false}
+      />
+    );
+
+    expect(screen.getByText('No infill lattice')).toBeInTheDocument();
+  });
 });

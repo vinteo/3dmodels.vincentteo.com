@@ -5,6 +5,7 @@ export type ParameterLayout = 'full' | 'half' | 'inline';
 export interface ParameterOption {
   value: string;
   label: string;
+  description?: string;
 }
 
 export interface ParameterDefinition {
