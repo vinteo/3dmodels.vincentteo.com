@@ -7,6 +7,7 @@ import {
   createSectorPattern,
   buildKumikoKeychainParts,
   defaultKumikoParameters,
+  calculateKumikoDimensions,
   kumikoKeychainModel,
   Triangle2D,
   Point2D
@@ -161,5 +162,41 @@ describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {
     expect(parts.length).toBe(1);
     expect(parts[0].name).toBe('Kumiko_Keychain_Fused');
     expect(parts[0].shape).toBeDefined();
+  });
+
+  it('calculates exact model dimensions including vertex-to-vertex, side-to-side, height, and ring length', () => {
+    const dimensionsWithRing = calculateKumikoDimensions({
+      hex_radius: 20,
+      height: 3,
+      include_keychain_ring: true,
+      ring_thickness: 2
+    });
+
+    expect(dimensionsWithRing).toHaveLength(4);
+
+    const v2v = dimensionsWithRing.find((d) => d.id === 'vertex_to_vertex');
+    expect(v2v?.value).toBe(40);
+    expect(v2v?.formatted).toBe('40.0 mm');
+
+    const s2s = dimensionsWithRing.find((d) => d.id === 'side_to_side');
+    expect(s2s?.value).toBeCloseTo(34.64, 1);
+    expect(s2s?.formatted).toBe('34.6 mm');
+
+    const h = dimensionsWithRing.find((d) => d.id === 'height');
+    expect(h?.value).toBe(3);
+    expect(h?.formatted).toBe('3.0 mm');
+
+    const fullLengthWithRing = dimensionsWithRing.find((d) => d.id === 'full_length');
+    expect(fullLengthWithRing?.value).toBe(48.5);
+    expect(fullLengthWithRing?.formatted).toBe('48.5 mm');
+
+    // Without ring, full length equals vertex-to-vertex
+    const dimensionsWithoutRing = calculateKumikoDimensions({
+      hex_radius: 20,
+      height: 3,
+      include_keychain_ring: false
+    });
+    const fullLengthWithoutRing = dimensionsWithoutRing.find((d) => d.id === 'full_length');
+    expect(fullLengthWithoutRing?.value).toBe(40);
   });
 });
