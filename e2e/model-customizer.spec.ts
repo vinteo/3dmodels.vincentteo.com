@@ -10,7 +10,9 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
         await route.fulfill({
           status: 200,
           contentType: 'model/stl',
-          body: Buffer.from('solid test\nfacet normal 0 0 0\nouter loop\nvertex 0 0 0\nvertex 1 0 0\nvertex 0 1 0\nendloop\nendfacet\nendsolid test')
+          body: Buffer.from(
+            'solid test\nfacet normal 0 0 0\nouter loop\nvertex 0 0 0\nvertex 1 0 0\nvertex 0 1 0\nendloop\nendfacet\nendsolid test'
+          )
         });
         return;
       }
@@ -21,7 +23,9 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
         contentType: 'application/json',
         body: JSON.stringify({
           success: true,
-          data: includeHidden ? modelsConfig : (modelsConfig as Array<{ hidden?: boolean }>).filter((m) => !m.hidden),
+          data: includeHidden
+            ? modelsConfig
+            : (modelsConfig as Array<{ hidden?: boolean }>).filter((m) => !m.hidden),
           mockMode: true
         })
       });
@@ -31,7 +35,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
   test('should display minimalist header with logo and title', async ({ page }) => {
     // Verify compact header with Vin's Space 3D Models title
-    await expect(page.locator("header").locator("text=Vin's Space 3D Models")).toBeVisible();
+    await expect(page.locator('header').locator("text=Vin's Space 3D Models")).toBeVisible();
     await expect(page.locator("button[title='Open Model Catalog']")).toBeVisible();
   });
 
@@ -47,12 +51,14 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await page.click("button:has-text('Kumiko Keychain')");
 
     // Drawer closes and left sidebar shows parameters
-    await expect(page.locator("text=Model Catalog")).not.toBeVisible();
-    await expect(page.locator("text=Section Patterns")).toBeVisible();
-    await expect(page.locator("text=Hexagon Radius")).toBeVisible();
+    await expect(page.locator('text=Model Catalog')).not.toBeVisible();
+    await expect(page.locator('text=Section Patterns')).toBeVisible();
+    await expect(page.locator('text=Hexagon Radius')).toBeVisible();
   });
 
-  test('should display external model repository links for Printables and QIDI Maker', async ({ page }) => {
+  test('should display external model repository links for Printables and QIDI Maker', async ({
+    page
+  }) => {
     // Check links in left sidebar
     const printablesLink = page.locator("a[title='Open model page on Printables']");
     await expect(printablesLink).toBeVisible();
@@ -75,7 +81,9 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await expect(canvas).toBeVisible();
 
     // Verify viewport control buttons
-    await expect(page.locator("button[title='Pause Rotation'], button[title='Auto-Rotate']")).toBeVisible();
+    await expect(
+      page.locator("button[title='Pause Rotation'], button[title='Auto-Rotate']")
+    ).toBeVisible();
     await expect(page.locator("button[title='Toggle Wireframe']")).toBeVisible();
     await expect(page.locator("button[aria-label='Toggle part color studio']")).toBeVisible();
     await expect(page.locator("button[title='Toggle Ground Grid']")).toBeVisible();
@@ -87,8 +95,8 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await page.click("button[aria-label='Toggle part color studio']");
 
     // Part Color Studio dialog should appear
-    await expect(page.locator("text=Part Materials & Colors")).toBeVisible();
-    await expect(page.locator("text=1-Click Theme Palettes")).toBeVisible();
+    await expect(page.locator('text=Part Materials & Colors')).toBeVisible();
+    await expect(page.locator('text=1-Click Theme Palettes')).toBeVisible();
     await expect(page.locator("button:has-text('Classic Kumiko')")).toBeVisible();
     await expect(page.locator("button:has-text('Cyberpunk Neon')")).toBeVisible();
 
@@ -97,7 +105,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
     // Close Part Color Studio
     await page.click("button[aria-label='Close part color studio']");
-    await expect(page.locator("text=Part Materials & Colors")).not.toBeVisible();
+    await expect(page.locator('text=Part Materials & Colors')).not.toBeVisible();
   });
 
   test('should adjust parameter in left sidebar and detect dirty state', async ({ page }) => {
@@ -106,7 +114,9 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await masterSelect.selectOption('2');
 
     // Should now indicate "Update 3D Preview" once initial geometry settles
-    await expect(page.locator("button:has-text('Update 3D Preview')")).toBeVisible({ timeout: 15000 });
+    await expect(page.locator("button:has-text('Update 3D Preview')")).toBeVisible({
+      timeout: 15000
+    });
   });
 
   test('should open export modal and switch format tabs', async ({ page }) => {
@@ -114,39 +124,43 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await page.click("aside button:has-text('Export STL / STEP Files')");
 
     // Modal should be visible
-    await expect(page.locator("text=Export Customized Model")).toBeVisible();
-    await expect(page.locator("text=STL (3D Printing)")).toBeVisible();
-    await expect(page.locator("text=STEP (CAD / CNC)")).toBeVisible();
+    await expect(page.locator('text=Export Customized Model')).toBeVisible();
+    await expect(page.locator('text=STL (3D Printing)')).toBeVisible();
+    await expect(page.locator('text=STEP (CAD / CNC)')).toBeVisible();
 
     // Switch to STEP tab
-    await page.click("text=STEP (CAD / CNC)");
-    await expect(page.locator("text=STEP Protocol")).toBeVisible();
+    await page.click('text=STEP (CAD / CNC)');
+    await expect(page.locator('text=STEP Protocol')).toBeVisible();
     await expect(page.locator("button:has-text('Download STEP Model')")).toBeVisible();
 
     // Close modal
     await page.click("button[aria-label='Close dialog']");
-    await expect(page.locator("text=Export Customized Model")).not.toBeVisible();
+    await expect(page.locator('text=Export Customized Model')).not.toBeVisible();
   });
 
-  test('should load model directly via clean path slug URL and synchronize address bar', async ({ page }) => {
+  test('should load model directly via clean path slug URL and synchronize address bar', async ({
+    page
+  }) => {
     // Navigate directly using a path slug permalink
     await page.goto('/kumiko-pattern-keychain');
 
     // Should load the Kumiko Keychain model directly
-    await expect(page.locator("aside").locator("text=Kumiko Keychain")).toBeVisible();
-    await expect(page.locator("text=Section Patterns")).toBeVisible();
+    await expect(page.locator('aside').locator('text=Kumiko Keychain')).toBeVisible();
+    await expect(page.locator('text=Section Patterns')).toBeVisible();
 
     // Verify address bar contains /kumiko-pattern-keychain
     expect(page.url()).toContain('/kumiko-pattern-keychain');
   });
 
-  test('should load in-browser Replicad model directly via clean path slug URL', async ({ page }) => {
+  test('should load in-browser Replicad model directly via clean path slug URL', async ({
+    page
+  }) => {
     // Navigate directly to the Replicad model slug
     await page.goto('/kumiko-keychain');
 
     // Should display Replicad model in sidebar
-    await expect(page.locator("aside").locator("text=Kumiko Keychain").first()).toBeVisible();
-    await expect(page.locator("text=Section Patterns")).toBeVisible();
+    await expect(page.locator('aside').locator('text=Kumiko Keychain').first()).toBeVisible();
+    await expect(page.locator('text=Section Patterns')).toBeVisible();
 
     // Verify address bar contains /kumiko-keychain
     expect(page.url()).toContain('/kumiko-keychain');

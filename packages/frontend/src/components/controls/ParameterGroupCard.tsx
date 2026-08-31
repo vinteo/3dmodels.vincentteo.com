@@ -184,36 +184,38 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
       </div>
 
       {primaryToggle?.description && (
-        <p className="text-[11px] text-slate-400 leading-relaxed">
-          {primaryToggle.description}
-        </p>
+        <p className="text-[11px] text-slate-400 leading-relaxed">{primaryToggle.description}</p>
       )}
 
       {/* Body Content */}
       {visibleBodyParams.length > 0 && (
         <div
           className={`space-y-3 ${
-            primaryToggle ? 'pt-2.5 border-t border-slate-800/80 animate-in fade-in slide-in-from-top-1 duration-200' : ''
+            primaryToggle
+              ? 'pt-2.5 border-t border-slate-800/80 animate-in fade-in slide-in-from-top-1 duration-200'
+              : ''
           }`}
         >
           {/* Master Controls for repeated clusters */}
           {hasClusters && (
             <div className="space-y-3">
               {clusters.map((cluster) => {
-                const firstVal = String(values[cluster.params[0].id] ?? cluster.sampleParam.default);
+                const firstVal = String(
+                  values[cluster.params[0].id] ?? cluster.sampleParam.default
+                );
                 const allSame = cluster.params.every(
                   (p) => String(values[p.id] ?? p.default) === firstVal
                 );
                 const masterVal = allSame ? firstVal : 'mixed';
                 const isSegmented = cluster.sampleParam.widget === 'segmented';
-                const selectedOpt = cluster.sampleParam.options?.find((opt) => opt.value === masterVal);
+                const selectedOpt = cluster.sampleParam.options?.find(
+                  (opt) => opt.value === masterVal
+                );
 
                 return (
                   <div key={cluster.id} className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <label className="font-bold text-slate-200">
-                        {cluster.name}
-                      </label>
+                      <label className="font-bold text-slate-200">{cluster.name}</label>
                       {isSegmented && (
                         <button
                           type="button"
@@ -328,9 +330,7 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
             >
               {standaloneParams.map((param) => {
                 const val = values[param.id] ?? param.default;
-                const isEnabled = param.dependsOn
-                  ? Boolean(values[param.dependsOn] ?? true)
-                  : true;
+                const isEnabled = param.dependsOn ? Boolean(values[param.dependsOn] ?? true) : true;
                 const colSpan = param.layout === 'half' ? 'col-span-1' : 'col-span-1 sm:col-span-2';
 
                 return (

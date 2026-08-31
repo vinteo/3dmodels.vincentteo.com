@@ -94,22 +94,25 @@ export const App: React.FC = () => {
   }, [activeModel, currentValues]);
 
   // Load 3D preview mesh for given model & parameters
-  const loadPreview = useCallback(async (model: ModelConfig, params: Record<string, number | string | boolean>) => {
-    setLoadingPreview(true);
-    setPreviewError(null);
+  const loadPreview = useCallback(
+    async (model: ModelConfig, params: Record<string, number | string | boolean>) => {
+      setLoadingPreview(true);
+      setPreviewError(null);
 
-    try {
-      const buffer = await fetchModelPreviewMesh(model, params);
-      setMeshData(buffer);
-      setAppliedValues({ ...params });
-    } catch (err: unknown) {
-      console.error('Failed to load model preview:', err);
-      setPreviewError(err instanceof Error ? err.message : 'Failed to generate 3D preview.');
-      setAppliedValues({ ...params });
-    } finally {
-      setLoadingPreview(false);
-    }
-  }, []);
+      try {
+        const buffer = await fetchModelPreviewMesh(model, params);
+        setMeshData(buffer);
+        setAppliedValues({ ...params });
+      } catch (err: unknown) {
+        console.error('Failed to load model preview:', err);
+        setPreviewError(err instanceof Error ? err.message : 'Failed to generate 3D preview.');
+        setAppliedValues({ ...params });
+      } finally {
+        setLoadingPreview(false);
+      }
+    },
+    []
+  );
 
   // Initialize parameters from URL (if customized in link) or defaults, then load preview
   useEffect(() => {

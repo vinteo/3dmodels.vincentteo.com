@@ -4,6 +4,7 @@ import {
   getOneThirdPoint,
   getPointAtFraction,
   rotatePoint2D,
+  getLineIntersection,
   createSectorPattern,
   buildKumikoKeychainParts,
   defaultKumikoParameters,
@@ -74,6 +75,50 @@ describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {
     const rot360 = rotatePoint2D(point, center, 2 * Math.PI);
     expect(rot360[0]).toBeCloseTo(20, 4);
     expect(rot360[1]).toBeCloseTo(10, 4);
+  });
+
+  it('calculates the 2D intersection point between two lines accurately', () => {
+    // 1. Perpendicular lines intersecting at (4, 5)
+    const p1: Point2D = [0, 5];
+    const p2: Point2D = [10, 5];
+    const p3: Point2D = [4, 0];
+    const p4: Point2D = [4, 10];
+    const inter1 = getLineIntersection(p1, p2, p3, p4);
+    expect(inter1).not.toBeNull();
+    expect(inter1?.[0]).toBeCloseTo(4, 4);
+    expect(inter1?.[1]).toBeCloseTo(5, 4);
+
+    // 2. Diagonal lines intersecting at (1, 1)
+    const d1: Point2D = [0, 0];
+    const d2: Point2D = [2, 2];
+    const d3: Point2D = [0, 2];
+    const d4: Point2D = [2, 0];
+    const inter2 = getLineIntersection(d1, d2, d3, d4);
+    expect(inter2).not.toBeNull();
+    expect(inter2?.[0]).toBeCloseTo(1, 4);
+    expect(inter2?.[1]).toBeCloseTo(1, 4);
+
+    // 3. Parallel lines return null
+    const par1: Point2D = [0, 0];
+    const par2: Point2D = [10, 0];
+    const par3: Point2D = [0, 5];
+    const par4: Point2D = [10, 5];
+    expect(getLineIntersection(par1, par2, par3, par4)).toBeNull();
+
+    // 4. Intersection outside segment range with segmentOnly flag
+    const s1: Point2D = [0, 0];
+    const s2: Point2D = [1, 1];
+    const s3: Point2D = [2, 0];
+    const s4: Point2D = [3, -1];
+    // Infinite line intersection exists at (1, 1)
+    const infiniteInter = getLineIntersection(s1, s2, s3, s4, false);
+    expect(infiniteInter).not.toBeNull();
+    expect(infiniteInter?.[0]).toBeCloseTo(1, 4);
+    expect(infiniteInter?.[1]).toBeCloseTo(1, 4);
+
+    // Segment-only returns null because (1, 1) is not between s3 and s4
+    const segmentInter = getLineIntersection(s1, s2, s3, s4, true);
+    expect(segmentInter).toBeNull();
   });
 
   it('generates rotated 3D pattern solids for 0°, 120°, and 240° rotations', () => {
@@ -211,13 +256,29 @@ describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {
 
     const patternOptions = getKumikoPatternOptions();
     expect(patternOptions).toEqual(KUMIKO_PATTERN_OPTIONS);
-    expect(patternOptions.map((o) => o.value)).toEqual(['0', '1', '2', '3', '4']);
+    expect(patternOptions.map((o) => o.value)).toEqual([
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9'
+    ]);
     expect(patternOptions.map((o) => o.label)).toEqual([
       'Empty',
-      'Asa-no-ha (Hemp Leaf)',
+      'Asa-no-ha',
       'Ryuso Asa-no-ha',
       'Asa-no-ha Variant',
-      'Rindo Asa-no-ha (Bellflower)'
+      'Rindo Asa-no-ha',
+      'Kasane Rindo',
+      'Kasane Rindo Variant',
+      'Tsumi-ishi Kikko',
+      'Bishamon Kikko',
+      'Goma-gara'
     ]);
 
     // Check that section parameters (1 to 6) all use the registry options

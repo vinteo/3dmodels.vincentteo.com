@@ -31,7 +31,7 @@ export const PRESET_SWATCHES: string[] = [
   '#f8fafc', // Titanium White
   '#94a3b8', // Cool Slate
   '#1e293b', // Deep Obsidian
-  '#0f172a'  // Midnight Black
+  '#0f172a' // Midnight Black
 ];
 
 /**
@@ -151,7 +151,11 @@ export function formatPartName(rawName: string): string {
 /**
  * Resolves a palette color for a given part name in a theme
  */
-export function resolveThemeColorForPart(theme: ThemePalette, partName: string, index: number): string {
+export function resolveThemeColorForPart(
+  theme: ThemePalette,
+  partName: string,
+  index: number
+): string {
   const norm = partName.toLowerCase().replace(/[^a-z0-9]/g, '_');
   for (const [key, color] of Object.entries(theme.colors)) {
     if (norm.includes(key) || key.includes(norm)) {

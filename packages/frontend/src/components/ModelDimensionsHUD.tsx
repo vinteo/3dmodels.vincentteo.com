@@ -18,7 +18,10 @@ export const ModelDimensionsHUD: React.FC<ModelDimensionsHUDProps> = ({
   }
 
   // Generate summary string for collapsed pill (e.g., "40.0 × 34.6 × 3.0 mm")
-  const summaryText = dimensions.slice(0, 3).map((d) => d.formatted || `${d.value} ${d.unit}`).join(' × ');
+  const summaryText = dimensions
+    .slice(0, 3)
+    .map((d) => d.formatted || `${d.value} ${d.unit}`)
+    .join(' × ');
 
   if (collapsed) {
     return (
@@ -44,9 +47,7 @@ export const ModelDimensionsHUD: React.FC<ModelDimensionsHUDProps> = ({
           <div className="p-1 rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
             <Ruler className="w-3.5 h-3.5" />
           </div>
-          <span className="text-xs font-bold text-white tracking-wide">
-            Model Dimensions
-          </span>
+          <span className="text-xs font-bold text-white tracking-wide">Model Dimensions</span>
         </div>
 
         <button
@@ -66,9 +67,7 @@ export const ModelDimensionsHUD: React.FC<ModelDimensionsHUDProps> = ({
             className="flex items-center justify-between py-1 px-2 rounded-xl bg-slate-950/60 border border-slate-800/60 hover:border-slate-700/80 transition-colors"
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-medium text-slate-300">
-                {dim.label}
-              </span>
+              <span className="text-[11px] font-medium text-slate-300">{dim.label}</span>
               {dim.description && (
                 <span title={dim.description} className="text-slate-500 cursor-help">
                   <Info className="w-3 h-3" />

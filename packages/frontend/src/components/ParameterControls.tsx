@@ -161,9 +161,7 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
               Active Model
             </span>
-            <span className="text-xs font-bold text-white truncate block">
-              {model.name}
-            </span>
+            <span className="text-xs font-bold text-white truncate block">{model.name}</span>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
@@ -176,7 +174,11 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
               }`}
               title="Copy direct permalink URL with current parameters"
             >
-              {copiedLink ? <Check className="w-3 h-3 text-emerald-400" /> : <Share2 className="w-3 h-3 text-violet-400" />}
+              {copiedLink ? (
+                <Check className="w-3 h-3 text-emerald-400" />
+              ) : (
+                <Share2 className="w-3 h-3 text-violet-400" />
+              )}
               <span>{copiedLink ? 'Copied!' : 'Share'}</span>
             </button>
 
@@ -206,8 +208,8 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                   link.site === 'printables'
                     ? 'bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/25 hover:border-orange-500/50'
                     : link.site === 'qidimaker'
-                    ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/25 hover:border-sky-500/50'
-                    : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white'
+                      ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/25 hover:border-sky-500/50'
+                      : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white'
                 }`}
                 title={`Open model page on ${link.label}`}
               >
@@ -245,7 +247,9 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                   <GenericControl
                     param={param}
                     value={currentValues[param.id] ?? param.default}
-                    isEnabled={param.dependsOn ? Boolean(currentValues[param.dependsOn] ?? true) : true}
+                    isEnabled={
+                      param.dependsOn ? Boolean(currentValues[param.dependsOn] ?? true) : true
+                    }
                     onChange={(newVal) => handleChange(param.id, newVal)}
                   />
                 </div>

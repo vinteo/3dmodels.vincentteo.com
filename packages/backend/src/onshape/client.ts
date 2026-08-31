@@ -76,7 +76,9 @@ export class OnshapeClient {
         const delaySeconds = retryAfterHeader ? parseInt(retryAfterHeader, 10) : attempt * 2;
         const delayMs = (isNaN(delaySeconds) ? attempt * 2 : delaySeconds) * 1000;
 
-        console.warn(`[OnshapeClient] Received 429 Too Many Requests. Retrying in ${delayMs}ms (attempt ${attempt}/${maxRetries})...`);
+        console.warn(
+          `[OnshapeClient] Received 429 Too Many Requests. Retrying in ${delayMs}ms (attempt ${attempt}/${maxRetries})...`
+        );
         await new Promise((resolve) => setTimeout(resolve, delayMs));
         continue;
       }
@@ -98,7 +100,10 @@ export class OnshapeClient {
           message: {
             parameterId: p.id,
             parameterName: p.name,
-            typeName: p.type === 'quantity' ? 'BTMConfigurationParameterQuantity' : 'BTMConfigurationParameterEnum',
+            typeName:
+              p.type === 'quantity'
+                ? 'BTMConfigurationParameterQuantity'
+                : 'BTMConfigurationParameterEnum',
             rangeAndDefault: {
               minValue: p.min,
               maxValue: p.max,
@@ -245,9 +250,12 @@ export class OnshapeClient {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       attempts++;
 
-      const statusRes = await this.fetchWithRetry(`${this.baseUrl}/api/v6/translations/${translationId}`, {
-        headers: this.getAuthHeader()
-      });
+      const statusRes = await this.fetchWithRetry(
+        `${this.baseUrl}/api/v6/translations/${translationId}`,
+        {
+          headers: this.getAuthHeader()
+        }
+      );
 
       if (!statusRes.ok) continue;
 
@@ -272,7 +280,9 @@ export class OnshapeClient {
       }
 
       if (statusData.requestState === 'FAILED') {
-        throw new Error(`Onshape translation failed: ${statusData.failureReason || 'Unknown error'}`);
+        throw new Error(
+          `Onshape translation failed: ${statusData.failureReason || 'Unknown error'}`
+        );
       }
     }
 

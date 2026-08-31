@@ -25,7 +25,9 @@ describe('Google Analytics 4 Service', () => {
 
     expect(initialized).toBe(true);
 
-    const script = document.querySelector(`script[src*="googletagmanager.com/gtag/js?id=${testId}"]`) as HTMLScriptElement | null;
+    const script = document.querySelector(
+      `script[src*="googletagmanager.com/gtag/js?id=${testId}"]`
+    ) as HTMLScriptElement | null;
     expect(script).not.toBeNull();
     expect(script?.async).toBe(true);
 
@@ -38,7 +40,9 @@ describe('Google Analytics 4 Service', () => {
     initGA(testId);
     initGA(testId);
 
-    const scripts = document.querySelectorAll(`script[src*="googletagmanager.com/gtag/js?id=${testId}"]`);
+    const scripts = document.querySelectorAll(
+      `script[src*="googletagmanager.com/gtag/js?id=${testId}"]`
+    );
     expect(scripts.length).toBe(1);
   });
 

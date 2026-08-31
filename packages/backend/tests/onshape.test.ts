@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import app from '../src/index';
-import { getAllModels, getModelById, buildConfigurationString, parseConfigurationString } from '../src/config/models';
+import {
+  getAllModels,
+  getModelById,
+  buildConfigurationString,
+  parseConfigurationString
+} from '../src/config/models';
 import { generateMockSTL, generateMockSTEP } from '../src/onshape/mock';
 
 describe('Models Configuration and Parsing', () => {

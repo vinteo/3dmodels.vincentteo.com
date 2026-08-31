@@ -1,15 +1,15 @@
 import { ensureReplicadReady } from './occt';
 import { ExportOptions, MultiPartPreview, PreviewPartMesh } from '../../types/model';
 import { AnyShape, exportSTEP, makeCompound } from 'replicad';
-import { getReplicadModel, getAllReplicadModels, isReplicadModel, registerReplicadModel } from './registry';
-import { ReplicadPart, ReplicadModelDefinition } from './types';
-
-export {
+import {
   getReplicadModel,
   getAllReplicadModels,
   isReplicadModel,
   registerReplicadModel
-};
+} from './registry';
+import { ReplicadPart, ReplicadModelDefinition } from './types';
+
+export { getReplicadModel, getAllReplicadModels, isReplicadModel, registerReplicadModel };
 export type { ReplicadPart, ReplicadModelDefinition };
 
 /**

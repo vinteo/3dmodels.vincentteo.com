@@ -66,20 +66,25 @@ Designed and styled to seamlessly match the signature aesthetic of [vincentteo.c
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 20+
 - npm 10+ (or pnpm)
 
 ### Option 1: Using Dev Container (Recommended)
+
 Open this repository in **VS Code** with the **Dev Containers** extension installed. When prompted, click **Reopen in Container**. The container will automatically install all dependencies, configure Playwright, and forward ports `5173` (Frontend) and `8787` (Backend).
 
 ### Option 2: Local Setup
+
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/vinteo/3dmodels.vincentteo.com.git
    cd 3dmodels.vincentteo.com
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -94,7 +99,8 @@ Open this repository in **VS Code** with the **Dev Containers** extension instal
      ONSHAPE_ACCESS_KEY=your_access_key
      ONSHAPE_SECRET_KEY=your_secret_key
      ```
-   *(If omitted, the app automatically runs in Mock Demo Mode with procedural 3D models).*
+
+   _(If omitted, the app automatically runs in Mock Demo Mode with procedural 3D models)._
 
 4. Start the local development server:
    ```bash
@@ -140,16 +146,19 @@ Add a new entry to `config/models.config.json`:
 ## Testing & Quality Assurance
 
 ### Run Unit & Integration Tests (Vitest)
+
 ```bash
 npm run test
 ```
 
 ### Run TypeScript Typechecking
+
 ```bash
 npm run typecheck
 ```
 
 ### Run End-to-End Tests (Playwright)
+
 ```bash
 # Install browser binaries if running for the first time
 npx playwright install --with-deps chromium
@@ -163,13 +172,17 @@ npm run test:e2e
 ## Production Deployment
 
 ### 1. Backend (Cloudflare Workers)
+
 Configured via `.github/workflows/deploy-backend.yml`. Add the following GitHub repository secrets:
+
 - `CLOUDFLARE_API_TOKEN`: Cloudflare API token with Workers permission.
 - `ONSHAPE_ACCESS_KEY`: Onshape Developer Portal Access Key.
 - `ONSHAPE_SECRET_KEY`: Onshape Developer Portal Secret Key.
 
 ### 2. Frontend (GitHub Pages)
+
 Configured via `.github/workflows/deploy-frontend.yml`:
+
 - Set repository secret `VITE_API_URL` to your production Cloudflare Worker URL (e.g. `https://3dmodels-backend.<subdomain>.workers.dev`).
 - Enable GitHub Pages in repository settings pointing to **GitHub Actions**.
 - Configures custom domain `3dmodels.vincentteo.com` with `CNAME` and SPA 404 redirect.
@@ -177,4 +190,5 @@ Configured via `.github/workflows/deploy-frontend.yml`:
 ---
 
 ## License
+
 MIT © [Vincent Teo](https://vincentteo.com/)

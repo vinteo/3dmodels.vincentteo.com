@@ -10,7 +10,10 @@ import {
   buildDefaultConfigurationString,
   ReplicadModelDefinition
 } from '../engines/replicad/types';
-import { defaultKumikoParameters, kumikoParameters } from '../engines/replicad/models/kumikoKeychain';
+import {
+  defaultKumikoParameters,
+  kumikoParameters
+} from '../engines/replicad/models/kumikoKeychain';
 import { mergeWithReplicadModels } from '../services/api';
 import { ModelConfig } from '../types/model';
 
@@ -62,9 +65,7 @@ describe('Replicad Model Registry & Parameter Management', () => {
         tags: ['Kumiko'],
         defaultConfiguration: '',
         parameters: [], // Empty in raw catalog JSON
-        links: [
-          { label: 'Printables', url: 'https://printables.com' }
-        ]
+        links: [{ label: 'Printables', url: 'https://printables.com' }]
       }
     ];
 

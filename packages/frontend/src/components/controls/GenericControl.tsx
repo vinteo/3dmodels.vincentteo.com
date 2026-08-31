@@ -38,9 +38,7 @@ export const QuantityControl: React.FC<GenericControlProps> = ({
         >
           {param.name}
           {!isEnabled && (
-            <span className="text-[10px] font-normal text-slate-500 italic">
-              (Disabled)
-            </span>
+            <span className="text-[10px] font-normal text-slate-500 italic">(Disabled)</span>
           )}
           {param.description && (
             <span title={param.description} className="text-slate-500 cursor-help">
@@ -78,8 +76,12 @@ export const QuantityControl: React.FC<GenericControlProps> = ({
       />
 
       <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-        <span>{min} {param.unit === 'millimeter' ? 'mm' : ''}</span>
-        <span>{max} {param.unit === 'millimeter' ? 'mm' : ''}</span>
+        <span>
+          {min} {param.unit === 'millimeter' ? 'mm' : ''}
+        </span>
+        <span>
+          {max} {param.unit === 'millimeter' ? 'mm' : ''}
+        </span>
       </div>
     </div>
   );
@@ -114,9 +116,7 @@ export const EnumControl: React.FC<GenericControlProps> = ({
           >
             {param.name}
             {!isEnabled && (
-              <span className="text-[10px] font-normal text-slate-500 italic">
-                (Disabled)
-              </span>
+              <span className="text-[10px] font-normal text-slate-500 italic">(Disabled)</span>
             )}
             {param.description && (
               <span title={param.description} className="text-slate-500 cursor-help">
@@ -169,9 +169,7 @@ export const EnumControl: React.FC<GenericControlProps> = ({
         >
           {param.name}
           {!isEnabled && (
-            <span className="text-[10px] font-normal text-slate-500 italic">
-              (Disabled)
-            </span>
+            <span className="text-[10px] font-normal text-slate-500 italic">(Disabled)</span>
           )}
           {param.description && (
             <span title={param.description} className="text-slate-500 cursor-help">
@@ -220,13 +218,9 @@ export const BooleanControl: React.FC<GenericControlProps> = ({
       }`}
     >
       <div className="pr-2">
-        <span className="block text-xs font-bold text-white">
-          {param.name}
-        </span>
+        <span className="block text-xs font-bold text-white">{param.name}</span>
         {param.description && (
-          <span className="block text-[11px] text-slate-400">
-            {param.description}
-          </span>
+          <span className="block text-[11px] text-slate-400">{param.description}</span>
         )}
       </div>
       <button
@@ -264,10 +258,7 @@ export const StringControl: React.FC<GenericControlProps> = ({
         !isEnabled ? 'opacity-40 pointer-events-none' : ''
       }`}
     >
-      <label
-        htmlFor={`param-${param.id}`}
-        className="block text-xs font-bold text-slate-200"
-      >
+      <label htmlFor={`param-${param.id}`} className="block text-xs font-bold text-slate-200">
         {param.name}
       </label>
       <input

@@ -80,4 +80,3 @@ export interface MultiPartPreview {
 }
 
 export type PreviewMeshData = ArrayBuffer | MultiPartPreview;
-

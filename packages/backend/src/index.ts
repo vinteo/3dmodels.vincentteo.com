@@ -9,12 +9,15 @@ import { OnshapeClient } from './onshape/client';
 const app = new Hono<{ Bindings: Env }>();
 
 // Enable CORS for all routes so frontend on GitHub Pages or localhost can connect freely
-app.use('*', cors({
-  origin: '*',
-  allowMethods: ['GET', 'POST', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  exposeHeaders: ['Content-Disposition', 'Content-Length', 'X-Mock-Mode']
-}));
+app.use(
+  '*',
+  cors({
+    origin: '*',
+    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposeHeaders: ['Content-Disposition', 'Content-Length', 'X-Mock-Mode']
+  })
+);
 
 // Health check and environment probe
 app.get('/api/health', (c) => {
@@ -40,10 +43,13 @@ app.notFound((c) => {
 // Global error handler
 app.onError((err, c) => {
   console.error('Unhandled worker error:', err);
-  return c.json({
-    success: false,
-    error: err.message || 'Internal Server Error'
-  }, 500);
+  return c.json(
+    {
+      success: false,
+      error: err.message || 'Internal Server Error'
+    },
+    500
+  );
 });
 
 export default app;
