@@ -1,6 +1,7 @@
 # 3D Models Customizer & Exporter (3dmodels.vincentteo.com)
 
 [![CI](https://github.com/vinteo/3dmodels.vincentteo.com/actions/workflows/ci.yml/badge.svg)](https://github.com/vinteo/3dmodels.vincentteo.com/actions/workflows/ci.yml)
+[![Super-Linter](https://github.com/vinteo/3dmodels.vincentteo.com/actions/workflows/super-linter.yml/badge.svg)](https://github.com/vinteo/3dmodels.vincentteo.com/actions/workflows/super-linter.yml)
 [![Frontend Deploy](https://github.com/vinteo/3dmodels.vincentteo.com/actions/workflows/deploy-frontend.yml/badge.svg)](https://github.com/vinteo/3dmodels.vincentteo.com/actions/workflows/deploy-frontend.yml)
 [![Backend Deploy](https://github.com/vinteo/3dmodels.vincentteo.com/actions/workflows/deploy-backend.yml/badge.svg)](https://github.com/vinteo/3dmodels.vincentteo.com/actions/workflows/deploy-backend.yml)
 
@@ -27,7 +28,7 @@ Designed and styled to seamlessly match the signature aesthetic of [vincentteo.c
 
 ## Project Structure
 
-```
+```text
 3dmodels.vincentteo.com/
 ├── .devcontainer/               # VS Code / Codespaces Dev Container
 │   └── devcontainer.json
@@ -90,11 +91,15 @@ Open this repository in **VS Code** with the **Dev Containers** extension instal
    ```
 
 3. Configure Environment Variables (Optional):
+
    - Copy `.env.example` to `.env`:
+
      ```bash
      cp .env.example .env
      ```
+
    - For local live Onshape connection, create `packages/backend/.dev.vars`:
+
      ```ini
      ONSHAPE_ACCESS_KEY=your_access_key
      ONSHAPE_SECRET_KEY=your_secret_key
@@ -103,9 +108,11 @@ Open this repository in **VS Code** with the **Dev Containers** extension instal
    _(If omitted, the app automatically runs in Mock Demo Mode with procedural 3D models)._
 
 4. Start the local development server:
+
    ```bash
    npm run dev
    ```
+
    - Frontend: `http://localhost:5173`
    - Cloudflare Worker: `http://localhost:8787`
 
