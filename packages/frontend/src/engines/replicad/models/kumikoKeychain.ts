@@ -45,27 +45,18 @@ export function getCentroid(
   p2: [number, number],
   p3: [number, number]
 ): [number, number] {
-  return [
-    (p1[0] + p2[0] + p3[0]) / 3,
-    (p1[1] + p2[1] + p3[1]) / 3
-  ];
+  return [(p1[0] + p2[0] + p3[0]) / 3, (p1[1] + p2[1] + p3[1]) / 3];
 }
 
 export function getMidpoint(p1: Point2D, p2: Point2D): Point2D {
-  return [
-    (p1[0] + p2[0]) / 2,
-    (p1[1] + p2[1]) / 2
-  ];
+  return [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2];
 }
 
 /**
  * Calculates the point located at a fractional distance (t) from p1 towards p2
  */
 export function getPointAtFraction(p1: Point2D, p2: Point2D, fraction: number): Point2D {
-  return [
-    p1[0] + (p2[0] - p1[0]) * fraction,
-    p1[1] + (p2[1] - p1[1]) * fraction
-  ];
+  return [p1[0] + (p2[0] - p1[0]) * fraction, p1[1] + (p2[1] - p1[1]) * fraction];
 }
 
 /**
@@ -97,10 +88,48 @@ export function rotatePoint2D(p: Point2D, center: Point2D, angleRad: number): Po
   const sinA = Math.sin(angleRad);
   const dx = p[0] - center[0];
   const dy = p[1] - center[1];
-  return [
-    center[0] + dx * cosA - dy * sinA,
-    center[1] + dx * sinA + dy * cosA
-  ];
+  return [center[0] + dx * cosA - dy * sinA, center[1] + dx * sinA + dy * cosA];
+}
+
+/**
+ * Calculates the 2D intersection point between two lines (p1 -> p2) and (p3 -> p4).
+ * @param p1 Start point of first line
+ * @param p2 End point of first line
+ * @param p3 Start point of second line
+ * @param p4 End point of second line
+ * @param segmentOnly If true, only returns intersection if it falls within both line segments
+ * @returns Intersection Point2D or null if lines are parallel or do not intersect
+ */
+export function getLineIntersection(
+  p1: Point2D,
+  p2: Point2D,
+  p3: Point2D,
+  p4: Point2D,
+  segmentOnly: boolean = false
+): Point2D | null {
+  const dx12 = p2[0] - p1[0];
+  const dy12 = p2[1] - p1[1];
+  const dx34 = p4[0] - p3[0];
+  const dy34 = p4[1] - p3[1];
+
+  const denom = dx12 * dy34 - dy12 * dx34;
+  if (Math.abs(denom) < 1e-9) {
+    return null; // Lines are parallel or collinear
+  }
+
+  const dx13 = p1[0] - p3[0];
+  const dy13 = p1[1] - p3[1];
+
+  const t = (dy13 * dx34 - dx13 * dy34) / denom;
+  const u = (dx12 * dy13 - dy12 * dx13) / denom;
+
+  if (segmentOnly) {
+    if (t < -1e-6 || t > 1 + 1e-6 || u < -1e-6 || u > 1 + 1e-6) {
+      return null;
+    }
+  }
+
+  return [p1[0] + t * dx12, p1[1] + t * dy12];
 }
 
 /**
@@ -140,11 +169,7 @@ export function createStrutDrawing(
   const p2b: [number, number] = [p2[0] + unx * o1, p2[1] + uny * o1];
   const p1b: [number, number] = [p1[0] + unx * o1, p1[1] + uny * o1];
 
-  return draw(p1a)
-    .lineTo(p2a)
-    .lineTo(p2b)
-    .lineTo(p1b)
-    .close();
+  return draw(p1a).lineTo(p2a).lineTo(p2b).lineTo(p1b).close();
 }
 
 /**
@@ -237,7 +262,9 @@ export const generateEmptyPattern: PatternGenerator = () => null;
 /**
  * 1. Classic Asa-no-ha (Hemp Leaf tripod lattice)
  */
-export const generateAsaNoHaPattern: PatternGenerator = (ctx: SectorGeometryContext): Drawing | null => {
+export const generateAsaNoHaPattern: PatternGenerator = (
+  ctx: SectorGeometryContext
+): Drawing | null => {
   const branch0 = createStrutDrawing(ctx.C_spoke, ctx.spokeCenter, ctx.designThick);
   const branch1 = createStrutDrawing(ctx.C_spoke, ctx.spoke1, ctx.designThick);
   const branch2 = createStrutDrawing(ctx.C_spoke, ctx.spoke2, ctx.designThick);
@@ -252,9 +279,16 @@ export const generateAsaNoHaPattern: PatternGenerator = (ctx: SectorGeometryCont
 /**
  * 2. Ryuso Asa-no-ha (Classic tripod + inward triangular frame)
  */
-export const generateRyusoAsaNoHaPattern: PatternGenerator = (ctx: SectorGeometryContext): Drawing | null => {
+export const generateRyusoAsaNoHaPattern: PatternGenerator = (
+  ctx: SectorGeometryContext
+): Drawing | null => {
   const tripod = generateAsaNoHaPattern(ctx);
-  const triFrame = createTriangleFrame(ctx.midInner1, ctx.midInner2, ctx.midInnerOuter, ctx.designThick);
+  const triFrame = createTriangleFrame(
+    ctx.midInner1,
+    ctx.midInner2,
+    ctx.midInnerOuter,
+    ctx.designThick
+  );
 
   if (tripod && triFrame) return (tripod as Drawing).fuse(triFrame);
   return (tripod as Drawing) || triFrame || null;
@@ -263,7 +297,9 @@ export const generateRyusoAsaNoHaPattern: PatternGenerator = (ctx: SectorGeometr
 /**
  * 3. Asa-no-ha Variant
  */
-export const generateAsaNoHaVariantPattern: PatternGenerator = (ctx: SectorGeometryContext): Drawing | null => {
+export const generateAsaNoHaVariantPattern: PatternGenerator = (
+  ctx: SectorGeometryContext
+): Drawing | null => {
   const center = getOneThirdPoint(ctx.C_spoke, ctx.midSpokeOuter);
   const branch0 = createStrutDrawing(center, ctx.spokeCenter, ctx.designThick);
   const branch1 = createStrutDrawing(center, ctx.spoke1, ctx.designThick);
@@ -279,13 +315,160 @@ export const generateAsaNoHaVariantPattern: PatternGenerator = (ctx: SectorGeome
 /**
  * 4. Rindo Asa-no-ha (Bellflower)
  */
-export const generateRindoAsaNoHaPattern: PatternGenerator = (ctx: SectorGeometryContext): Drawing | null => {
+export const generateRindoAsaNoHaPattern: PatternGenerator = (
+  ctx: SectorGeometryContext
+): Drawing | null => {
   const branch0 = createStrutDrawing(ctx.spokeCenter, ctx.midSpokeOuter, ctx.designThick);
-  const branch1 = createStrutDrawing(ctx.innerCenter, getMidpoint(ctx.spoke1, ctx.midSpokeOuter), ctx.designThick);
-  const branch2 = createStrutDrawing(ctx.innerCenter, getMidpoint(ctx.spoke2, ctx.midSpokeOuter), ctx.designThick);
+  const branch1 = createStrutDrawing(
+    ctx.innerCenter,
+    getMidpoint(ctx.spoke1, ctx.midSpokeOuter),
+    ctx.designThick
+  );
+  const branch2 = createStrutDrawing(
+    ctx.innerCenter,
+    getMidpoint(ctx.spoke2, ctx.midSpokeOuter),
+    ctx.designThick
+  );
 
   let drawing: Drawing | null = null;
   for (const strut of [branch0, branch1, branch2]) {
+    if (strut) drawing = drawing ? drawing.fuse(strut) : strut;
+  }
+  return drawing;
+};
+
+/**
+ * 5. Kasane Rindo
+ */
+export const generateKasaneRindoPattern: PatternGenerator = (
+  ctx: SectorGeometryContext
+): Drawing | null => {
+  const branch0 = createStrutDrawing(
+    ctx.spoke1,
+    getOneThirdPoint(ctx.spokeCenter, ctx.spoke2),
+    ctx.designThick
+  );
+  const branch1 = createStrutDrawing(
+    ctx.spoke2,
+    getOneThirdPoint(ctx.spokeCenter, ctx.spoke1),
+    ctx.designThick
+  );
+
+  let drawing: Drawing | null = null;
+  for (const strut of [branch0, branch1]) {
+    if (strut) drawing = drawing ? drawing.fuse(strut) : strut;
+  }
+  return drawing;
+};
+
+/**
+ * 6. Kasane Rindo Variant
+ */
+export const generateKasaneRindoVariantPattern: PatternGenerator = (
+  ctx: SectorGeometryContext
+): Drawing | null => {
+  const branch0 = createStrutDrawing(
+    ctx.spoke1,
+    getOneThirdPoint(ctx.spokeCenter, ctx.spoke2),
+    ctx.designThick
+  );
+  const branch1 = createStrutDrawing(
+    ctx.spoke2,
+    getOneThirdPoint(ctx.spokeCenter, ctx.spoke1),
+    ctx.designThick
+  );
+  const intersection = getLineIntersection(
+    ctx.spoke1,
+    getOneThirdPoint(ctx.spokeCenter, ctx.spoke2),
+    ctx.spoke2,
+    getOneThirdPoint(ctx.spokeCenter, ctx.spoke1)
+  );
+  if (!intersection) return null;
+
+  const midpoint = getMidpoint(intersection, ctx.midSpokeOuter);
+  const branch2 = createStrutDrawing(midpoint, intersection, ctx.designThick);
+  const branch3 = createStrutDrawing(midpoint, ctx.spoke1, ctx.designThick);
+  const branch4 = createStrutDrawing(midpoint, ctx.spoke2, ctx.designThick);
+
+  let drawing: Drawing | null = null;
+  for (const strut of [branch0, branch1, branch2, branch3, branch4]) {
+    if (strut) drawing = drawing ? drawing.fuse(strut) : strut;
+  }
+  return drawing;
+};
+
+/**
+ * 7. Tsumi-ishi Kikko
+ */
+export const generateTsumiIshiKikkoPattern: PatternGenerator = (
+  ctx: SectorGeometryContext
+): Drawing | null => {
+  const branch0 = createStrutDrawing(ctx.C_spoke, ctx.midSpoke1, ctx.designThick);
+  const branch1 = createStrutDrawing(ctx.C_spoke, ctx.midSpoke2, ctx.designThick);
+  const branch2 = createStrutDrawing(ctx.C_spoke, ctx.midSpokeOuter, ctx.designThick);
+
+  let drawing: Drawing | null = null;
+  for (const strut of [branch0, branch1, branch2]) {
+    if (strut) drawing = drawing ? drawing.fuse(strut) : strut;
+  }
+  return drawing;
+};
+
+/**
+ * 8. Bishamon Kikko
+ */
+export const generateBishamonKikkoPattern: PatternGenerator = (
+  ctx: SectorGeometryContext
+): Drawing | null => {
+  const branch0 = createStrutDrawing(
+    ctx.C_spoke,
+    getOneThirdPoint(ctx.spokeCenter, ctx.spoke1),
+    ctx.designThick
+  );
+  const branch1 = createStrutDrawing(
+    ctx.C_spoke,
+    getOneThirdPoint(ctx.spoke2, ctx.spokeCenter),
+    ctx.designThick
+  );
+  const branch2 = createStrutDrawing(
+    ctx.C_spoke,
+    getOneThirdPoint(ctx.spoke1, ctx.spoke2),
+    ctx.designThick
+  );
+
+  let drawing: Drawing | null = null;
+  for (const strut of [branch0, branch1, branch2]) {
+    if (strut) drawing = drawing ? drawing.fuse(strut) : strut;
+  }
+  return drawing;
+};
+
+/**
+ * 9. Goma-gara
+ */
+export const generateGomaGaraPattern: PatternGenerator = (
+  ctx: SectorGeometryContext
+): Drawing | null => {
+  const pCenter1_14 = getPointAtFraction(ctx.spokeCenter, ctx.spoke1, 1 / 4);
+  const pCenter1_34 = getPointAtFraction(ctx.spokeCenter, ctx.spoke1, 3 / 4);
+  const pCenter2_14 = getPointAtFraction(ctx.spokeCenter, ctx.spoke2, 1 / 4);
+  const pCenter2_34 = getPointAtFraction(ctx.spokeCenter, ctx.spoke2, 3 / 4);
+  const p12_14 = getPointAtFraction(ctx.spoke1, ctx.spoke2, 1 / 4);
+  const p12_34 = getPointAtFraction(ctx.spoke1, ctx.spoke2, 3 / 4);
+
+  const intersection = getLineIntersection(pCenter1_34, pCenter2_34, pCenter2_14, p12_14);
+
+  const branch0 = createStrutDrawing(pCenter1_14, p12_34, ctx.designThick);
+  const branch1 = createStrutDrawing(pCenter2_14, p12_14, ctx.designThick);
+  const branch2 = intersection
+    ? createStrutDrawing(pCenter1_34, intersection, ctx.designThick)
+    : null;
+  const branch3 = intersection
+    ? createStrutDrawing(pCenter2_34, intersection, ctx.designThick)
+    : null;
+
+  let drawing: Drawing | null = null;
+  for (const strut of [branch0, branch1, branch2, branch3]) {
     if (strut) drawing = drawing ? drawing.fuse(strut) : strut;
   }
   return drawing;
@@ -315,7 +498,7 @@ export const KUMIKO_PATTERNS: KumikoPatternDefinition[] = [
   },
   {
     id: '1',
-    name: 'Asa-no-ha (Hemp Leaf)',
+    name: 'Asa-no-ha',
     generator: generateAsaNoHaPattern,
     aliases: ['asa-no-ha'],
     description: 'Classic Asa-no-ha hemp leaf tripod lattice'
@@ -336,10 +519,45 @@ export const KUMIKO_PATTERNS: KumikoPatternDefinition[] = [
   },
   {
     id: '4',
-    name: 'Rindo Asa-no-ha (Bellflower)',
+    name: 'Rindo Asa-no-ha',
     generator: generateRindoAsaNoHaPattern,
     aliases: ['rindo-asa-no-ha'],
-    description: 'Bellflower motif with outer midpoint spokes'
+    description: 'Bellflower with outer midpoint spokes'
+  },
+  {
+    id: '5',
+    name: 'Kasane Rindo',
+    generator: generateKasaneRindoPattern,
+    aliases: ['kasane-rindo'],
+    description: 'Stacked bellflower with outer midpoint spokes'
+  },
+  {
+    id: '6',
+    name: 'Kasane Rindo Variant',
+    generator: generateKasaneRindoVariantPattern,
+    aliases: ['kasane-rindo-variant'],
+    description: 'Kasane Rindo with additional strut from intersection to outer midpoint'
+  },
+  {
+    id: '7',
+    name: 'Tsumi-ishi Kikko',
+    generator: generateTsumiIshiKikkoPattern,
+    aliases: ['tsumi-ishi-kikko'],
+    description: 'Tortoise shell pattern with outer midpoint struts'
+  },
+  {
+    id: '8',
+    name: 'Bishamon Kikko',
+    generator: generateBishamonKikkoPattern,
+    aliases: ['bishamon-kikko'],
+    description: 'Tortoise shell armour pattern with outer midpoint struts'
+  },
+  {
+    id: '9',
+    name: 'Goma-gara',
+    generator: generateGomaGaraPattern,
+    aliases: ['goma-gara'],
+    description: 'Sesame pattern'
   }
 ];
 
@@ -665,11 +883,13 @@ export const kumikoParameters: ParameterDefinition[] = [
     type: 'boolean',
     default: false,
     group: 'Assembly & Output',
-    description: 'Fuse all solid components into a single unified part at the end (uncheck to keep separate multi-color parts)'
+    description:
+      'Fuse all solid components into a single unified part at the end (uncheck to keep separate multi-color parts)'
   }
 ];
 
-export const defaultKumikoParameters: KumikoParameters = extractDefaultParameters<KumikoParameters>(kumikoParameters);
+export const defaultKumikoParameters: KumikoParameters =
+  extractDefaultParameters<KumikoParameters>(kumikoParameters);
 
 /**
  * Generates the 3D lattice/motif pattern solid for a 60° Kumiko wedge sector.
@@ -817,10 +1037,7 @@ export function buildKumikoKeychainParts(params: KumikoParameters): ReplicadPart
 
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI) / 3 + Math.PI / 6;
-    const vertex: [number, number] = [
-      rMidpoint * Math.cos(angle),
-      rMidpoint * Math.sin(angle)
-    ];
+    const vertex: [number, number] = [rMidpoint * Math.cos(angle), rMidpoint * Math.sin(angle)];
     spokeVertices.push(vertex);
 
     const spoke = createStrutDrawing([0, 0], vertex, tSpoke);
@@ -1024,7 +1241,8 @@ export function buildKumikoKeychain(params: KumikoParameters): AnyShape {
 export function calculateKumikoDimensions(params: KumikoParameters): ModelDimensionItem[] {
   const rOuter = params.hex_radius ?? 20;
   const h = params.height ?? 3;
-  const hasRing = params.include_keychain_ring !== false && String(params.include_keychain_ring) !== 'false';
+  const hasRing =
+    params.include_keychain_ring !== false && String(params.include_keychain_ring) !== 'false';
   const tRing = params.ring_thickness ?? 2;
   const ringInnerR = 3;
   const ringOuterR = ringInnerR + tRing;
@@ -1039,9 +1257,7 @@ export function calculateKumikoDimensions(params: KumikoParameters): ModelDimens
   const heightDepth = h;
 
   // 4. Full Length including Ring (from bottom hex vertex to top of ring loop)
-  const totalLength = hasRing
-    ? 2 * rOuter + 2 * ringOuterR - 1.5
-    : vertexToVertex;
+  const totalLength = hasRing ? 2 * rOuter + 2 * ringOuterR - 1.5 : vertexToVertex;
 
   return [
     {
@@ -1087,7 +1303,8 @@ export function calculateKumikoDimensions(params: KumikoParameters): ModelDimens
 export const kumikoKeychainModel: ReplicadModelDefinition<KumikoParameters> = {
   id: 'kumiko-keychain',
   name: 'Kumiko Keychain',
-  description: 'Customisable Simple Kumiko Inspired Keychain powered by Replicad & OpenCASCADE.js (zero API limits).',
+  description:
+    'Customisable Simple Kumiko Inspired Keychain powered by Replicad & OpenCASCADE.js (zero API limits).',
   tags: ['Kumiko', '3D Print', 'Keychain', 'Replicad', 'Instant CAD'],
   parameters: kumikoParameters,
   calculateDimensions: (params: KumikoParameters) => calculateKumikoDimensions(params),

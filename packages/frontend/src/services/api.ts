@@ -59,9 +59,13 @@ export function mergeWithReplicadModels(baseModels: ModelConfig[]): ModelConfig[
   return updatedModels;
 }
 
-export async function getModels(includeHidden = false): Promise<{ models: ModelConfig[]; mockMode: boolean }> {
+export async function getModels(
+  includeHidden = false
+): Promise<{ models: ModelConfig[]; mockMode: boolean }> {
   try {
-    const url = includeHidden ? `${API_BASE}/api/models?includeHidden=true` : `${API_BASE}/api/models`;
+    const url = includeHidden
+      ? `${API_BASE}/api/models?includeHidden=true`
+      : `${API_BASE}/api/models`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP error ${res.status}`);
     const data = (await res.json()) as ModelsApiResponse;

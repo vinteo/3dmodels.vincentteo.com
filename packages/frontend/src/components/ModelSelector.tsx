@@ -84,9 +84,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                         >
                           <Box className="w-4 h-4" />
                         </div>
-                        <span className="text-sm font-bold text-white">
-                          {m.name}
-                        </span>
+                        <span className="text-sm font-bold text-white">{m.name}</span>
                       </div>
 
                       <div className="flex items-center gap-1.5">
@@ -100,8 +98,14 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                           }`}
                           title="Copy direct permalink to this model"
                         >
-                          {copiedId === m.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Share2 className="w-3 h-3 text-violet-400" />}
-                          <span className="hidden sm:inline">{copiedId === m.id ? 'Copied' : 'Link'}</span>
+                          {copiedId === m.id ? (
+                            <Check className="w-3 h-3 text-emerald-400" />
+                          ) : (
+                            <Share2 className="w-3 h-3 text-violet-400" />
+                          )}
+                          <span className="hidden sm:inline">
+                            {copiedId === m.id ? 'Copied' : 'Link'}
+                          </span>
                         </button>
 
                         {isSelected && (
@@ -131,8 +135,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                               link.site === 'printables'
                                 ? 'bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/30'
                                 : link.site === 'qidimaker'
-                                ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/30'
-                                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                                  ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/30'
+                                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                             }`}
                             title={`Open on ${link.label}`}
                           >

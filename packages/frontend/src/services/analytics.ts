@@ -19,7 +19,9 @@ export function initGA(measurementId: string = GA_MEASUREMENT_ID): boolean {
   }
 
   // Prevent duplicate script injection
-  const existingScript = document.querySelector(`script[src*="googletagmanager.com/gtag/js?id=${measurementId}"]`);
+  const existingScript = document.querySelector(
+    `script[src*="googletagmanager.com/gtag/js?id=${measurementId}"]`
+  );
   if (!existingScript) {
     const script = document.createElement('script');
     script.async = true;

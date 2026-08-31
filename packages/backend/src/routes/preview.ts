@@ -111,7 +111,8 @@ previewRouter.post('/:id/preview', async (c) => {
       res = await client.getSTL(model, configuration, 'binary', 'millimeter');
     }
 
-    const contentType = res.headers.get('Content-Type') || (format === 'gltf' ? 'model/gltf-binary' : 'model/stl');
+    const contentType =
+      res.headers.get('Content-Type') || (format === 'gltf' ? 'model/gltf-binary' : 'model/stl');
     const arrayBuffer = await res.arrayBuffer();
 
     // Store in in-memory cache

@@ -9,12 +9,7 @@
     "workspaceId": "c6b29a76d27afd2301c0bb88",
     "elementId": "0d5d97d3dc742d1e76ff657d",
     "elementType": "partstudio",
-    "tags": [
-      "Kumiko",
-      "3D Print",
-      "Keychain",
-      "Onshape"
-    ],
+    "tags": ["Kumiko", "3D Print", "Keychain", "Onshape"],
     "defaultConfiguration": "include_keychain_ring=true;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter;hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=3+millimeter;section_1=1;section_2=1;section_3=1;section_4=1;section_5=1;section_6=1",
     "links": [
       {
@@ -454,13 +449,7 @@
     "name": "Kumiko Keychain",
     "description": "Customisable Simple Kumiko Inspired Keychain",
     "engine": "replicad",
-    "tags": [
-      "Kumiko",
-      "3D Print",
-      "Keychain",
-      "Replicad",
-      "Instant CAD"
-    ],
+    "tags": ["Kumiko", "3D Print", "Keychain", "Replicad", "Instant CAD"],
     "links": [
       {
         "label": "Printables",

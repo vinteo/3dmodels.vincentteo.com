@@ -34,25 +34,75 @@ export function generateMockSTL(model: ModelConfig, configStr: string): string {
   const z0 = 0;
   const z1 = height;
 
-  const triangles: Array<[[number, number, number], [number, number, number], [number, number, number]]> = [
+  const triangles: Array<
+    [[number, number, number], [number, number, number], [number, number, number]]
+  > = [
     // Bottom face (z0)
-    [[x0, y0, z0], [x1, y1, z0], [x1, y0, z0]],
-    [[x0, y0, z0], [x0, y1, z0], [x1, y1, z0]],
+    [
+      [x0, y0, z0],
+      [x1, y1, z0],
+      [x1, y0, z0]
+    ],
+    [
+      [x0, y0, z0],
+      [x0, y1, z0],
+      [x1, y1, z0]
+    ],
     // Top face (z1)
-    [[x0, y0, z1], [x1, y0, z1], [x1, y1, z1]],
-    [[x0, y0, z1], [x1, y1, z1], [x0, y1, z1]],
+    [
+      [x0, y0, z1],
+      [x1, y0, z1],
+      [x1, y1, z1]
+    ],
+    [
+      [x0, y0, z1],
+      [x1, y1, z1],
+      [x0, y1, z1]
+    ],
     // Front face (y0)
-    [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1]],
-    [[x0, y0, z0], [x1, y0, z1], [x0, y0, z1]],
+    [
+      [x0, y0, z0],
+      [x1, y0, z0],
+      [x1, y0, z1]
+    ],
+    [
+      [x0, y0, z0],
+      [x1, y0, z1],
+      [x0, y0, z1]
+    ],
     // Back face (y1)
-    [[x0, y1, z0], [x1, y1, z1], [x1, y1, z0]],
-    [[x0, y1, z0], [x0, y1, z1], [x1, y1, z1]],
+    [
+      [x0, y1, z0],
+      [x1, y1, z1],
+      [x1, y1, z0]
+    ],
+    [
+      [x0, y1, z0],
+      [x0, y1, z1],
+      [x1, y1, z1]
+    ],
     // Left face (x0)
-    [[x0, y0, z0], [x0, y0, z1], [x0, y1, z1]],
-    [[x0, y0, z0], [x0, y1, z1], [x0, y1, z0]],
+    [
+      [x0, y0, z0],
+      [x0, y0, z1],
+      [x0, y1, z1]
+    ],
+    [
+      [x0, y0, z0],
+      [x0, y1, z1],
+      [x0, y1, z0]
+    ],
     // Right face (x1)
-    [[x1, y0, z0], [x1, y1, z1], [x1, y0, z1]],
-    [[x1, y0, z0], [x1, y1, z0], [x1, y1, z1]]
+    [
+      [x1, y0, z0],
+      [x1, y1, z1],
+      [x1, y0, z1]
+    ],
+    [
+      [x1, y0, z0],
+      [x1, y1, z0],
+      [x1, y1, z1]
+    ]
   ];
 
   let stl = `solid ${model.id}\n`;

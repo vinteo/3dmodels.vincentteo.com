@@ -72,7 +72,8 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   const [computedBoundingDims, setComputedBoundingDims] = useState<ModelDimensionItem[]>([]);
 
   // Effective dimensions to show in HUD (prefers domain-calculated dimensions if provided, falls back to bounding box)
-  const effectiveDimensions = dimensions && dimensions.length > 0 ? dimensions : computedBoundingDims;
+  const effectiveDimensions =
+    dimensions && dimensions.length > 0 ? dimensions : computedBoundingDims;
 
   // Active parts in current model
   const activeParts = useMemo(() => {
@@ -448,9 +449,15 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   const handleToggleFullscreen = () => {
     if (!containerRef.current) return;
     if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+      containerRef.current
+        .requestFullscreen()
+        .then(() => setIsFullscreen(true))
+        .catch(() => {});
     } else {
-      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+      document
+        .exitFullscreen()
+        .then(() => setIsFullscreen(false))
+        .catch(() => {});
     }
   };
 
@@ -550,7 +557,11 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
             title={copiedShareLink ? 'Permalink Copied!' : 'Copy Model Permalink'}
             aria-label="Copy direct permalink"
           >
-            {copiedShareLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+            {copiedShareLink ? (
+              <Check className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <Share2 className="w-4 h-4" />
+            )}
           </button>
 
           <button
@@ -696,9 +707,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
               <RotateCcw className="w-3.5 h-3.5" />
               Reset to Defaults
             </button>
-            <span className="text-[10px] text-slate-500">
-              Live Real-Time Preview
-            </span>
+            <span className="text-[10px] text-slate-500">Live Real-Time Preview</span>
           </div>
         </div>
       )}
@@ -727,9 +736,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
           <span className="mt-4 text-sm font-bold text-white tracking-wide">
             Calculating Parametric Geometry...
           </span>
-          <span className="mt-1 text-xs text-slate-400">
-            Querying Onshape CAD engine
-          </span>
+          <span className="mt-1 text-xs text-slate-400">Querying Onshape CAD engine</span>
         </div>
       )}
 
@@ -740,9 +747,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
             <AlertCircle className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-white">Preview Generation Failed</h3>
-          <p className="mt-1 text-xs text-slate-400 max-w-sm leading-relaxed">
-            {error}
-          </p>
+          <p className="mt-1 text-xs text-slate-400 max-w-sm leading-relaxed">{error}</p>
           {onRefresh && (
             <button
               onClick={onRefresh}

@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import { ModelConfig, ExportOptions } from '../types/model';
 import { trackExport } from '../services/analytics';
-import {
-  X,
-  Download,
-  FileCode,
-  Box,
-  CheckCircle2,
-  AlertCircle
-} from 'lucide-react';
+import { X, Download, FileCode, Box, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -88,12 +81,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <Download className="w-4 h-4" />
             CAD Model Export
           </div>
-          <h3 className="text-xl font-extrabold text-white">
-            Export Customized Model
-          </h3>
-          <p className="text-xs text-slate-400">
-            {model.name} with your custom parameter settings
-          </p>
+          <h3 className="text-xl font-extrabold text-white">Export Customized Model</h3>
+          <p className="text-xs text-slate-400">{model.name} with your custom parameter settings</p>
         </div>
 
         {/* Format Selector Tabs */}
@@ -206,7 +195,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </div>
 
             <p className="text-[11px] text-slate-400 leading-relaxed pt-2 border-t border-slate-800">
-              Preserves exact solid geometry and B-rep boundaries. Ready for SolidWorks, Autodesk Fusion 360, FreeCAD, or CNC CAM toolpaths.
+              Preserves exact solid geometry and B-rep boundaries. Ready for SolidWorks, Autodesk
+              Fusion 360, FreeCAD, or CNC CAM toolpaths.
             </p>
           </div>
         )}
