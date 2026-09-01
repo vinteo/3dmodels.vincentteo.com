@@ -46,8 +46,8 @@ jobs:
 
       - name: Setup GitHub Pages SPA routing & CNAME
         run: |
-          cp packages/frontend/dist/index.html packages/frontend/dist/404.html
           echo "3dmodels.vincentteo.com" > packages/frontend/dist/CNAME
+          touch packages/frontend/dist/.nojekyll
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5

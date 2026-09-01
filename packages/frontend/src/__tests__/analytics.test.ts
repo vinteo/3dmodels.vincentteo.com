@@ -85,12 +85,14 @@ describe('Google Analytics 4 Service', () => {
     });
   });
 
-  it('should track model views with model_view event schema', () => {
+  it('should track model views with model_view and page_view schemas and update document.title', () => {
     initGA('G-TESTVIEW');
     const gtagSpy = vi.fn();
     window.gtag = gtagSpy;
 
     trackModelView('custom-enclosure', 'Parametric Enclosure', 'onshape');
+
+    expect(document.title).toBe('Parametric Enclosure | Vincent Teo 3D Models');
 
     expect(gtagSpy).toHaveBeenCalledWith('event', 'model_view', {
       model_id: 'custom-enclosure',
@@ -99,5 +101,13 @@ describe('Google Analytics 4 Service', () => {
       event_category: 'engagement',
       event_label: 'Parametric Enclosure'
     });
+
+    expect(gtagSpy).toHaveBeenCalledWith(
+      'event',
+      'page_view',
+      expect.objectContaining({
+        page_title: 'Parametric Enclosure | Vincent Teo 3D Models'
+      })
+    );
   });
 });

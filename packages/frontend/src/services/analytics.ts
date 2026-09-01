@@ -96,14 +96,39 @@ export function trackExport({
 }
 
 /**
+ * Tracks SPA virtual page views in Google Analytics 4.
+ */
+export function trackPageView(pageTitle?: string, pageLocation?: string): void {
+  if (typeof window === 'undefined') return;
+
+  const title = pageTitle || document.title;
+  const location = pageLocation || window.location.href;
+  const path = window.location.pathname + window.location.search;
+
+  trackEvent('page_view', {
+    page_title: title,
+    page_location: location,
+    page_path: path
+  });
+}
+
+/**
  * Tracks when a user selects or views a 3D model.
+ * Automatically synchronizes document.title and triggers SPA virtual pageviews.
  */
 export function trackModelView(modelId: string, modelName: string, engine?: string): void {
+  const title = `${modelName} | Vincent Teo 3D Models`;
+  if (typeof document !== 'undefined') {
+    document.title = title;
+  }
+
   trackEvent('model_view', {
     model_id: modelId,
     model_name: modelName,
-    cad_engine: engine || 'onshape',
+    cad_engine: engine || 'replicad',
     event_category: 'engagement',
     event_label: modelName
   });
+
+  trackPageView(title, typeof window !== 'undefined' ? window.location.href : undefined);
 }
