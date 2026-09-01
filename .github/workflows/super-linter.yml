@@ -33,6 +33,7 @@ jobs:
           JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.json
           TYPESCRIPT_ES_CONFIG_FILE: .eslintrc.json
           MARKDOWN_CONFIG_FILE: .markdownlint.json
+          HTML_CONFIG_FILE: .htmlhintrc
           # Linters enabled for this project
           VALIDATE_JAVASCRIPT_ES: true
           VALIDATE_TYPESCRIPT_ES: true
