@@ -10,6 +10,7 @@ export default defineConfig({
     exclude: ['replicad-opencascadejs']
   },
   base: process.env.VITE_BASE_URL || '/',
+  envDir: '../../',
   server: {
     port: 5173,
     proxy: {
