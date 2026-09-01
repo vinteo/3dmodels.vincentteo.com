@@ -1,5 +1,5 @@
-import { ExportOptions, ModelConfig, ModelsApiResponse, PreviewMeshData } from '../types/model';
-import fallbackModels from '../../../../config/models.config.json';
+import { ExportOptions, ModelConfig, PreviewMeshData } from '../types/model';
+import modelsCatalog from '../../../../config/models.config.json';
 import {
   generateReplicadPreviewMesh,
   exportReplicadFile,
@@ -59,29 +59,18 @@ export function mergeWithReplicadModels(baseModels: ModelConfig[]): ModelConfig[
   return updatedModels;
 }
 
+/**
+ * Retrieves the available 3D models catalog directly from local configuration
+ * and registered Replicad models without requiring an active backend connection.
+ */
 export async function getModels(
   includeHidden = false
 ): Promise<{ models: ModelConfig[]; mockMode: boolean }> {
-  try {
-    const url = includeHidden
-      ? `${API_BASE}/api/models?includeHidden=true`
-      : `${API_BASE}/api/models`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    const data = (await res.json()) as ModelsApiResponse;
-    const merged = mergeWithReplicadModels(data.data);
-    return {
-      models: includeHidden ? merged : merged.filter((m) => !m.hidden),
-      mockMode: data.mockMode
-    };
-  } catch (err) {
-    console.warn('Backend API unreachable, using fallback configuration catalog:', err);
-    const all = mergeWithReplicadModels(fallbackModels as ModelConfig[]);
-    return {
-      models: includeHidden ? all : all.filter((m) => !m.hidden),
-      mockMode: true
-    };
-  }
+  const all = mergeWithReplicadModels(modelsCatalog as ModelConfig[]);
+  return {
+    models: includeHidden ? all : all.filter((m) => !m.hidden),
+    mockMode: false
+  };
 }
 
 export async function fetchModelPreviewMesh(
