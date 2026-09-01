@@ -134,33 +134,19 @@ describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {
       [18 * Math.cos(Math.PI / 2), 18 * Math.sin(Math.PI / 2)]
     ];
 
-    // Test Asa-no-ha (Pattern 1) under 0, 120, 240
-    for (const rot of ['0', '120', '240']) {
-      const solid = createSectorPattern('1', spokeTriangle, innerTriangle, 1.0, 2.0, rot);
-      expect(solid).not.toBeNull();
-    }
+    // Test all registered non-empty patterns under 0, 120, 240 rotations
+    for (const pattern of KUMIKO_PATTERNS) {
+      if (pattern.id === '0') {
+        const emptySolid = createSectorPattern('0', spokeTriangle, innerTriangle, 1.0, 2.0, 0);
+        expect(emptySolid).toBeNull();
+        continue;
+      }
 
-    // Test Ryuso Asa-no-ha (Pattern 2) under 0, 120, 240
-    for (const rot of ['0', '120', '240']) {
-      const solid = createSectorPattern('2', spokeTriangle, innerTriangle, 1.0, 2.0, rot);
-      expect(solid).not.toBeNull();
+      for (const rot of ['0', '120', '240']) {
+        const solid = createSectorPattern(pattern.id, spokeTriangle, innerTriangle, 1.0, 2.0, rot);
+        expect(solid).not.toBeNull();
+      }
     }
-
-    // Test Asa-no-ha Variant (Pattern 3) under 0, 120, 240
-    for (const rot of ['0', '120', '240']) {
-      const solid = createSectorPattern('3', spokeTriangle, innerTriangle, 1.0, 2.0, rot);
-      expect(solid).not.toBeNull();
-    }
-
-    // Test Rindo Asa-no-ha (Pattern 4) under 0, 120, 240
-    for (const rot of ['0', '120', '240']) {
-      const solid = createSectorPattern('4', spokeTriangle, innerTriangle, 1.0, 2.0, rot);
-      expect(solid).not.toBeNull();
-    }
-
-    // Pattern 0 (Empty) returns null
-    const emptySolid = createSectorPattern('0', spokeTriangle, innerTriangle, 1.0, 2.0, 0);
-    expect(emptySolid).toBeNull();
   });
 
   it('builds complete watertight Kumiko Keychain assembly with distinct rotated sections', () => {
@@ -256,30 +242,8 @@ describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {
 
     const patternOptions = getKumikoPatternOptions();
     expect(patternOptions).toEqual(KUMIKO_PATTERN_OPTIONS);
-    expect(patternOptions.map((o) => o.value)).toEqual([
-      '0',
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9'
-    ]);
-    expect(patternOptions.map((o) => o.label)).toEqual([
-      'Empty',
-      'Asa-no-ha',
-      'Ryuso Asa-no-ha',
-      'Asa-no-ha Variant',
-      'Rindo Asa-no-ha',
-      'Kasane Rindo',
-      'Kasane Rindo Variant',
-      'Tsumi-ishi Kikko',
-      'Bishamon Kikko',
-      'Goma-gara'
-    ]);
+    expect(patternOptions.map((o) => o.value)).toEqual(KUMIKO_PATTERNS.map((p) => p.id));
+    expect(patternOptions.map((o) => o.label)).toEqual(KUMIKO_PATTERNS.map((p) => p.name));
 
     // Check that section parameters (1 to 6) all use the registry options
     for (let s = 1; s <= 6; s++) {
