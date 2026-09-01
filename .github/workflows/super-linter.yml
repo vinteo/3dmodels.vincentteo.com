@@ -31,6 +31,8 @@ jobs:
           # Linters enabled for this project
           VALIDATE_JAVASCRIPT_ES: true
           VALIDATE_TYPESCRIPT_ES: true
+          JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.json
+          TYPESCRIPT_ES_CONFIG_FILE: .eslintrc.json
           VALIDATE_JAVASCRIPT_PRETTIER: true
           VALIDATE_TYPESCRIPT_PRETTIER: true
           VALIDATE_JSON: true
