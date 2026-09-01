@@ -32,8 +32,10 @@ export function initGA(measurementId: string = GA_MEASUREMENT_ID): boolean {
   // Initialize dataLayer and gtag function
   window.dataLayer = window.dataLayer || [];
   if (!window.gtag) {
-    window.gtag = function (...args: unknown[]) {
-      window.dataLayer?.push(args);
+    // Official Google Analytics gtag() command queue requires Arguments object in dataLayer
+    window.gtag = function () {
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer?.push(arguments);
     };
   }
 

@@ -19,7 +19,7 @@ describe('Google Analytics 4 Service', () => {
     expect(document.querySelector('script[src*="googletagmanager.com"]')).toBeNull();
   });
 
-  it('should inject gtag.js script and initialize dataLayer with valid measurement ID', () => {
+  it('should inject gtag.js script and initialize dataLayer with valid measurement ID using Arguments objects', () => {
     const testId = 'G-TEST123456';
     const initialized = initGA(testId);
 
@@ -33,6 +33,12 @@ describe('Google Analytics 4 Service', () => {
 
     expect(window.dataLayer).toBeDefined();
     expect(typeof window.gtag).toBe('function');
+
+    // Verify that dataLayer contains arguments objects, not plain arrays
+    expect(window.dataLayer?.length).toBeGreaterThanOrEqual(2);
+    const firstItem = window.dataLayer?.[0];
+    // In JavaScript, arguments object has callee property and [object Arguments] toString tag
+    expect(Object.prototype.toString.call(firstItem)).toBe('[object Arguments]');
   });
 
   it('should not inject duplicate scripts when initGA is called multiple times', () => {
