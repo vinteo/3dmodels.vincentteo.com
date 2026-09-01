@@ -28,6 +28,22 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://vincentteo.com/assets/images/favicon.png" />
+
+    <!-- GitHub Pages Single Page App Route Restoration (spa-github-pages) -->
+    <script type="text/javascript">
+      (function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search
+            .slice(1)
+            .split('&')
+            .map(function (s) {
+              return s.replace(/~and~/g, '&');
+            })
+            .join('?');
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+    </script>
   </head>
   <body
     class="bg-[#120e25] text-slate-200 antialiased selection:bg-violet-500 selection:text-white flex flex-col min-h-screen"
