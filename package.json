@@ -27,9 +27,9 @@
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.68.0",
     "concurrently": "^10.0.5",
-    "eslint": "^8.57.1",
+    "eslint": "^10.9.1",
     "prettier": "^3.9.6",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   },
   "prettier": {
     "printWidth": 100,
