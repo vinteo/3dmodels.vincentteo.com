@@ -1,18 +1,20 @@
 import React from 'react';
-import { Box, Sparkles, Layers } from 'lucide-react';
+import { Box, Sparkles, Layers, Bot } from 'lucide-react';
 
 interface HeaderProps {
   mockMode?: boolean;
   onOpenModelDrawer: () => void;
   activeModelName: string;
   activeModelEngine?: string;
+  onOpenAiDisclosure?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   mockMode,
   onOpenModelDrawer,
   activeModelName,
-  activeModelEngine
+  activeModelEngine,
+  onOpenAiDisclosure
 }) => {
   // Only show Demo Mode badge if in mock mode and the active model uses the Onshape cloud engine
   const showDemoBadge = Boolean(mockMode && activeModelEngine === 'onshape');
@@ -52,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
         </a>
       </div>
 
-      {/* Right: Active Model Badge & Mock Status */}
+      {/* Right: Active Model Badge & Mock Status & AI Disclosure */}
       <div className="flex items-center space-x-2">
         <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-semibold text-slate-300">
           <Box className="w-3.5 h-3.5 text-violet-400" />
@@ -68,6 +70,17 @@ export const Header: React.FC<HeaderProps> = ({
             Demo Mode
           </span>
         )}
+
+        {/* AI Disclosure Pill */}
+        <button
+          type="button"
+          onClick={onOpenAiDisclosure}
+          title="AI Disclosure"
+          className="playful-btn inline-flex items-center gap-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700/80 px-2.5 py-1 text-[11px] font-bold text-slate-300 hover:text-white border border-slate-700/80 hover:border-slate-600 transition-all cursor-pointer shadow-sm"
+        >
+          <Bot className="w-3.5 h-3.5 text-cyan-400" />
+          <span>AI Disclosure</span>
+        </button>
       </div>
     </header>
   );
