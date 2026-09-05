@@ -37,12 +37,16 @@ describe('AI Disclosure Feature', () => {
 
       // Customiser and framework AI assistance
       expect(
-        screen.getByText(/This interactive customiser web application and its supporting frontend framework were created with AI assistance/i)
+        screen.getByText(
+          /This interactive customiser web application and its supporting frontend framework were created with AI assistance/i
+        )
       ).toBeInTheDocument();
 
       // Model generation code manually written
       expect(
-        screen.getByText(/All 3D model generation code, parametric geometry definitions, and CAD algorithms are manually written/i)
+        screen.getByText(
+          /All 3D model generation code, parametric geometry definitions, and CAD algorithms are manually written/i
+        )
       ).toBeInTheDocument();
     });
 

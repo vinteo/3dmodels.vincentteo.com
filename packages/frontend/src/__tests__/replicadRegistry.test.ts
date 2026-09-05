@@ -73,7 +73,7 @@ describe('Replicad Model Registry & Parameter Management', () => {
     expect(merged.length).toBe(1);
     expect(merged[0].parameters.length).toBe(kumikoParameters.length);
     expect(merged[0].parameters.find((p) => p.id === 'hex_radius')?.default).toBe(20);
-    expect(merged[0].links?.length).toBe(1);
+    expect(merged[0].links?.length).toBe(3);
     expect(merged[0].defaultConfiguration).toContain('hex_radius=20+millimeter');
   });
 

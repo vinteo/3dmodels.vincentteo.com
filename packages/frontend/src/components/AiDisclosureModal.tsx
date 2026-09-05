@@ -63,8 +63,8 @@ export const AiDisclosureModal: React.FC<AiDisclosureModalProps> = ({ isOpen, on
               <span>Customiser & Framework</span>
             </div>
             <p className="text-slate-300">
-              This interactive customiser web application and its supporting frontend framework
-              were created with AI assistance.
+              This interactive customiser web application and its supporting frontend framework were
+              created with AI assistance.
             </p>
           </div>
 
@@ -74,8 +74,8 @@ export const AiDisclosureModal: React.FC<AiDisclosureModalProps> = ({ isOpen, on
               <span>3D Model Generation</span>
             </div>
             <p className="text-slate-300">
-              All 3D model generation code, parametric geometry definitions, and CAD algorithms
-              are manually written.
+              All 3D model generation code, parametric geometry definitions, and CAD algorithms are
+              manually written.
             </p>
           </div>
         </div>

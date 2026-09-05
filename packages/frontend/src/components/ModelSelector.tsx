@@ -86,6 +86,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-label="Model Catalog"
         className="w-full max-w-md bg-[#120e25]/95 h-full border-r border-slate-800 shadow-2xl flex flex-col justify-between"
         onClick={(e) => e.stopPropagation()}
       >
@@ -259,7 +261,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             const isSelected = m.id === selectedModelId;
 
             return (
-              <button
+              <div
                 key={m.id}
                 onClick={() => {
                   onSelectModel(m.id);
@@ -331,11 +333,13 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border ${
-                            link.site === 'printables'
-                              ? 'bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/30'
-                              : link.site === 'qidimaker'
-                                ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/30'
-                                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                            link.site === 'blog'
+                              ? 'bg-purple-500/15 text-purple-300 border-purple-500/30 hover:bg-purple-500/30'
+                              : link.site === 'printables'
+                                ? 'bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/30'
+                                : link.site === 'qidimaker'
+                                  ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/30'
+                                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                           }`}
                           title={`Open on ${link.label}`}
                         >
@@ -358,7 +362,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                     </span>
                   ))}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
