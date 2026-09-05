@@ -35,7 +35,9 @@ export interface ModelConfig {
   id: string;
   name: string;
   description: string;
-  engine?: 'onshape' | 'replicad';
+  project?: string;
+  partName?: string;
+  engine?: 'onshape' | 'replicad' | 'openscad';
   hidden?: boolean;
   documentId?: string;
   workspaceId?: string;
@@ -63,7 +65,7 @@ export interface ModelDetailApiResponse {
 }
 
 export interface ExportOptions {
-  format: 'stl' | 'step';
+  format: 'stl' | 'step' | 'scad';
   units?: 'millimeter' | 'inch';
   stlMode?: 'binary' | 'ascii';
   stepVersion?: 'AP203' | 'AP214' | 'AP242';

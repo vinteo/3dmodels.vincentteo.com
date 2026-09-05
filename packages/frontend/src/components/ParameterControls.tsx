@@ -12,16 +12,20 @@ import {
   ChevronRight,
   Share2,
   Layers,
-  ExternalLink
+  ExternalLink,
+  FolderKanban,
+  Box
 } from 'lucide-react';
 
 interface ParameterControlsProps {
   model: ModelConfig;
+  models?: ModelConfig[];
   currentValues: Record<string, number | string | boolean>;
   onChangeValues: (newValues: Record<string, number | string | boolean>) => void;
   onApply: () => void;
   onOpenExport: () => void;
   onOpenModelDrawer: () => void;
+  onSelectModel?: (modelId: string) => void;
   isDirty: boolean;
   loading: boolean;
   collapsed?: boolean;
@@ -30,11 +34,13 @@ interface ParameterControlsProps {
 
 export const ParameterControls: React.FC<ParameterControlsProps> = ({
   model,
+  models = [],
   currentValues,
   onChangeValues,
   onApply,
   onOpenExport,
   onOpenModelDrawer,
+  onSelectModel,
   isDirty,
   loading,
   collapsed = false,
@@ -42,6 +48,12 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
 }) => {
   const [autoUpdate, setAutoUpdate] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Sibling models belonging to the same project
+  const projectSiblings = useMemo(() => {
+    if (!model.project) return [];
+    return models.filter((m) => !m.hidden && m.project === model.project);
+  }, [models, model.project]);
 
   const handleCopyPermalink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -113,7 +125,9 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
         <button
           onClick={onOpenExport}
           className="p-2 rounded-xl text-fuchsia-400 hover:bg-slate-800 transition-colors cursor-pointer"
-          title="Export CAD Files"
+          title={
+            model.engine === 'openscad' ? 'Export STL / SCAD Files' : 'Export STL / STEP Files'
+          }
         >
           <Download className="w-5 h-5" />
         </button>
@@ -156,40 +170,91 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
         </div>
 
         {/* Model switcher banner in sidebar */}
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
-          <div className="truncate pr-2">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
-              Active Model
-            </span>
-            <span className="text-xs font-bold text-white truncate block">{model.name}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={handleCopyPermalink}
-              className={`flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
-                copiedLink
-                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
-                  : 'text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border-slate-700/80'
-              }`}
-              title="Copy direct permalink URL with current parameters"
-            >
-              {copiedLink ? (
-                <Check className="w-3 h-3 text-emerald-400" />
+        <div className="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="truncate pr-1">
+              {model.project ? (
+                <div className="flex items-center gap-1.5 text-[10px] text-indigo-400 font-bold uppercase tracking-wider mb-0.5">
+                  <FolderKanban className="w-3 h-3 text-indigo-400 shrink-0" />
+                  <span className="truncate">{model.project}</span>
+                </div>
               ) : (
-                <Share2 className="w-3 h-3 text-violet-400" />
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-0.5">
+                  Active Model
+                </span>
               )}
-              <span>{copiedLink ? 'Copied!' : 'Share'}</span>
-            </button>
+              <span className="text-xs font-bold text-white truncate block">{model.name}</span>
+            </div>
 
-            <button
-              onClick={onOpenModelDrawer}
-              className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-fuchsia-400 hover:text-fuchsia-300 px-2 py-1 rounded-lg bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/30 transition-all cursor-pointer"
-            >
-              <Layers className="w-3 h-3" />
-              Change
-            </button>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={handleCopyPermalink}
+                className={`flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                  copiedLink
+                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                    : 'text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border-slate-700/80'
+                }`}
+                title="Copy direct permalink URL with current parameters"
+              >
+                {copiedLink ? (
+                  <Check className="w-3 h-3 text-emerald-400" />
+                ) : (
+                  <Share2 className="w-3 h-3 text-violet-400" />
+                )}
+                <span>{copiedLink ? 'Copied!' : 'Share'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onOpenModelDrawer}
+                className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-fuchsia-400 hover:text-fuchsia-300 px-2 py-1 rounded-lg bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/30 transition-all cursor-pointer"
+                title="Browse full model catalog"
+              >
+                <Layers className="w-3 h-3" />
+                Change
+              </button>
+            </div>
           </div>
+
+          {/* Project Part Switcher Tabs (when part of a multi-model project) */}
+          {projectSiblings.length > 1 && (
+            <div className="pt-2 border-t border-slate-800/80">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                Switch Part:
+              </span>
+              <div
+                className={`grid gap-1.5 p-1 bg-slate-950/80 border border-slate-800/80 rounded-xl ${
+                  projectSiblings.length >= 3 ? 'grid-cols-3' : 'grid-cols-2'
+                }`}
+              >
+                {projectSiblings.map((pm) => {
+                  const isCurrent = pm.id === model.id;
+                  const partLabel =
+                    pm.partName || pm.name.replace(model.project || '', '').trim() || pm.name;
+
+                  return (
+                    <button
+                      key={pm.id}
+                      type="button"
+                      onClick={() => onSelectModel?.(pm.id)}
+                      className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer truncate ${
+                        isCurrent
+                          ? 'bg-fuchsia-500 text-white shadow-md shadow-fuchsia-500/25 ring-1 ring-fuchsia-400'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      }`}
+                      title={`Switch to ${pm.name}`}
+                    >
+                      <Box
+                        className={`w-3.5 h-3.5 shrink-0 ${isCurrent ? 'text-white' : 'text-slate-500'}`}
+                      />
+                      <span className="truncate">{partLabel}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Community & Original Model Links */}
@@ -248,7 +313,12 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                     param={param}
                     value={currentValues[param.id] ?? param.default}
                     isEnabled={
-                      param.dependsOn ? Boolean(currentValues[param.dependsOn] ?? true) : true
+                      param.dependsOn
+                        ? param.dependsOn.includes('=')
+                          ? String(currentValues[param.dependsOn.split('=')[0]] ?? '') ===
+                            param.dependsOn.split('=')[1]
+                          : Boolean(currentValues[param.dependsOn] ?? true)
+                        : true
                     }
                     onChange={(newVal) => handleChange(param.id, newVal)}
                   />
@@ -318,7 +388,7 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
           className="w-full playful-btn flex items-center justify-center gap-2 rounded-2xl py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-700/80 border border-slate-700 shadow-md transition-all cursor-pointer"
         >
           <Download className="w-3.5 h-3.5 text-violet-400" />
-          Export STL / STEP Files
+          {model.engine === 'openscad' ? 'Export STL / SCAD Files' : 'Export STL / STEP Files'}
         </button>
       </div>
     </aside>

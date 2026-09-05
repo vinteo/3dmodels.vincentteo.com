@@ -463,5 +463,71 @@
       }
     ],
     "parameters": []
+  },
+  {
+    "id": "opengrid-display-case-shell",
+    "name": "OpenGrid Display Case Shell",
+    "project": "OpenGrid Display Case",
+    "partName": "Case",
+    "description": "Customisable OpenGrid Display Case Shell with corner connector cutoffs",
+    "engine": "openscad",
+    "tags": ["OpenGrid", "Display Case", "Storage", "OpenSCAD", "Parametric", "3D Print"],
+    "links": [
+      {
+        "label": "Printables",
+        "url": "https://www.printables.com/model/1803030-enclosed-display-caseframe-with-opengrid-mounts",
+        "site": "printables"
+      },
+      {
+        "label": "QIDI Maker",
+        "url": "https://www.qidimaker.com/en/models/detail/2089852363063504898?profile_id=2089864128757313537",
+        "site": "qidimaker"
+      }
+    ],
+    "parameters": []
+  },
+  {
+    "id": "opengrid-display-case-cover",
+    "name": "OpenGrid Display Case Cover",
+    "project": "OpenGrid Display Case",
+    "partName": "Cover",
+    "description": "Customisable OpenGrid Display Case Cover with acrylic sheet insert and corner connectors",
+    "engine": "openscad",
+    "tags": ["OpenGrid", "Display Case", "Cover", "OpenSCAD", "Parametric", "3D Print"],
+    "links": [
+      {
+        "label": "Printables",
+        "url": "https://www.printables.com/model/1803030-enclosed-display-caseframe-with-opengrid-mounts",
+        "site": "printables"
+      },
+      {
+        "label": "QIDI Maker",
+        "url": "https://www.qidimaker.com/en/models/detail/2089852363063504898?profile_id=2089864128757313537",
+        "site": "qidimaker"
+      }
+    ],
+    "parameters": []
+  },
+  {
+    "id": "opengrid-display-case-connector",
+    "name": "OpenGrid Display Case Connector",
+    "project": "OpenGrid Display Case",
+    "partName": "Connector",
+    "description": "Connector with optional OpenGrid snap base and individual arm depth controls",
+    "engine": "openscad",
+    "tags": ["OpenGrid", "Display Case", "Connector", "OpenSCAD", "Parametric", "3D Print"],
+    "links": [
+      {
+        "label": "Printables",
+        "url": "https://www.printables.com/model/1803030-enclosed-display-caseframe-with-opengrid-mounts",
+        "site": "printables"
+      },
+      {
+        "label": "QIDI Maker",
+        "url": "https://www.qidimaker.com/en/models/detail/2089852363063504898?profile_id=2089864128757313537",
+        "site": "qidimaker"
+      }
+    ],
+    "parameters": []
   }
 ]

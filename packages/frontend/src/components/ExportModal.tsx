@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ModelConfig, ExportOptions } from '../types/model';
 import { trackExport } from '../services/analytics';
 import { X, Download, FileCode, Box, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -18,13 +18,20 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   currentValues,
   onTriggerExport
 }) => {
-  const [format, setFormat] = useState<'stl' | 'step'>('stl');
-  const [units, setUnits] = useState<'millimeter' | 'inch'>('millimeter');
+  const isOpenscad = model.engine === 'openscad';
+  const [format, setFormat] = useState<'stl' | 'step' | 'scad'>('stl');
+  const units = 'millimeter';
   const [stlMode, setStlMode] = useState<'binary' | 'ascii'>('binary');
   const [stepVersion, setStepVersion] = useState<'AP203' | 'AP214' | 'AP242'>('AP242');
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (isOpenscad && format === 'step') {
+      setFormat('stl');
+    }
+  }, [isOpenscad, format]);
 
   if (!isOpen) return null;
 
@@ -100,81 +107,80 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             STL (3D Printing)
           </button>
 
-          <button
-            type="button"
-            onClick={() => setFormat('step')}
-            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              format === 'step'
-                ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <FileCode className="w-4 h-4" />
-            STEP (CAD / CNC)
-          </button>
+          {isOpenscad ? (
+            <button
+              type="button"
+              onClick={() => setFormat('scad')}
+              className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                format === 'scad'
+                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <FileCode className="w-4 h-4" />
+              SCAD (Source Code)
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setFormat('step')}
+              className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                format === 'step'
+                  ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <FileCode className="w-4 h-4" />
+              STEP (CAD / CNC)
+            </button>
+          )}
         </div>
 
         {/* Format Specific Options */}
         {format === 'stl' && (
           <div className="space-y-4 rounded-2xl bg-slate-900/50 border border-slate-800/80 p-4">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-300">File Encoding</span>
-              <div className="flex gap-2">
+              <span className="font-semibold text-slate-300">STL Encoding</span>
+              <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
                 <button
                   type="button"
                   onClick={() => setStlMode('binary')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+                  className={`px-3 py-1 rounded text-xs font-bold transition-colors cursor-pointer ${
                     stlMode === 'binary'
-                      ? 'bg-slate-800 text-fuchsia-300 border border-fuchsia-500/40'
-                      : 'text-slate-500 hover:text-slate-300'
+                      ? 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  Binary (Recommended)
+                  Binary (Compact)
                 </button>
                 <button
                   type="button"
                   onClick={() => setStlMode('ascii')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+                  className={`px-3 py-1 rounded text-xs font-bold transition-colors cursor-pointer ${
                     stlMode === 'ascii'
-                      ? 'bg-slate-800 text-fuchsia-300 border border-fuchsia-500/40'
-                      : 'text-slate-500 hover:text-slate-300'
+                      ? 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  ASCII Text
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-300">Target Units</span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setUnits('millimeter')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
-                    units === 'millimeter'
-                      ? 'bg-slate-800 text-fuchsia-300 border border-fuchsia-500/40'
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  Millimeters (mm)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setUnits('inch')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
-                    units === 'inch'
-                      ? 'bg-slate-800 text-fuchsia-300 border border-fuchsia-500/40'
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  Inches
+                  ASCII (Text)
                 </button>
               </div>
             </div>
 
             <p className="text-[11px] text-slate-400 leading-relaxed pt-2 border-t border-slate-800">
               Compatible with slicers including Bambu Studio, PrusaSlicer, Cura, and OrcaSlicer.
+            </p>
+          </div>
+        )}
+
+        {format === 'scad' && (
+          <div className="space-y-4 rounded-2xl bg-slate-900/50 border border-slate-800/80 p-4">
+            <p className="text-[12px] text-slate-300 leading-relaxed">
+              Download the customized OpenSCAD script with your modified parameter values
+              pre-configured.
+            </p>
+            <p className="text-[11px] text-emerald-400 leading-relaxed pt-2 border-t border-slate-800">
+              Ready to view and edit in the native OpenSCAD desktop app.
             </p>
           </div>
         )}
@@ -237,7 +243,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           {exporting ? (
             <span className="flex items-center gap-2">
               <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-              Generating {format.toUpperCase()} CAD File...
+              Generating {format.toUpperCase()} File...
             </span>
           ) : (
             <>

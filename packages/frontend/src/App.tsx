@@ -3,6 +3,7 @@ import { ModelConfig, ExportOptions, PreviewMeshData } from './types/model';
 import { getModels, fetchModelPreviewMesh, triggerModelExport } from './services/api';
 import { trackModelView } from './services/analytics';
 import { getReplicadModel } from './engines/replicad/registry';
+import { getOpenSCADModel } from './engines/openscad/registry';
 import { Header } from './components/Header';
 import { ModelSelector } from './components/ModelSelector';
 import { ModelViewer } from './components/ModelViewer';
@@ -33,11 +34,13 @@ export const App: React.FC = () => {
   const getModelIdFromUrl = useCallback((loadedModels: ModelConfig[]): string | null => {
     if (loadedModels.length === 0) return null;
 
-    // 1. Check path slug e.g. /kumiko-pattern-keychain or /models/kumiko-pattern-keychain
+    // 1. Check path slug e.g. /kumiko-pattern-keychain or /opengrid-display-case
     const rawPath = window.location.pathname.replace(/^\/+/g, '').replace(/\/+$/g, '');
     if (rawPath) {
       const slug = rawPath.replace(/^models\//, '');
-      const matched = loadedModels.find((m) => m.id === slug);
+      const matched = loadedModels.find(
+        (m) => m.id === slug || (m.project && m.project.toLowerCase().replace(/\s+/g, '-') === slug)
+      );
       if (matched) return matched.id;
     }
 
@@ -45,7 +48,11 @@ export const App: React.FC = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const queryModelId = searchParams.get('model');
     if (queryModelId) {
-      const matched = loadedModels.find((m) => m.id === queryModelId);
+      const matched = loadedModels.find(
+        (m) =>
+          m.id === queryModelId ||
+          (m.project && m.project.toLowerCase().replace(/\s+/g, '-') === queryModelId)
+      );
       if (matched) return matched.id;
     }
 
@@ -86,6 +93,12 @@ export const App: React.FC = () => {
   // Live computed model dimensions for 3D overlay HUD
   const liveDimensions = useMemo(() => {
     if (!activeModel) return [];
+    if (activeModel.engine === 'openscad') {
+      const openscadDef = getOpenSCADModel(activeModel.id);
+      if (openscadDef?.calculateDimensions) {
+        return openscadDef.calculateDimensions(currentValues);
+      }
+    }
     const replicadDef = getReplicadModel(activeModel.id);
     if (replicadDef?.calculateDimensions) {
       return replicadDef.calculateDimensions(currentValues);
@@ -212,11 +225,13 @@ export const App: React.FC = () => {
         {activeModel && (
           <ParameterControls
             model={activeModel}
+            models={models}
             currentValues={currentValues}
             onChangeValues={setCurrentValues}
             onApply={handleApplyParameters}
             onOpenExport={() => setExportModalOpen(true)}
             onOpenModelDrawer={() => setModelDrawerOpen(true)}
+            onSelectModel={handleSelectModel}
             isDirty={isDirty}
             loading={loadingPreview}
             collapsed={sidebarCollapsed}

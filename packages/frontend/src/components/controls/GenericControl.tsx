@@ -126,7 +126,7 @@ export const EnumControl: React.FC<GenericControlProps> = ({
           </label>
         </div>
 
-        <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-950 border border-slate-800 rounded-xl">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-950 border border-slate-800 rounded-xl w-full">
           {param.options.map((opt) => (
             <button
               key={opt.value}
@@ -134,7 +134,7 @@ export const EnumControl: React.FC<GenericControlProps> = ({
               disabled={!isEnabled}
               title={opt.description || opt.label}
               onClick={() => onChange(opt.value)}
-              className={`py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-colors cursor-pointer text-center disabled:opacity-40 disabled:cursor-not-allowed ${
                 strVal === opt.value
                   ? 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40 shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'

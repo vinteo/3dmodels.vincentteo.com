@@ -448,4 +448,54 @@ describe('ParameterControls Component (Schema-Driven)', () => {
 
     expect(screen.getByText('No infill lattice')).toBeInTheDocument();
   });
+
+  it('renders project name and interactive part switcher for multi-model projects', () => {
+    const projectModel1: ModelConfig = {
+      ...mockModel,
+      id: 'opengrid-display-case-shell',
+      name: 'OpenGrid Display Case Shell',
+      project: 'OpenGrid Display Case',
+      partName: 'Shell Case'
+    };
+
+    const projectModel2: ModelConfig = {
+      ...mockModel,
+      id: 'opengrid-display-case-cover',
+      name: 'OpenGrid Display Case Cover',
+      project: 'OpenGrid Display Case',
+      partName: 'Front Cover'
+    };
+
+    const allModels = [projectModel1, projectModel2];
+    const onSelectModel = vi.fn();
+
+    render(
+      <ParameterControls
+        model={projectModel1}
+        models={allModels}
+        currentValues={{ Length: 120 }}
+        onChangeValues={vi.fn()}
+        onApply={vi.fn()}
+        onOpenExport={vi.fn()}
+        onOpenModelDrawer={vi.fn()}
+        onSelectModel={onSelectModel}
+        isDirty={false}
+        loading={false}
+      />
+    );
+
+    // Displays project name
+    expect(screen.getByText('OpenGrid Display Case')).toBeInTheDocument();
+    expect(screen.getByText('OpenGrid Display Case Shell')).toBeInTheDocument();
+
+    // Displays part switcher
+    expect(screen.getByText('Switch Part:')).toBeInTheDocument();
+    expect(screen.getByText('Shell Case')).toBeInTheDocument();
+    const coverBtn = screen.getByText('Front Cover');
+    expect(coverBtn).toBeInTheDocument();
+
+    // Click Front Cover
+    fireEvent.click(coverBtn);
+    expect(onSelectModel).toHaveBeenCalledWith('opengrid-display-case-cover');
+  });
 });
