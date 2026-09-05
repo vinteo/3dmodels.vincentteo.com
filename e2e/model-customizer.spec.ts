@@ -44,18 +44,19 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await page.click("button:has-text('Models')");
 
     // Drawer should appear with visible models and exclude hidden models
-    await expect(page.locator("button:has-text('Kumiko Keychain')").first()).toBeVisible();
-    await expect(page.locator("button:has-text('Kumiko Keychain (Onshape)')")).not.toBeVisible();
+    const catalogDrawer = page.locator("div[role='dialog'][aria-label='Model Catalog']");
+    await expect(catalogDrawer.locator('text=Kumiko Keychain').first()).toBeVisible();
+    await expect(catalogDrawer.locator('text=Kumiko Keychain (Onshape)')).not.toBeVisible();
 
     // Grouped project card should be visible
-    await expect(page.locator('text=OpenGrid Display Case').first()).toBeVisible();
-    await expect(page.locator('text=Project (3 Parts)')).toBeVisible();
-    await expect(page.locator("button:has-text('Case')").first()).toBeVisible();
-    await expect(page.locator("button:has-text('Cover')").first()).toBeVisible();
-    await expect(page.locator("button:has-text('Connector')").first()).toBeVisible();
+    await expect(catalogDrawer.locator('text=OpenGrid Display Case').first()).toBeVisible();
+    await expect(catalogDrawer.locator('text=Project (3 Parts)')).toBeVisible();
+    await expect(catalogDrawer.locator("button:has-text('Case')").first()).toBeVisible();
+    await expect(catalogDrawer.locator("button:has-text('Cover')").first()).toBeVisible();
+    await expect(catalogDrawer.locator("button:has-text('Connector')").first()).toBeVisible();
 
     // Select Replicad model from pop-out drawer
-    await page.click("button:has-text('Kumiko Keychain')");
+    await catalogDrawer.locator('text=Kumiko Keychain').first().click();
 
     // Drawer closes and left sidebar shows parameters
     await expect(page.locator('text=Model Catalog')).not.toBeVisible();
@@ -79,10 +80,17 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await expect(page.locator('text=Acrylic Sheet Width')).toBeVisible();
   });
 
-  test('should display external model repository links for Printables and QIDI Maker', async ({
+  test('should display external model repository links for Blog, Printables and QIDI Maker', async ({
     page
   }) => {
     // Check links in left sidebar
+    const blogLink = page.locator("a[title='Open model page on Blog Post']");
+    await expect(blogLink).toBeVisible();
+    await expect(blogLink).toHaveAttribute(
+      'href',
+      'https://vincentteo.com/blog/2026/09/05/kumiko-keychain-customizer/'
+    );
+
     const printablesLink = page.locator("a[title='Open model page on Printables']");
     await expect(printablesLink).toBeVisible();
     await expect(printablesLink).toHaveAttribute(

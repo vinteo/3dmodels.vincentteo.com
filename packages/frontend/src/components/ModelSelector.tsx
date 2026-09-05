@@ -86,6 +86,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-label="Model Catalog"
         className="w-full max-w-md bg-[#120e25]/95 h-full border-r border-slate-800 shadow-2xl flex flex-col justify-between"
         onClick={(e) => e.stopPropagation()}
       >
@@ -259,7 +261,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             const isSelected = m.id === selectedModelId;
 
             return (
-              <button
+              <div
                 key={m.id}
                 onClick={() => {
                   onSelectModel(m.id);
@@ -360,7 +362,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                     </span>
                   ))}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

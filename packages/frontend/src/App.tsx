@@ -285,10 +285,7 @@ export const App: React.FC = () => {
       )}
 
       {/* AI Disclosure Modal Dialog */}
-      <AiDisclosureModal
-        isOpen={aiDisclosureOpen}
-        onClose={() => setAiDisclosureOpen(false)}
-      />
+      <AiDisclosureModal isOpen={aiDisclosureOpen} onClose={() => setAiDisclosureOpen(false)} />
     </div>
   );
 };
