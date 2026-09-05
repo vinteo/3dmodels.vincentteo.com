@@ -9,6 +9,7 @@ import { ModelSelector } from './components/ModelSelector';
 import { ModelViewer } from './components/ModelViewer';
 import { ParameterControls } from './components/ParameterControls';
 import { ExportModal } from './components/ExportModal';
+import { AiDisclosureModal } from './components/AiDisclosureModal';
 import { Footer } from './components/Footer';
 
 export const App: React.FC = () => {
@@ -20,6 +21,7 @@ export const App: React.FC = () => {
   const [modelDrawerOpen, setModelDrawerOpen] = useState<boolean>(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
+  const [aiDisclosureOpen, setAiDisclosureOpen] = useState<boolean>(false);
 
   // Parameter State: user edited vs last previewed
   const [currentValues, setCurrentValues] = useState<Record<string, number | string | boolean>>({});
@@ -217,6 +219,7 @@ export const App: React.FC = () => {
         onOpenModelDrawer={() => setModelDrawerOpen(true)}
         activeModelName={activeModel?.name || ''}
         activeModelEngine={activeModel?.engine}
+        onOpenAiDisclosure={() => setAiDisclosureOpen(true)}
       />
 
       {/* 2. Middle Body: Sidebar + Full Viewport 3D Canvas */}
@@ -280,6 +283,12 @@ export const App: React.FC = () => {
           onTriggerExport={handleExport}
         />
       )}
+
+      {/* AI Disclosure Modal Dialog */}
+      <AiDisclosureModal
+        isOpen={aiDisclosureOpen}
+        onClose={() => setAiDisclosureOpen(false)}
+      />
     </div>
   );
 };
