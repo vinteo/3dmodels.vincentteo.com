@@ -13,6 +13,11 @@
     "defaultConfiguration": "include_keychain_ring=true;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter;hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=3+millimeter;section_1=1;section_2=1;section_3=1;section_4=1;section_5=1;section_6=1",
     "links": [
       {
+        "label": "Blog Post",
+        "url": "https://vincentteo.com/blog/2026/09/05/kumiko-keychain-customizer/",
+        "site": "blog"
+      },
+      {
         "label": "Printables",
         "url": "https://www.printables.com/model/1826573-simple-kumiko-inspired-keychain-customisable",
         "site": "printables"
@@ -451,6 +456,11 @@
     "engine": "replicad",
     "tags": ["Kumiko", "3D Print", "Keychain", "Replicad", "Instant CAD"],
     "links": [
+      {
+        "label": "Blog Post",
+        "url": "https://vincentteo.com/blog/2026/09/05/kumiko-keychain-customizer/",
+        "site": "blog"
+      },
       {
         "label": "Printables",
         "url": "https://www.printables.com/model/1826573-simple-kumiko-inspired-keychain-customisable",

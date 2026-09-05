@@ -1980,6 +1980,23 @@ export const kumikoKeychainModel: ReplicadModelDefinition<KumikoParameters> = {
   description:
     'Customisable Simple Kumiko Inspired Keychain powered by Replicad & OpenCASCADE.js (zero API limits).',
   tags: ['Kumiko', '3D Print', 'Keychain', 'Replicad', 'Instant CAD'],
+  links: [
+    {
+      label: 'Blog Post',
+      url: 'https://vincentteo.com/blog/2026/09/05/kumiko-keychain-customizer/',
+      site: 'blog'
+    },
+    {
+      label: 'Printables',
+      url: 'https://www.printables.com/model/1826573-simple-kumiko-inspired-keychain-customisable',
+      site: 'printables'
+    },
+    {
+      label: 'QIDI Maker',
+      url: 'https://www.qidimaker.com/en/models/detail/2093595266801807362',
+      site: 'qidimaker'
+    }
+  ],
   parameters: kumikoParameters,
   calculateDimensions: (params: KumikoParameters) => calculateKumikoDimensions(params),
   buildParts: (params: KumikoParameters) => buildKumikoKeychainParts(params),

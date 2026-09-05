@@ -36,6 +36,7 @@ export function mergeWithReplicadModels(baseModels: ModelConfig[]): ModelConfig[
         description: repDef.description || model.description,
         engine: 'replicad' as const,
         tags: model.tags?.length ? model.tags : repDef.tags,
+        links: repDef.links?.length ? repDef.links : model.links,
         parameters: repDef.parameters,
         defaultConfiguration:
           repDef.defaultConfiguration || buildDefaultConfigurationString(repDef.parameters)
@@ -90,6 +91,7 @@ export function mergeWithOpenSCADModels(baseModels: ModelConfig[]): ModelConfig[
         description: scadDef.description || model.description,
         engine: 'openscad' as const,
         tags: model.tags?.length ? model.tags : scadDef.tags,
+        links: scadDef.links?.length ? scadDef.links : model.links,
         parameters: scadDef.parameters,
         defaultConfiguration:
           scadDef.defaultConfiguration || buildDefaultConfigurationString(scadDef.parameters)
