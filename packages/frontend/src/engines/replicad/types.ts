@@ -20,6 +20,8 @@ export interface ModelDimensionItem {
 export interface ReplicadModelDefinition<TParams = Record<string, number | string | boolean>> {
   id: string;
   name: string;
+  project?: string;
+  partName?: string;
   description: string;
   tags: string[];
   hidden?: boolean;

@@ -335,22 +335,16 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
 
       if (group.children.length === 0) return;
 
-      // Compute bounding box and center geometry
+      // Ground on Z=0 plane: Rotate CAD coordinates (Z-up) so Z=0 aligns with Three.js horizontal ground grid (XZ)
+      group.rotateX(-Math.PI / 2);
+
+      // Compute bounding box and center geometry on ground plane
       const bbox = new THREE.Box3().setFromObject(group);
-      const rawSize = new THREE.Vector3();
-      bbox.getSize(rawSize);
-
-      // Auto-orient: If CAD model was extruded along Z (thin along Z), rotate to lie flat on the Three.js XZ ground grid
-      if (rawSize.z < rawSize.x && rawSize.z < rawSize.y) {
-        group.rotateX(-Math.PI / 2);
-      }
-
-      const updatedBbox = new THREE.Box3().setFromObject(group);
       const center = new THREE.Vector3();
-      updatedBbox.getCenter(center);
+      bbox.getCenter(center);
 
-      // Center horizontally on X & Z, and place bottom on ground plane (Y = 0)
-      group.position.set(-center.x, -updatedBbox.min.y, -center.z);
+      // Center horizontally on X & Z, and ground bottom on bed plane (Y = 0)
+      group.position.set(-center.x, -bbox.min.y, -center.z);
 
       // Remove existing model group if present
       if (currentGroupRef.current && sceneRef.current) {

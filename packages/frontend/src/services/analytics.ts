@@ -65,7 +65,7 @@ export function trackEvent(eventName: string, params: Record<string, unknown> = 
 export interface TrackExportParams {
   modelId: string;
   modelName: string;
-  format: 'stl' | 'step';
+  format: 'stl' | 'step' | 'scad';
   units?: string;
   stlMode?: 'binary' | 'ascii';
   stepVersion?: 'AP203' | 'AP214' | 'AP242';

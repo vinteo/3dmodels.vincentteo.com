@@ -47,6 +47,13 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await expect(page.locator("button:has-text('Kumiko Keychain')").first()).toBeVisible();
     await expect(page.locator("button:has-text('Kumiko Keychain (Onshape)')")).not.toBeVisible();
 
+    // Grouped project card should be visible
+    await expect(page.locator('text=OpenGrid Display Case').first()).toBeVisible();
+    await expect(page.locator('text=Project (3 Parts)')).toBeVisible();
+    await expect(page.locator("button:has-text('Case')").first()).toBeVisible();
+    await expect(page.locator("button:has-text('Cover')").first()).toBeVisible();
+    await expect(page.locator("button:has-text('Connector')").first()).toBeVisible();
+
     // Select Replicad model from pop-out drawer
     await page.click("button:has-text('Kumiko Keychain')");
 
@@ -54,6 +61,22 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await expect(page.locator('text=Model Catalog')).not.toBeVisible();
     await expect(page.locator('text=Section Patterns')).toBeVisible();
     await expect(page.locator('text=Hexagon Radius')).toBeVisible();
+  });
+
+  test('should select sub-component from grouped project in model selector', async ({ page }) => {
+    // Open model catalog drawer
+    await page.click("button:has-text('Models')");
+
+    // Click Cover within the OpenGrid Display Case project group
+    await page.click("button:has-text('Cover')");
+
+    // Drawer closes and Front Cover parameters appear
+    await expect(page.locator('text=Model Catalog')).not.toBeVisible();
+    await expect(
+      page.locator('aside').locator('text=OpenGrid Display Case Cover').first()
+    ).toBeVisible();
+    await expect(page.locator('text=Acrylic Window')).toBeVisible();
+    await expect(page.locator('text=Acrylic Sheet Width')).toBeVisible();
   });
 
   test('should display external model repository links for Printables and QIDI Maker', async ({
@@ -164,5 +187,98 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
     // Verify address bar contains /kumiko-keychain
     expect(page.url()).toContain('/kumiko-keychain');
+  });
+
+  test('should load in-browser OpenSCAD model and display OpenGrid parameters', async ({
+    page
+  }) => {
+    // Navigate directly to OpenSCAD model slug
+    await page.goto('/opengrid-display-case-shell');
+
+    // Verify OpenSCAD engine indicator & model title in sidebar
+    await expect(
+      page.locator('aside').locator('text=OpenGrid Display Case Shell').first()
+    ).toBeVisible();
+    await expect(page.locator('text=Shell Dimensions')).toBeVisible();
+    await expect(page.locator('text=Sizing Mode')).toBeVisible();
+    await expect(page.locator('text=OpenGrid Units (28mm)')).toBeVisible();
+    await expect(page.locator('text=Grid Width (X)')).toBeVisible();
+    await expect(page.locator('text=Grid Height (Y)')).toBeVisible();
+    await expect(page.locator('text=Shell Depth')).toBeVisible();
+    await expect(page.locator("label[for='param-wall_thickness']")).toBeVisible();
+
+    // Verify canvas is active
+    await expect(page.locator('canvas')).toBeVisible();
+  });
+
+  test('should toggle sizing mode to Custom and update dimensions cleanly', async ({ page }) => {
+    await page.goto('/opengrid-display-case-shell');
+
+    // Switch Sizing Mode to Custom (mm)
+    await page.click("button:has-text('Custom (mm)')");
+    await expect(page.locator('text=Custom Width')).toBeVisible();
+    await expect(page.locator('text=Custom Height')).toBeVisible();
+
+    // Locate the numeric input for Custom Width and update value
+    const widthInput = page.locator("input[type='number']").first();
+    await widthInput.fill('210');
+
+    // Button should show "Update 3D Preview"
+    const updateBtn = page.locator("button:has-text('Update 3D Preview')");
+    await expect(updateBtn).toBeVisible();
+    await updateBtn.click();
+
+    // Verify canvas remains rendered without error alert
+    await expect(page.locator('text=Failed to generate 3D preview')).not.toBeVisible();
+    await expect(page.locator('canvas')).toBeVisible();
+  });
+
+  test('should open OpenSCAD export modal with STL and SCAD tabs', async ({ page }) => {
+    await page.goto('/opengrid-display-case-shell');
+
+    // Open export dialog with OpenSCAD-specific button label
+    await page.click("aside button:has-text('Export STL / SCAD Files')");
+
+    // Verify OpenSCAD export tabs
+    await expect(page.locator('text=Export Customized Model')).toBeVisible();
+    await expect(page.locator('button:has-text("STL (3D Printing)")')).toBeVisible();
+    await expect(page.locator('button:has-text("SCAD (Source Code)")')).toBeVisible();
+
+    // Switch to SCAD tab
+    await page.click('button:has-text("SCAD (Source Code)")');
+    await expect(
+      page.locator(
+        'text=Download the customized OpenSCAD script with your modified parameter values'
+      )
+    ).toBeVisible();
+    await expect(page.locator("button:has-text('Download SCAD Model')")).toBeVisible();
+
+    // Close dialog
+    await page.click("button[aria-label='Close dialog']");
+    await expect(page.locator('text=Export Customized Model')).not.toBeVisible();
+  });
+
+  test('should display active project name in sidebar and switch parts directly', async ({
+    page
+  }) => {
+    await page.goto('/opengrid-display-case-shell');
+
+    // Verify Active Model banner displays Project name
+    const aside = page.locator('aside');
+    await expect(aside.locator('text=OpenGrid Display Case').first()).toBeVisible();
+    await expect(aside.locator('text=OpenGrid Display Case Shell').first()).toBeVisible();
+
+    // Verify Switch Part section is visible with Case, Cover, and Connector buttons
+    await expect(aside.locator('text=Switch Part:')).toBeVisible();
+    await expect(aside.locator("button:has-text('Case')").first()).toBeVisible();
+    await expect(aside.locator("button:has-text('Cover')").first()).toBeVisible();
+    await expect(aside.locator("button:has-text('Connector')").first()).toBeVisible();
+
+    // Click Connector in the sidebar
+    await aside.locator("button:has-text('Connector')").first().click();
+
+    // Verify view switches to OpenGrid Display Case Connector
+    await expect(aside.locator('text=OpenGrid Display Case Connector').first()).toBeVisible();
+    await expect(aside.locator('text=OpenGrid Snap Base')).toBeVisible();
   });
 });

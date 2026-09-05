@@ -58,6 +58,11 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
   // Filter out dependent parameters when parent condition is false
   const visibleBodyParams = bodyParams.filter((p) => {
     if (!p.dependsOn) return true;
+    if (p.dependsOn.includes('=')) {
+      const [key, expected] = p.dependsOn.split('=');
+      const actual = values[key];
+      return String(actual ?? '') === expected;
+    }
     const parentVal = values[p.dependsOn];
     return parentVal === undefined ? true : Boolean(parentVal);
   });
@@ -230,14 +235,14 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
                     </div>
 
                     {isSegmented ? (
-                      <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-950 border border-slate-800 rounded-xl">
+                      <div className="flex items-center gap-1.5 p-1 bg-slate-950 border border-slate-800 rounded-xl w-full">
                         {cluster.sampleParam.options?.map((opt) => (
                           <button
                             key={opt.value}
                             type="button"
                             title={opt.description || opt.label}
                             onClick={() => handleBatchUpdate(cluster, opt.value)}
-                            className={`py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-colors cursor-pointer text-center ${
                               masterVal === opt.value
                                 ? 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40 shadow-sm'
                                 : 'text-slate-400 hover:text-slate-200'
