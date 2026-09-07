@@ -5,6 +5,7 @@ import {
   getPointAtFraction,
   rotatePoint2D,
   getLineIntersection,
+  createTriangleFrame,
   createSectorPattern,
   buildKumikoKeychainParts,
   defaultKumikoParameters,
@@ -285,5 +286,28 @@ describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {
     // Alias lookup
     const aliasResult = createSectorPattern('flower', spokeTriangle, innerTriangle, 1, 2, 0);
     expect(aliasResult).toBeNull();
+  });
+
+  it('creates triangular frame with inner, outer, and symmetrical alignment', () => {
+    const p1: Point2D = [0, 0];
+    const p2: Point2D = [20, 0];
+    const p3: Point2D = [10, 17.32];
+
+    const innerFrame = createTriangleFrame(p1, p2, p3, 1, 'inner');
+    expect(innerFrame).toBeDefined();
+
+    const outerFrame = createTriangleFrame(p1, p2, p3, 1, 'outer');
+    expect(outerFrame).toBeDefined();
+
+    const symmFrame = createTriangleFrame(p1, p2, p3, 1, 'symmetrical');
+    expect(symmFrame).toBeDefined();
+
+    // Default alignment should be 'inner'
+    const defaultFrame = createTriangleFrame(p1, p2, p3, 1);
+    expect(defaultFrame).toBeDefined();
+
+    // Zero or negative thickness returns null
+    expect(createTriangleFrame(p1, p2, p3, 0)).toBeNull();
+    expect(createTriangleFrame(p1, p2, p3, -1)).toBeNull();
   });
 });
