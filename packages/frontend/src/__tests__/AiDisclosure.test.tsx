@@ -42,10 +42,26 @@ describe('AI Disclosure Feature', () => {
         )
       ).toBeInTheDocument();
 
-      // Model generation code manually written
+      // Model generation code manually written for default models
       expect(
         screen.getByText(
           /All 3D model generation code, parametric geometry definitions, and CAD algorithms are manually written/i
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('renders 3D modeling AI assisted notice when disclosure config specifies modelingAiAssisted', () => {
+      render(
+        <AiDisclosureModal
+          isOpen={true}
+          onClose={vi.fn()}
+          disclosure={{ modelingAiAssisted: true }}
+        />
+      );
+
+      expect(
+        screen.getByText(
+          /The 3D model generation code, parametric geometry definitions, and CAD algorithms for this model were created with AI assistance/i
         )
       ).toBeInTheDocument();
     });
@@ -74,6 +90,25 @@ describe('AI Disclosure Feature', () => {
       const backdrop = screen.getByRole('dialog');
       fireEvent.click(backdrop);
       expect(handleClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('integrates with getModels to provide AI disclosure for flags keychain', async () => {
+      const { getModels } = await import('../services/api');
+      const { models } = await getModels(true);
+      const flagsModel = models.find((m) => m.id === 'flags-keychain');
+
+      expect(flagsModel).toBeDefined();
+      expect(flagsModel?.aiDisclosure?.modelingAiAssisted).toBe(true);
+
+      render(
+        <AiDisclosureModal isOpen={true} onClose={vi.fn()} disclosure={flagsModel?.aiDisclosure} />
+      );
+
+      expect(
+        screen.getByText(
+          /The 3D model generation code, parametric geometry definitions, and CAD algorithms for this model were created with AI assistance/i
+        )
+      ).toBeInTheDocument();
     });
   });
 });

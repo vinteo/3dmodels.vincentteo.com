@@ -1,12 +1,18 @@
 import React, { useEffect } from 'react';
 import { X, Bot, Code2, Sparkles } from 'lucide-react';
+import { ModelAiDisclosure } from '../types/model';
 
 interface AiDisclosureModalProps {
   isOpen: boolean;
   onClose: () => void;
+  disclosure?: ModelAiDisclosure;
 }
 
-export const AiDisclosureModal: React.FC<AiDisclosureModalProps> = ({ isOpen, onClose }) => {
+export const AiDisclosureModal: React.FC<AiDisclosureModalProps> = ({
+  isOpen,
+  onClose,
+  disclosure
+}) => {
   useEffect(() => {
     if (!isOpen) return;
 
@@ -21,6 +27,17 @@ export const AiDisclosureModal: React.FC<AiDisclosureModalProps> = ({ isOpen, on
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+
+  const customiserText =
+    disclosure?.customiserNotice ||
+    'This interactive customiser web application and its supporting frontend framework were created with AI assistance.';
+
+  const isModelAiAssisted = disclosure?.modelingAiAssisted ?? false;
+  const modelText =
+    disclosure?.modelNotice ||
+    (isModelAiAssisted
+      ? 'The 3D model generation code, parametric geometry definitions, and CAD algorithms for this model were created with AI assistance.'
+      : 'All 3D model generation code, parametric geometry definitions, and CAD algorithms are manually written.');
 
   return (
     <div
@@ -62,10 +79,7 @@ export const AiDisclosureModal: React.FC<AiDisclosureModalProps> = ({ isOpen, on
               <Bot className="w-4 h-4 text-cyan-400 shrink-0" />
               <span>Customiser & Framework</span>
             </div>
-            <p className="text-slate-300">
-              This interactive customiser web application and its supporting frontend framework were
-              created with AI assistance.
-            </p>
+            <p className="text-slate-300">{customiserText}</p>
           </div>
 
           <div className="rounded-2xl bg-violet-950/20 border border-violet-800/40 p-4 space-y-1.5">
@@ -73,10 +87,7 @@ export const AiDisclosureModal: React.FC<AiDisclosureModalProps> = ({ isOpen, on
               <Code2 className="w-4 h-4 text-violet-400 shrink-0" />
               <span>3D Model Generation</span>
             </div>
-            <p className="text-slate-300">
-              All 3D model generation code, parametric geometry definitions, and CAD algorithms are
-              manually written.
-            </p>
+            <p className="text-slate-300">{modelText}</p>
           </div>
         </div>
 

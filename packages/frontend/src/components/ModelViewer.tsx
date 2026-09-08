@@ -120,6 +120,10 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   const handleApplyTheme = (theme: ThemePalette) => {
     const updated: Record<string, string> = { ...customPartColors };
     activeParts.forEach((part, index) => {
+      // Preserve authentic national flag colors when theme is applied
+      if (part.name.toLowerCase().startsWith('flag_') || part.name.toLowerCase().includes('flag')) {
+        return;
+      }
       const color = resolveThemeColorForPart(theme, part.name, index);
       updated[part.name] = color;
     });

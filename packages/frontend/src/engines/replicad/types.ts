@@ -1,5 +1,5 @@
 import { AnyShape } from 'replicad';
-import { ParameterDefinition, ModelLink } from '../../types/model';
+import { ParameterDefinition, ModelLink, ModelAiDisclosure } from '../../types/model';
 
 export interface ReplicadPart {
   shape: AnyShape;
@@ -28,6 +28,7 @@ export interface ReplicadModelDefinition<TParams = Record<string, number | strin
   thumbnail?: string;
   links?: ModelLink[];
   parameters: ParameterDefinition[];
+  aiDisclosure?: ModelAiDisclosure;
   defaultConfiguration?: string;
   calculateDimensions?: (params: TParams) => ModelDimensionItem[];
   buildParts: (params: TParams) => ReplicadPart[];

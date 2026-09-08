@@ -45,10 +45,16 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
 
     // Drawer should appear with visible models and exclude hidden models
     const catalogDrawer = page.locator("div[role='dialog'][aria-label='Model Catalog']");
-    await expect(catalogDrawer.locator('text=Kumiko Keychain').first()).toBeVisible();
+    await expect(catalogDrawer.locator('text=Hex Keychain').first()).toBeVisible();
     await expect(catalogDrawer.locator('text=Kumiko Keychain (Onshape)')).not.toBeVisible();
 
-    // Grouped project card should be visible
+    // Grouped project cards should be visible
+    await expect(catalogDrawer.locator('text=Project (2 Parts)')).toBeVisible();
+    await expect(catalogDrawer.locator("button:has-text('Kumiko')").first()).toBeVisible();
+    await expect(
+      catalogDrawer.locator("button:has-text('Flags of the World')").first()
+    ).toBeVisible();
+
     await expect(catalogDrawer.locator('text=OpenGrid Display Case').first()).toBeVisible();
     await expect(catalogDrawer.locator('text=Project (3 Parts)')).toBeVisible();
     await expect(catalogDrawer.locator("button:has-text('Case')").first()).toBeVisible();
@@ -56,7 +62,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await expect(catalogDrawer.locator("button:has-text('Connector')").first()).toBeVisible();
 
     // Select Replicad model from pop-out drawer
-    await catalogDrawer.locator('text=Kumiko Keychain').first().click();
+    await catalogDrawer.locator("button:has-text('Kumiko')").first().click();
 
     // Drawer closes and left sidebar shows parameters
     await expect(page.locator('text=Model Catalog')).not.toBeVisible();

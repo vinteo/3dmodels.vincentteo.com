@@ -45,6 +45,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     icon: '🪵',
     colors: {
       hex_frame: '#92400e',
+      hex_backplate: '#fef3c7',
+      backplate: '#fef3c7',
       internal_spokes: '#b45309',
       kumiko_lattice_pattern: '#f59e0b',
       keychain_ring_attachment: '#78350f',
@@ -60,6 +62,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     icon: '🌌',
     colors: {
       hex_frame: '#3b82f6',
+      hex_backplate: '#0f172a',
+      backplate: '#0f172a',
       internal_spokes: '#10b981',
       kumiko_lattice_pattern: '#f59e0b',
       keychain_ring_attachment: '#a855f7',
@@ -75,6 +79,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     icon: '👑',
     colors: {
       hex_frame: '#1e293b',
+      hex_backplate: '#0f172a',
+      backplate: '#0f172a',
       internal_spokes: '#334155',
       kumiko_lattice_pattern: '#eab308',
       keychain_ring_attachment: '#f59e0b',
@@ -90,6 +96,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     icon: '🌸',
     colors: {
       hex_frame: '#fda4af',
+      hex_backplate: '#fff1f2',
+      backplate: '#fff1f2',
       internal_spokes: '#f43f5e',
       kumiko_lattice_pattern: '#e11d48',
       keychain_ring_attachment: '#be123c',
@@ -105,6 +113,8 @@ export const THEME_PALETTES: ThemePalette[] = [
     icon: '🤍',
     colors: {
       hex_frame: '#475569',
+      hex_backplate: '#f8fafc',
+      backplate: '#f8fafc',
       internal_spokes: '#64748b',
       kumiko_lattice_pattern: '#e2e8f0',
       keychain_ring_attachment: '#334155',
@@ -123,6 +133,9 @@ export function formatPartName(rawName: string): string {
 
   const normalized = rawName.toLowerCase().replace(/[_-]/g, ' ').trim();
 
+  if (normalized.includes('backplate') || normalized.includes('back plate')) {
+    return 'Hex Backplate';
+  }
   if (normalized.includes('hex') && normalized.includes('frame')) {
     return 'Hex Frame';
   }
@@ -134,6 +147,30 @@ export function formatPartName(rawName: string): string {
   }
   if (normalized.includes('ring')) {
     return 'Keychain Ring';
+  }
+  if (normalized.includes('flag') && (normalized.includes('top') || normalized.includes('upper'))) {
+    return 'Flag Top';
+  }
+  if (
+    normalized.includes('flag') &&
+    (normalized.includes('bottom') || normalized.includes('lower'))
+  ) {
+    return 'Flag Bottom';
+  }
+  if (
+    normalized.includes('flag') &&
+    (normalized.includes('middle') || normalized.includes('mid') || normalized.includes('center'))
+  ) {
+    return 'Flag Middle';
+  }
+  if (normalized.includes('flag') && normalized.includes('left')) {
+    return 'Flag Left';
+  }
+  if (normalized.includes('flag') && normalized.includes('right')) {
+    return 'Flag Right';
+  }
+  if (normalized.includes('hex') && normalized.includes('base')) {
+    return 'Hex Base';
   }
   if (normalized.includes('fused') || normalized.includes('single')) {
     return 'Unified Solid';

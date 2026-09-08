@@ -36,7 +36,16 @@ describe('Replicad Model Registry & Parameter Management', () => {
     expect(isReplicadModel('kumiko-keychain')).toBe(true);
     expect(isReplicadModel('kumiko-keychain-replicad')).toBe(true);
     expect(isReplicadModel('kumiko-pattern-keychain')).toBe(true);
+    expect(isReplicadModel('flags-keychain')).toBe(true);
     expect(isReplicadModel('unknown-model-xyz')).toBe(false);
+  });
+
+  it('registers and retrieves the Flags of the World Keychain model definition under Hex Keychain project', () => {
+    const flagsModel = getReplicadModel('flags-keychain');
+    expect(flagsModel).toBeDefined();
+    expect(flagsModel?.id).toBe('flags-keychain');
+    expect(flagsModel?.project).toBe('Hex Keychain');
+    expect(flagsModel?.partName).toBe('Flags of the World');
   });
 
   it('extracts default parameters from parameter definitions accurately', () => {
@@ -66,15 +75,32 @@ describe('Replicad Model Registry & Parameter Management', () => {
         defaultConfiguration: '',
         parameters: [], // Empty in raw catalog JSON
         links: [{ label: 'Printables', url: 'https://printables.com' }]
+      },
+      {
+        id: 'flags-keychain',
+        name: 'Flags of the World Keychain',
+        description: 'Test description',
+        engine: 'replicad',
+        tags: ['Flags'],
+        defaultConfiguration: '',
+        parameters: []
       }
     ];
 
     const merged = mergeWithReplicadModels(rawCatalog);
-    expect(merged.length).toBe(1);
-    expect(merged[0].parameters.length).toBe(kumikoParameters.length);
-    expect(merged[0].parameters.find((p) => p.id === 'hex_radius')?.default).toBe(20);
-    expect(merged[0].links?.length).toBe(3);
-    expect(merged[0].defaultConfiguration).toContain('hex_radius=20+millimeter');
+    expect(merged.length).toBe(2);
+
+    const kumiko = merged.find((m) => m.id === 'kumiko-keychain');
+    expect(kumiko).toBeDefined();
+    expect(kumiko?.parameters.length).toBe(kumikoParameters.length);
+    expect(kumiko?.parameters.find((p) => p.id === 'hex_radius')?.default).toBe(20);
+    expect(kumiko?.links?.length).toBe(3);
+    expect(kumiko?.defaultConfiguration).toContain('hex_radius=20+millimeter');
+
+    const flags = merged.find((m) => m.id === 'flags-keychain');
+    expect(flags).toBeDefined();
+    expect(flags?.project).toBe('Hex Keychain');
+    expect(flags?.partName).toBe('Flags of the World');
   });
 
   it('allows registering custom Replicad models dynamically', () => {

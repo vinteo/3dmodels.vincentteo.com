@@ -38,6 +38,7 @@ export function mergeWithReplicadModels(baseModels: ModelConfig[]): ModelConfig[
         tags: model.tags?.length ? model.tags : repDef.tags,
         links: repDef.links?.length ? repDef.links : model.links,
         parameters: repDef.parameters,
+        aiDisclosure: repDef.aiDisclosure || model.aiDisclosure,
         defaultConfiguration:
           repDef.defaultConfiguration || buildDefaultConfigurationString(repDef.parameters)
       };
@@ -59,6 +60,7 @@ export function mergeWithReplicadModels(baseModels: ModelConfig[]): ModelConfig[
         hidden: repDef.hidden ?? false,
         thumbnail: repDef.thumbnail,
         links: repDef.links || [],
+        aiDisclosure: repDef.aiDisclosure,
         defaultConfiguration:
           repDef.defaultConfiguration || buildDefaultConfigurationString(repDef.parameters),
         parameters: repDef.parameters
@@ -93,6 +95,7 @@ export function mergeWithOpenSCADModels(baseModels: ModelConfig[]): ModelConfig[
         tags: model.tags?.length ? model.tags : scadDef.tags,
         links: scadDef.links?.length ? scadDef.links : model.links,
         parameters: scadDef.parameters,
+        aiDisclosure: scadDef.aiDisclosure || model.aiDisclosure,
         defaultConfiguration:
           scadDef.defaultConfiguration || buildDefaultConfigurationString(scadDef.parameters)
       };
@@ -114,6 +117,7 @@ export function mergeWithOpenSCADModels(baseModels: ModelConfig[]): ModelConfig[
         hidden: scadDef.hidden ?? false,
         thumbnail: scadDef.thumbnail,
         links: scadDef.links || [],
+        aiDisclosure: scadDef.aiDisclosure,
         defaultConfiguration:
           scadDef.defaultConfiguration || buildDefaultConfigurationString(scadDef.parameters),
         parameters: scadDef.parameters
