@@ -2173,6 +2173,8 @@ export function calculateKumikoDimensions(params: KumikoParameters): ModelDimens
 export const kumikoKeychainModel: ReplicadModelDefinition<KumikoParameters> = {
   id: 'kumiko-keychain',
   name: 'Kumiko Keychain',
+  project: 'Hex Keychain',
+  partName: 'Kumiko',
   description:
     'Customisable Simple Kumiko Inspired Keychain powered by Replicad & OpenCASCADE.js (zero API limits).',
   tags: ['Kumiko', '3D Print', 'Keychain', 'Replicad', 'Instant CAD'],

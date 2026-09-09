@@ -1,4 +1,4 @@
-import { ParameterDefinition, ModelLink } from '../../types/model';
+import { ParameterDefinition, ModelLink, ModelAiDisclosure } from '../../types/model';
 import { ModelDimensionItem } from '../replicad/types';
 
 export interface OpenSCADModelDefinition<TParams = Record<string, number | string | boolean>> {
@@ -12,6 +12,7 @@ export interface OpenSCADModelDefinition<TParams = Record<string, number | strin
   thumbnail?: string;
   links?: ModelLink[];
   parameters: ParameterDefinition[];
+  aiDisclosure?: ModelAiDisclosure;
   scadContent: string;
   defaultConfiguration?: string;
   calculateDimensions?: (params: TParams) => ModelDimensionItem[];

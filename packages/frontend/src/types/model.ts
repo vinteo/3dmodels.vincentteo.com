@@ -31,6 +31,12 @@ export interface ModelLink {
   site?: 'printables' | 'qidimaker' | 'makerworld' | 'thingiverse' | 'github' | string;
 }
 
+export interface ModelAiDisclosure {
+  customiserNotice?: string;
+  modelNotice?: string;
+  modelingAiAssisted?: boolean;
+}
+
 export interface ModelConfig {
   id: string;
   name: string;
@@ -48,6 +54,7 @@ export interface ModelConfig {
   parameters: ParameterDefinition[];
   thumbnail?: string;
   links?: ModelLink[];
+  aiDisclosure?: ModelAiDisclosure;
 }
 
 export interface ModelsApiResponse {

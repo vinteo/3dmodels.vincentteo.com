@@ -452,6 +452,8 @@
   {
     "id": "kumiko-keychain",
     "name": "Kumiko Keychain",
+    "project": "Hex Keychain",
+    "partName": "Kumiko",
     "description": "Customisable Simple Kumiko Inspired Keychain",
     "engine": "replicad",
     "tags": ["Kumiko", "3D Print", "Keychain", "Replicad", "Instant CAD"],
@@ -472,6 +474,21 @@
         "site": "qidimaker"
       }
     ],
+    "parameters": []
+  },
+  {
+    "id": "flags-keychain",
+    "name": "Flags of the World Keychain",
+    "project": "Hex Keychain",
+    "partName": "Flags of the World",
+    "description": "Customisable Flags of the World Hex Keychain",
+    "engine": "replicad",
+    "tags": ["Flags", "3D Print", "Keychain", "Replicad", "Instant CAD"],
+    "aiDisclosure": {
+      "modelingAiAssisted": true,
+      "modelNotice": "The 3D model generation code, parametric geometry definitions, and CAD algorithms for this model were created with AI assistance."
+    },
+    "links": [],
     "parameters": []
   },
   {
