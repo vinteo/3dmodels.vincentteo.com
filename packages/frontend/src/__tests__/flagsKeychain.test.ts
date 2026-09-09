@@ -27,9 +27,10 @@ describe('Flags of the World Hex Keychain Model', () => {
     expect(defaultFlagsParameters.hex_radius).toBe(25);
     expect(defaultFlagsParameters.flag_type).toBe('empty');
     expect(defaultFlagsParameters.flag_orientation).toBe('standard');
-    expect(defaultFlagsParameters.flag_depth).toBe(1.2);
+    expect(defaultFlagsParameters.flag_depth).toBe(1.5);
     expect(defaultFlagsParameters.include_backplate).toBe(true);
     expect(defaultFlagsParameters.include_keychain_ring).toBe(true);
+    expect(defaultFlagsParameters.include_flag_mirror).toBe(false);
   });
 
   it('supports custom flag_depth parameter for embossing or insetting flag parts', () => {

@@ -11,6 +11,7 @@ export type { ReplicadPart };
 
 export interface FlagsParameters {
   flag_type?: string;
+  include_flag_mirror?: boolean;
   flag_orientation?: string;
   flag_depth?: number;
   flag_thickness?: number;
@@ -6187,6 +6188,15 @@ export const flagsParameters: ParameterDefinition[] = [
     description: 'Use standard national flag orientation or rotate sections 90 degrees'
   },
   {
+    id: 'include_flag_mirror',
+    name: 'Include Flag Mirror',
+    type: 'boolean',
+    default: false,
+    group: 'Flag Design',
+    dependsOn: 'flag_type',
+    description: 'Add a flipped copy of the flag on the back side of the keychain'
+  },
+  {
     id: 'flag_fillet',
     name: 'Flag Corner Fillet',
     type: 'quantity',
@@ -6204,7 +6214,7 @@ export const flagsParameters: ParameterDefinition[] = [
     name: 'Flag Parts Height / Depth',
     type: 'quantity',
     unit: 'millimeter',
-    default: 1.2,
+    default: 1.5,
     min: 0.2,
     max: 5,
     step: 0.1,
@@ -6259,7 +6269,7 @@ export const flagsParameters: ParameterDefinition[] = [
     name: 'Backplate Thickness',
     type: 'quantity',
     unit: 'millimeter',
-    default: 1.8,
+    default: 1.5,
     min: 0.4,
     max: 5,
     step: 0.2,
@@ -6396,15 +6406,37 @@ export function buildFlagsKeychainParts(params: FlagsParameters): ReplicadPart[]
   }
 
   // ==========================================
+  // Layout Logic: Single vs Double Sided
+  // ==========================================
+  const isDoubleSided = !!params.include_flag_mirror;
+  let zStartBackplate = 0;
+  let zOffsetFront = 0;
+
+  if (isDoubleSided) {
+    if (hasBackplate && tBackplate > 0) {
+      zStartBackplate = h / 2 - tBackplate / 2;
+      zOffsetFront = h / 2 + tBackplate / 2;
+    } else {
+      zOffsetFront = h / 2;
+    }
+  } else {
+    if (hasBackplate && tBackplate > 0) {
+      zStartBackplate = 0;
+      zOffsetFront = tBackplate;
+    } else {
+      zOffsetFront = 0;
+    }
+  }
+
+  // ==========================================
   // Part 2: Hexagonal Backplate (if enabled)
   // ==========================================
   if (hasBackplate && tBackplate > 0) {
-    // Backplate covers the inner area of the hexagon from Z=0 up to tBackplate
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const backplateSketch = innerHex.sketchOnPlane('XY') as any;
+    const backplateSketch = innerHex.sketchOnPlane('XY', zStartBackplate) as any;
     let backplateSolid = backplateSketch.extrude(tBackplate);
 
-    if (fBackplate > 0 && fBackplate < 0.6) {
+    if (!isDoubleSided && fBackplate > 0 && fBackplate < 0.6) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         backplateSolid = (backplateSolid as any).fillet(fBackplate);
@@ -6428,7 +6460,7 @@ export function buildFlagsKeychainParts(params: FlagsParameters): ReplicadPart[]
   if (flagType !== 'empty') {
     const flagDef = FLAG_REGISTRY[flagType];
     if (flagDef && typeof flagDef.generate === 'function') {
-      const zOffset = hasBackplate && tBackplate > 0 ? tBackplate : 0;
+      const zOffset = zOffsetFront;
       const flagDepthParam = params.flag_depth ?? params.flag_thickness ?? params.flag_height;
       const hFlag =
         flagDepthParam !== undefined && flagDepthParam !== null
@@ -6448,6 +6480,36 @@ export function buildFlagsKeychainParts(params: FlagsParameters): ReplicadPart[]
       });
 
       parts.push(...flagParts);
+
+      if (params.include_flag_mirror) {
+        const copyFlagParts = flagDef.generate({
+          innerHex,
+          rInner,
+          hFlag: hFlag,
+          zOffset: 0,
+          fFlag,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          orientation: (params.flag_orientation as any) || 'standard',
+          params
+        });
+
+        for (const part of copyFlagParts) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let shape = part.shape as any;
+          // Mirror horizontally (left to right)
+          shape = shape.mirror('YZ', [0, 0, 0]);
+          // Mirror vertically to extrude out of the bottom (or midpoint if no backplate)
+          const zStartMirror = hasBackplate && tBackplate > 0 ? zStartBackplate : h / 2;
+          const mirrorZOrigin = zStartMirror / 2;
+          shape = shape.mirror('XY', [0, 0, mirrorZOrigin]);
+
+          parts.push({
+            ...part,
+            shape,
+            name: `${part.name}_Mirror`
+          });
+        }
+      }
     }
   }
 
