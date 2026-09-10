@@ -23,13 +23,15 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",
-    "@types/node": "^26.3.0",
-    "@typescript-eslint/eslint-plugin": "^8.68.0",
+    "@types/node": "^26.4.1",
+    "@typescript-eslint/eslint-plugin": "^8.69.0",
     "@typescript-eslint/parser": "^8.68.0",
     "concurrently": "^10.0.5",
-    "eslint": "^8.57.1",
+    "eslint": "^10.9.1",
+    "globals": "^17.12.0",
     "prettier": "^3.9.6",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.70.0"
   },
   "prettier": {
     "printWidth": 100,
