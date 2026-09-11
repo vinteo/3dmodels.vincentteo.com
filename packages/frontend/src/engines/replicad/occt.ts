@@ -16,9 +16,9 @@ export async function ensureReplicadReady(): Promise<void> {
       // In real browser, Vite serves the wasm URL via HTTP (/@fs/ in dev, /assets/ in prod)
       // In Node.js / jsdom test environment, strip /@fs so Node fs can read the file directly
       const isRealBrowser =
-        typeof window !== 'undefined' &&
+        (typeof window !== 'undefined' || typeof self !== 'undefined') &&
         typeof navigator !== 'undefined' &&
-        !navigator.userAgent.includes('jsdom');
+        !navigator.userAgent?.includes('jsdom');
       const resolvedWasm = isRealBrowser
         ? wasmUrl
         : typeof wasmUrl === 'string' && wasmUrl.startsWith('/@fs/')

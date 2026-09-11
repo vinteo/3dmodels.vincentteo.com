@@ -114,6 +114,9 @@ export const App: React.FC = () => {
       setLoadingPreview(true);
       setPreviewError(null);
 
+      // Yield briefly so React commits loading state and the browser renders UI feedback immediately
+      await new Promise((resolve) => setTimeout(resolve, 30));
+
       try {
         const buffer = await fetchModelPreviewMesh(model, params);
         setMeshData(buffer);
@@ -250,6 +253,7 @@ export const App: React.FC = () => {
               loading={loadingPreview}
               error={previewError}
               modelName={activeModel.name}
+              engine={activeModel.engine}
               dimensions={liveDimensions}
               onRefresh={handleApplyParameters}
             />
