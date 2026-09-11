@@ -23,30 +23,34 @@ export const QuantityControl: React.FC<GenericControlProps> = ({
   const max = param.max ?? 300;
   const step = param.step ?? 1;
 
+  const isHalf = param.layout === 'half';
+
   return (
     <div
       className={`space-y-1.5 transition-opacity duration-200 ${
         !isEnabled ? 'opacity-40 pointer-events-none' : ''
       }`}
     >
-      <div className="flex items-center justify-between text-xs">
+      <div className={`text-xs ${isHalf ? 'space-y-1' : 'flex items-center justify-between'}`}>
         <label
           htmlFor={`param-${param.id}`}
-          className={`font-bold flex items-center gap-1.5 ${
+          className={`font-bold flex items-center justify-between gap-1.5 ${
             isEnabled ? 'text-slate-200' : 'text-slate-500'
           }`}
         >
-          {param.name}
-          {!isEnabled && (
-            <span className="text-[10px] font-normal text-slate-500 italic">(Disabled)</span>
-          )}
-          {param.description && (
-            <span title={param.description} className="text-slate-500 cursor-help">
-              <Info className="w-3 h-3" />
-            </span>
-          )}
+          <span className="flex items-center gap-1.5">
+            {param.name}
+            {!isEnabled && (
+              <span className="text-[10px] font-normal text-slate-500 italic">(Disabled)</span>
+            )}
+            {param.description && (
+              <span title={param.description} className="text-slate-500 cursor-help">
+                <Info className="w-3 h-3" />
+              </span>
+            )}
+          </span>
         </label>
-        <div className="flex items-center gap-1.5">
+        <div className={`flex items-center gap-1.5 ${isHalf ? 'justify-end' : ''}`}>
           <input
             type="number"
             id={`param-${param.id}`}
