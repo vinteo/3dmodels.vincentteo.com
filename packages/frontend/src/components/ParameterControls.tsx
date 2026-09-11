@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ModelConfig, ParameterDefinition } from '../types/model';
 import { ParameterGroupCard } from './controls/ParameterGroupCard';
 import { GenericControl } from './controls/GenericControl';
@@ -14,7 +14,8 @@ import {
   Layers,
   ExternalLink,
   FolderKanban,
-  Box
+  Box,
+  Loader2
 } from 'lucide-react';
 
 interface ParameterControlsProps {
@@ -48,6 +49,17 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
 }) => {
   const [autoUpdate, setAutoUpdate] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [justUpdated, setJustUpdated] = useState(false);
+  const prevLoadingRef = useRef(loading);
+
+  useEffect(() => {
+    if (prevLoadingRef.current && !loading) {
+      setJustUpdated(true);
+      const timer = setTimeout(() => setJustUpdated(false), 1800);
+      return () => clearTimeout(timer);
+    }
+    prevLoadingRef.current = loading;
+  }, [loading]);
 
   // Sibling models belonging to the same project
   const projectSiblings = useMemo(() => {
@@ -358,24 +370,33 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
           onClick={onApply}
           disabled={loading || (!isDirty && !loading)}
           className={`w-full playful-btn flex items-center justify-center gap-2 rounded-2xl py-2.5 text-xs font-bold text-white transition-all shadow-md ${
-            isDirty
-              ? 'bg-fuchsia-500 hover:bg-fuchsia-400 shadow-fuchsia-500/30 cursor-pointer'
-              : 'bg-slate-800/70 text-slate-500 cursor-not-allowed'
+            loading
+              ? 'bg-gradient-to-r from-fuchsia-600 to-violet-600 ring-2 ring-fuchsia-400/50 shadow-fuchsia-500/40 cursor-wait animate-pulse'
+              : isDirty
+                ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 hover:from-fuchsia-400 hover:to-pink-400 shadow-fuchsia-500/30 cursor-pointer active:scale-[0.98]'
+                : justUpdated
+                  ? 'bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 shadow-emerald-500/20'
+                  : 'bg-slate-800/70 text-slate-500 cursor-not-allowed'
           }`}
         >
           {loading ? (
             <span className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-              Calculating CAD Geometry...
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-fuchsia-200" />
+              <span>Updating 3D Preview...</span>
             </span>
           ) : isDirty ? (
             <>
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 text-fuchsia-200 animate-pulse" />
               Update 3D Preview
+            </>
+          ) : justUpdated ? (
+            <>
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              Preview Updated!
             </>
           ) : (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <Check className="w-3.5 h-3.5 text-emerald-400/70" />
               Preview Up-to-Date
             </>
           )}

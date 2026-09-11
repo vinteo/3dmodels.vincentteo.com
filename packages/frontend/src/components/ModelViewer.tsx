@@ -17,7 +17,8 @@ import {
   Check,
   Palette,
   X,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { PreviewMeshData } from '../types/model';
 import { ModelDimensionItem } from '../engines/replicad/types';
@@ -35,6 +36,7 @@ interface ModelViewerProps {
   loading: boolean;
   error?: string | null;
   modelName: string;
+  engine?: 'replicad' | 'openscad' | 'onshape';
   dimensions?: ModelDimensionItem[];
   onRefresh?: () => void;
 }
@@ -44,6 +46,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   loading,
   error,
   modelName,
+  engine,
   dimensions,
   onRefresh
 }) => {
@@ -70,6 +73,23 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
   const [showColorStudio, setShowColorStudio] = useState<boolean>(false);
   const [customPartColors, setCustomPartColors] = useState<Record<string, string>>({});
   const [computedBoundingDims, setComputedBoundingDims] = useState<ModelDimensionItem[]>([]);
+  const [justUpdated, setJustUpdated] = useState<boolean>(false);
+  const prevLoadingRef = useRef<boolean>(loading);
+
+  useEffect(() => {
+    if (prevLoadingRef.current && !loading && !error && meshData) {
+      setJustUpdated(true);
+      const timer = setTimeout(() => setJustUpdated(false), 1600);
+      return () => clearTimeout(timer);
+    }
+    prevLoadingRef.current = loading;
+  }, [loading, error, meshData]);
+
+  const engineLabel = useMemo(() => {
+    if (engine === 'replicad') return 'Replicad OpenCASCADE CAD Kernel';
+    if (engine === 'openscad') return 'OpenSCAD WASM Engine';
+    return 'Onshape Cloud CAD Engine';
+  }, [engine]);
 
   // Effective dimensions to show in HUD (prefers domain-calculated dimensions if provided, falls back to bounding box)
   const effectiveDimensions =
@@ -722,9 +742,9 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
       {/* Floating Model Dimensions HUD in Bottom-Right */}
       <ModelDimensionsHUD dimensions={effectiveDimensions} />
 
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#120e25]/75 backdrop-blur-sm transition-all duration-300">
+      {/* 1. Initial Loading Overlay (when no 3D mesh is yet loaded) */}
+      {loading && !meshData && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#120e25]/85 backdrop-blur-md transition-all duration-300">
           <div className="relative">
             <div className="w-16 h-16 rounded-full border-4 border-slate-800 border-t-fuchsia-500 animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -734,7 +754,50 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
           <span className="mt-4 text-sm font-bold text-white tracking-wide">
             Calculating Parametric Geometry...
           </span>
-          <span className="mt-1 text-xs text-slate-400">Querying Onshape CAD engine</span>
+          <span className="mt-1 text-xs text-slate-400 font-mono">{engineLabel}</span>
+        </div>
+      )}
+
+      {/* 2. Updating Preview Overlay (when 3D mesh is already present - non-destructive HUD) */}
+      {loading && meshData && (
+        <>
+          {/* Top Edge High-Tech Glowing Progress Shimmer Bar */}
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-violet-500 via-fuchsia-400 to-pink-500 animate-pulse z-30 shadow-lg shadow-fuchsia-500/50" />
+
+          {/* Subtle Ambient Viewport Tint */}
+          <div className="absolute inset-0 z-20 pointer-events-none bg-slate-950/20 backdrop-blur-[1px] transition-all duration-300" />
+
+          {/* Floating Top-Center Glassmorphic HUD Pill */}
+          <div className="absolute top-4 inset-x-0 flex justify-center pointer-events-none z-30 animate-in fade-in slide-in-from-top-3 duration-200">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-slate-950/90 backdrop-blur-md border border-fuchsia-500/40 shadow-2xl shadow-fuchsia-500/25 text-slate-100">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuchsia-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-fuchsia-500"></span>
+              </span>
+              <Loader2 className="w-4 h-4 text-fuchsia-400 animate-spin" />
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-white tracking-wide">
+                  Updating 3D Preview...
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  Recalculating {engineLabel}
+                </span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* 3. Transient Success Toast in Render Area */}
+      {justUpdated && !loading && !error && (
+        <div className="absolute top-4 inset-x-0 flex justify-center pointer-events-none z-30 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/90 backdrop-blur-md border border-emerald-500/50 shadow-xl shadow-emerald-500/25 text-emerald-300">
+            <Check className="w-4 h-4 text-emerald-400 animate-in zoom-in" />
+            <span className="text-xs font-bold">Preview Updated</span>
+            <span className="text-[10px] text-emerald-400/70 font-mono pl-1 border-l border-emerald-500/30">
+              3D Mesh Synced
+            </span>
+          </div>
         </div>
       )}
 
