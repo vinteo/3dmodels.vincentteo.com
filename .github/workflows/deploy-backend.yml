@@ -1,6 +1,6 @@
-name: Deploy Backend to Cloudflare Workers (Disabled)
+name: Deploy Backend to Cloudflare Workers
 
-# Disabled for now - manual trigger only (inactive)
+# Manual trigger via workflow_dispatch
 on:
   workflow_dispatch:
   # push:
@@ -13,7 +13,6 @@ on:
 jobs:
   deploy:
     name: Deploy Worker
-    if: false # Disabled for now
     runs-on: ubuntu-latest
 
     steps:
