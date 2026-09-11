@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ParameterDefinition } from '../../types/model';
 import { GenericControl } from './GenericControl';
-import { CircleDot, Layers, Box, Settings, RotateCw } from 'lucide-react';
+import { CircleDot, Layers, Box, Settings, RotateCw, Grid } from 'lucide-react';
 
 export interface ParameterGroupCardProps {
   groupName: string;
@@ -25,6 +25,9 @@ function getGroupIcon(groupName: string) {
   const lower = groupName.toLowerCase();
   if (lower.includes('ring') || lower.includes('keychain')) {
     return <CircleDot className="w-3.5 h-3.5 text-fuchsia-400" />;
+  }
+  if (lower.includes('divider') || lower.includes('shelf') || lower.includes('compartment')) {
+    return <Grid className="w-3.5 h-3.5 text-emerald-400" />;
   }
   if (lower.includes('pattern') || lower.includes('section') || lower.includes('lattice')) {
     return <Layers className="w-3.5 h-3.5 text-pink-400" />;
@@ -58,6 +61,31 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
   // Filter out dependent parameters when parent condition is false
   const visibleBodyParams = bodyParams.filter((p) => {
     if (!p.dependsOn) return true;
+    if (p.dependsOn.includes('>=')) {
+      const [key, expected] = p.dependsOn.split('>=');
+      const actual = Number(values[key] ?? 0);
+      return actual >= Number(expected);
+    }
+    if (p.dependsOn.includes('>')) {
+      const [key, expected] = p.dependsOn.split('>');
+      const actual = Number(values[key] ?? 0);
+      return actual > Number(expected);
+    }
+    if (p.dependsOn.includes('<=')) {
+      const [key, expected] = p.dependsOn.split('<=');
+      const actual = Number(values[key] ?? 0);
+      return actual <= Number(expected);
+    }
+    if (p.dependsOn.includes('<')) {
+      const [key, expected] = p.dependsOn.split('<');
+      const actual = Number(values[key] ?? 0);
+      return actual < Number(expected);
+    }
+    if (p.dependsOn.includes('!=')) {
+      const [key, expected] = p.dependsOn.split('!=');
+      const actual = values[key];
+      return String(actual ?? '') !== expected;
+    }
     if (p.dependsOn.includes('=')) {
       const [key, expected] = p.dependsOn.split('=');
       const actual = values[key];
@@ -338,10 +366,24 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
                 const isEnabled = param.dependsOn ? Boolean(values[param.dependsOn] ?? true) : true;
                 const colSpan = param.layout === 'half' ? 'col-span-1' : 'col-span-1 sm:col-span-2';
 
+                // Dynamically bound divider depth parameters to shell depth ("shell height")
+                let effectiveParam = param;
+                if (
+                  param.id.includes('depth') &&
+                  param.id !== 'depth' &&
+                  values['depth'] !== undefined
+                ) {
+                  const maxDepth = Number(values['depth']);
+                  effectiveParam = {
+                    ...param,
+                    max: maxDepth
+                  };
+                }
+
                 return (
                   <div key={param.id} className={colSpan}>
                     <GenericControl
-                      param={param}
+                      param={effectiveParam}
                       value={val}
                       isEnabled={isEnabled}
                       onChange={(newVal) => onChange(param.id, newVal)}

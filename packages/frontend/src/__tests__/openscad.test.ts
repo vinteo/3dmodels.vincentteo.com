@@ -99,7 +99,7 @@ describe('OpenSCAD Model Registry & OpenGrid Case Model', () => {
     expect(model).toBeDefined();
     expect(model?.id).toBe('opengrid-display-case-shell');
     expect(model?.name).toBe('OpenGrid Display Case Shell');
-    expect(model?.parameters.length).toBe(9);
+    expect(model?.parameters.length).toBe(33);
     expect(isOpenSCADModel('opengrid-display-case-shell')).toBe(true);
     expect(isOpenSCADModel('unknown-model')).toBe(false);
   });
@@ -115,27 +115,40 @@ describe('OpenSCAD Model Registry & OpenGrid Case Model', () => {
     expect(defaults.wall_thickness).toBe(5);
     expect(defaults.back_thickness).toBe(1);
     expect(defaults.connector_offset).toBe(0.1);
+    expect(defaults.h_divider_count).toBe(0);
+    expect(defaults.h_divider_thickness).toBe(3);
+    expect(defaults.h_divider_1_pos).toBe(0);
+    expect(defaults.h_divider_1_depth).toBe(32);
+    expect(defaults.v_divider_count).toBe(0);
+    expect(defaults.v_divider_thickness).toBe(3);
+    expect(defaults.v_divider_1_pos).toBe(0);
+    expect(defaults.v_divider_1_depth).toBe(32);
   });
 
-  it('calculates display case dimensions in OpenGrid units mode', () => {
+  it('calculates display case dimensions in OpenGrid units mode with dividers', () => {
     const dims = calculateOpenGridDimensions({
       dimension_mode: 'grid',
       grid_width: 6,
       grid_height: 4,
       depth: 32,
       wall_thickness: 5,
-      back_thickness: 1
+      back_thickness: 1,
+      h_divider_count: 2,
+      v_divider_count: 1
     });
 
     const outerWidth = dims.find((d) => d.id === 'outer_width');
     const outerHeight = dims.find((d) => d.id === 'outer_height');
     const totalDepth = dims.find((d) => d.id === 'total_depth');
     const innerOpening = dims.find((d) => d.id === 'inner_opening');
+    const compartments = dims.find((d) => d.id === 'compartments');
 
     expect(outerWidth?.formatted).toBe('168.0 mm (6u)');
     expect(outerHeight?.formatted).toBe('112.0 mm (4u)');
     expect(totalDepth?.formatted).toBe('33.0 mm');
     expect(innerOpening?.formatted).toBe('158.0 × 102.0 mm');
+    expect(compartments?.value).toBe(6);
+    expect(compartments?.formatted).toBe('6 cells (2 col × 3 row)');
   });
 
   it('calculates display case dimensions in custom millimeter mode', () => {
