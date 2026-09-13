@@ -22,7 +22,7 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.1",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^26.4.1",
     "@typescript-eslint/eslint-plugin": "^8.69.0",
     "@typescript-eslint/parser": "^8.68.0",
