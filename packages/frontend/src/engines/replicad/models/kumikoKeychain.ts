@@ -181,7 +181,7 @@ export const kumikoKeychainModel: ReplicadModelDefinition<KumikoParameters> = {
   tags: ['Kumiko', '3D Print', 'Keychain', 'Replicad', 'Instant CAD'],
   links: [
     {
-      label: 'Blog Post',
+      label: 'Guide',
       url: 'https://vincentteo.com/blog/2026/09/05/kumiko-keychain-customizer/',
       site: 'blog'
     },

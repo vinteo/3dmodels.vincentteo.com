@@ -222,6 +222,7 @@ export const App: React.FC = () => {
         onOpenModelDrawer={() => setModelDrawerOpen(true)}
         activeModelName={activeModel?.name || ''}
         activeModelEngine={activeModel?.engine}
+        activeModelGuideUrl={activeModel?.links?.find((l) => l.label === 'Guide')?.url}
         onOpenAiDisclosure={() => setAiDisclosureOpen(true)}
       />
 
