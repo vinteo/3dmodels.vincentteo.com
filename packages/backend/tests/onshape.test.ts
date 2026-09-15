@@ -12,7 +12,7 @@ describe('Models Configuration and Parsing', () => {
   it('should load configured models from catalog and filter hidden models', () => {
     const visibleModels = getAllModels();
     expect(visibleModels.length).toBeGreaterThan(0);
-    expect(visibleModels[0].id).toBe('kumiko-keychain');
+    expect(visibleModels[0].id).toBe('opengrid-display-case-shell');
 
     const allModels = getAllModels(true);
     expect(allModels.length).toBeGreaterThanOrEqual(2);

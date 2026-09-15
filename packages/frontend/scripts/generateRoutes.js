@@ -33,7 +33,7 @@ if (fs.existsSync(configPath)) {
 }
 
 // Built-in known model fallback IDs
-const knownModelIds = new Set(['kumiko-keychain', 'kumiko-pattern-keychain']);
+const knownModelIds = new Set(['kumiko-keychain', 'kumiko-pattern-keychain', 'kumiko-bookmark']);
 models.forEach((m) => {
   if (m.id) knownModelIds.add(m.id);
 });
