@@ -6685,7 +6685,6 @@ export const flagsKeychainModel: ReplicadModelDefinition<FlagsParameters> = {
     modelNotice:
       'The 3D model generation code, parametric geometry definitions, and CAD algorithms for this model were created with AI assistance.'
   },
-  links: [],
   parameters: flagsParameters,
   calculateDimensions: (params: FlagsParameters) => calculateFlagsDimensions(params),
   buildParts: (params: FlagsParameters) => buildFlagsKeychainParts(params),

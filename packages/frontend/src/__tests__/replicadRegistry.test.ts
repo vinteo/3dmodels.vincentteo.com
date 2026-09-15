@@ -92,7 +92,7 @@ describe('Replicad Model Registry & Parameter Management', () => {
     expect(kumiko).toBeDefined();
     expect(kumiko?.parameters.length).toBe(kumikoParameters.length);
     expect(kumiko?.parameters.find((p) => p.id === 'hex_radius')?.default).toBe(20);
-    expect(kumiko?.links?.length).toBe(3);
+    expect(kumiko?.links?.length).toBe(1);
     expect(kumiko?.defaultConfiguration).toContain('hex_radius=20+millimeter');
 
     const flags = merged.find((m) => m.id === 'flags-keychain');

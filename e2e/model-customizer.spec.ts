@@ -90,7 +90,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     page
   }) => {
     // Check links in left sidebar
-    const blogLink = page.locator("a[title='Open model page on Guide']");
+    const blogLink = page.locator("a[title='Read Model Guide']");
     await expect(blogLink).toBeVisible();
     await expect(blogLink).toHaveAttribute(
       'href',
