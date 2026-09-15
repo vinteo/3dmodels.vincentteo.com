@@ -10,10 +10,8 @@ import {
   buildDefaultConfigurationString,
   ReplicadModelDefinition
 } from '../engines/replicad/types';
-import {
-  defaultKumikoParameters,
-  kumikoParameters
-} from '../engines/replicad/models/kumikoKeychain';
+import { defaultKumikoParameters } from '../engines/replicad/models/kumikoKeychain';
+import { kumikoParameters } from '../engines/replicad/models/kumikoPatterns';
 import { mergeWithReplicadModels } from '../services/api';
 import { ModelConfig } from '../types/model';
 
@@ -88,7 +86,7 @@ describe('Replicad Model Registry & Parameter Management', () => {
     ];
 
     const merged = mergeWithReplicadModels(rawCatalog);
-    expect(merged.length).toBe(2);
+    expect(merged.length).toBe(3);
 
     const kumiko = merged.find((m) => m.id === 'kumiko-keychain');
     expect(kumiko).toBeDefined();

@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import {
+  buildKumikoKeychainParts,
+  defaultKumikoParameters,
+  calculateKumikoDimensions,
+  kumikoKeychainModel
+} from '../engines/replicad/models/kumikoKeychain';
+import {
   getMidpoint,
   getOneThirdPoint,
   getPointAtFraction,
@@ -7,11 +13,7 @@ import {
   getLineIntersection,
   createTriangleFrame,
   createSectorPattern,
-  buildKumikoKeychainParts,
-  defaultKumikoParameters,
   kumikoParameters,
-  calculateKumikoDimensions,
-  kumikoKeychainModel,
   KUMIKO_PATTERNS,
   KUMIKO_PATTERN_OPTIONS,
   KUMIKO_ROTATION_OPTIONS,
@@ -19,7 +21,7 @@ import {
   registerKumikoPattern,
   Triangle2D,
   Point2D
-} from '../engines/replicad/models/kumikoKeychain';
+} from '../engines/replicad/models/kumikoPatterns';
 import { ensureReplicadReady } from '../engines/replicad/occt';
 
 describe('Kumiko Keychain Geometry & 120° Solid Rotation', () => {

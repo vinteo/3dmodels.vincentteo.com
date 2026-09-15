@@ -30,7 +30,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
         })
       });
     });
-    await page.goto('/');
+    await page.goto('/kumiko-keychain');
   });
 
   test('should display minimalist header with logo and title', async ({ page }) => {

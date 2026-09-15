@@ -1,12 +1,14 @@
 import { ReplicadModelDefinition } from './types';
 import { kumikoKeychainModel } from './models/kumikoKeychain';
 import { flagsKeychainModel } from './models/flagsKeychain';
+import { kumikoBookmarkModel } from './models/kumikoBookmark';
 
 const modelRegistry = new Map<string, ReplicadModelDefinition<any>>();
 
 // Register built-in models
 registerReplicadModel(kumikoKeychainModel);
 registerReplicadModel(flagsKeychainModel);
+registerReplicadModel(kumikoBookmarkModel);
 
 /**
  * Registers a Replicad model definition into the registry
