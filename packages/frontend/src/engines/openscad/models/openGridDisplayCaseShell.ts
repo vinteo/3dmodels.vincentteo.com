@@ -543,18 +543,6 @@ export const openGridDisplayCaseShellModel: ShellModelDef = {
   partName: 'Case',
   description: 'Parametric display case shell with corner connector cutouts.',
   tags: ['OpenGrid', 'Display Case', 'Storage', 'OpenSCAD', 'Parametric', '3D Print'],
-  links: [
-    {
-      label: 'Printables',
-      url: 'https://www.printables.com/model/1803030-enclosed-display-caseframe-with-opengrid-mounts',
-      site: 'printables'
-    },
-    {
-      label: 'QIDI Maker',
-      url: 'https://www.qidimaker.com/en/models/detail/2089852363063504898?profile_id=2089864128757313537',
-      site: 'qidimaker'
-    }
-  ],
   parameters: openGridDisplayCaseShellParameters,
   scadContent: openGridDisplayCaseShellScad,
   calculateDimensions: (params) => calculateOpenGridDimensions(params)

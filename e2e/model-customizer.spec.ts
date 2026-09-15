@@ -86,11 +86,11 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await expect(page.locator('text=Acrylic Sheet Width')).toBeVisible();
   });
 
-  test('should display external model repository links for Blog, Printables and QIDI Maker', async ({
+  test('should display external model repository links for Guide, Printables and QIDI Maker', async ({
     page
   }) => {
     // Check links in left sidebar
-    const blogLink = page.locator("a[title='Open model page on Blog Post']");
+    const blogLink = page.locator("a[title='Read Model Guide']");
     await expect(blogLink).toBeVisible();
     await expect(blogLink).toHaveAttribute(
       'href',

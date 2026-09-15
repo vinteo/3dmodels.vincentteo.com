@@ -334,7 +334,6 @@ export const kumikoBookmarkModel: ReplicadModelDefinition<KumikoBookmarkParamete
   partName: 'Kumiko Bookmark',
   description: 'Customizable rectangular bookmark filled with geometric Kumiko lattice patterns.',
   tags: ['Kumiko', '3D Print', 'Bookmark', 'Replicad'],
-  links: [],
   parameters: kumikoBookmarkParameters,
   calculateDimensions: calculateKumikoBookmarkDimensions,
   buildParts: buildKumikoBookmarkParts,

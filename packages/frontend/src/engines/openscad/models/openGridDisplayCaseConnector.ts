@@ -190,18 +190,6 @@ export const openGridDisplayCaseConnectorModel: ConnectorModelDef = {
   partName: 'Connector',
   description: 'Connector with optional OpenGrid snap base and individual arm depth controls.',
   tags: ['OpenGrid', 'Display Case', 'Connector', 'OpenSCAD', 'Parametric', '3D Print'],
-  links: [
-    {
-      label: 'Printables',
-      url: 'https://www.printables.com/model/1803030-enclosed-display-caseframe-with-opengrid-mounts',
-      site: 'printables'
-    },
-    {
-      label: 'QIDI Maker',
-      url: 'https://www.qidimaker.com/en/models/detail/2089852363063504898?profile_id=2089864128757313537',
-      site: 'qidimaker'
-    }
-  ],
   parameters: openGridDisplayCaseConnectorParameters,
   scadContent: openGridDisplayCaseConnectorScad,
   calculateDimensions: (params) => calculateOpenGridConnectorDimensions(params)

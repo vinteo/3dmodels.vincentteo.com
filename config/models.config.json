@@ -9,6 +9,11 @@
     "tags": ["OpenGrid", "Display Case", "Storage", "OpenSCAD", "Parametric", "3D Print"],
     "links": [
       {
+        "label": "Guide",
+        "url": "https://vincentteo.com/blog/2026/09/12/customising-opengrid-display-case/",
+        "site": "blog"
+      },
+      {
         "label": "Printables",
         "url": "https://www.printables.com/model/1803030-enclosed-display-caseframe-with-opengrid-mounts",
         "site": "printables"
@@ -31,6 +36,11 @@
     "tags": ["OpenGrid", "Display Case", "Cover", "OpenSCAD", "Parametric", "3D Print"],
     "links": [
       {
+        "label": "Guide",
+        "url": "https://vincentteo.com/blog/2026/09/12/customising-opengrid-display-case/",
+        "site": "blog"
+      },
+      {
         "label": "Printables",
         "url": "https://www.printables.com/model/1803030-enclosed-display-caseframe-with-opengrid-mounts",
         "site": "printables"
@@ -52,6 +62,11 @@
     "engine": "openscad",
     "tags": ["OpenGrid", "Display Case", "Connector", "OpenSCAD", "Parametric", "3D Print"],
     "links": [
+      {
+        "label": "Guide",
+        "url": "https://vincentteo.com/blog/2026/09/12/customising-opengrid-display-case/",
+        "site": "blog"
+      },
       {
         "label": "Printables",
         "url": "https://www.printables.com/model/1803030-enclosed-display-caseframe-with-opengrid-mounts",
@@ -79,7 +94,7 @@
     "defaultConfiguration": "include_keychain_ring=true;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter;hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=3+millimeter;section_1=1;section_2=1;section_3=1;section_4=1;section_5=1;section_6=1",
     "links": [
       {
-        "label": "Blog Post",
+        "label": "Guide",
         "url": "https://vincentteo.com/blog/2026/09/05/kumiko-keychain-customizer/",
         "site": "blog"
       },
@@ -525,7 +540,7 @@
     "tags": ["Kumiko", "3D Print", "Keychain", "Replicad", "Instant CAD"],
     "links": [
       {
-        "label": "Blog Post",
+        "label": "Guide",
         "url": "https://vincentteo.com/blog/2026/09/05/kumiko-keychain-customizer/",
         "site": "blog"
       },

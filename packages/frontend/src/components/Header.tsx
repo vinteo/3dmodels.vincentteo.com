@@ -6,6 +6,7 @@ interface HeaderProps {
   onOpenModelDrawer: () => void;
   activeModelName: string;
   activeModelEngine?: string;
+  activeModelGuideUrl?: string;
   onOpenAiDisclosure?: () => void;
 }
 
@@ -14,6 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenModelDrawer,
   activeModelName,
   activeModelEngine,
+  activeModelGuideUrl,
   onOpenAiDisclosure
 }) => {
   // Only show Demo Mode badge if in mock mode and the active model uses the Onshape cloud engine
@@ -56,10 +58,23 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right: Active Model Badge & Mock Status & AI Disclosure */}
       <div className="flex items-center space-x-2">
-        <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-semibold text-slate-300">
-          <Box className="w-3.5 h-3.5 text-violet-400" />
-          <span className="truncate max-w-[200px]">{activeModelName}</span>
-        </div>
+        {activeModelGuideUrl ? (
+          <a
+            href={activeModelGuideUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Read Model Guide"
+            className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 border border-violet-500 hover:border-violet-400 text-xs font-bold text-white transition-all cursor-pointer shadow-lg shadow-violet-500/25 animate-in fade-in duration-300 group"
+          >
+            <Box className="w-3.5 h-3.5 text-violet-200 group-hover:text-white transition-colors" />
+            <span className="truncate max-w-[200px]">Guide: {activeModelName}</span>
+          </a>
+        ) : (
+          <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-semibold text-slate-300">
+            <Box className="w-3.5 h-3.5 text-violet-400" />
+            <span className="truncate max-w-[200px]">{activeModelName}</span>
+          </div>
+        )}
 
         {showDemoBadge && (
           <span

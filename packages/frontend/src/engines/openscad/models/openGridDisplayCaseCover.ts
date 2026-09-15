@@ -233,18 +233,6 @@ export const openGridDisplayCaseCoverModel: CoverModelDef = {
   description:
     'Parametric display case front cover with acrylic sheet holder and corner connectors.',
   tags: ['OpenGrid', 'Display Case', 'Cover', 'OpenSCAD', 'Parametric', '3D Print'],
-  links: [
-    {
-      label: 'Printables',
-      url: 'https://www.printables.com/model/1803030-enclosed-display-caseframe-with-opengrid-mounts',
-      site: 'printables'
-    },
-    {
-      label: 'QIDI Maker',
-      url: 'https://www.qidimaker.com/en/models/detail/2089852363063504898?profile_id=2089864128757313537',
-      site: 'qidimaker'
-    }
-  ],
   parameters: openGridDisplayCaseCoverParameters,
   scadContent: openGridDisplayCaseCoverScad,
   calculateDimensions: (params) => calculateOpenGridCoverDimensions(params)
