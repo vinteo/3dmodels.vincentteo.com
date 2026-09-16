@@ -122,11 +122,11 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
   // Compute dynamic min/max constraints based on sibling values
   const dynamicConstraints = useMemo(() => {
     const rules: Record<string, { min?: number; max?: number }> = {};
-    
+
     if (model.id === 'kumiko-bookmark') {
       const h = Number(currentValues['height'] ?? 120);
       const tFrame = Number(currentValues['frame_thickness'] ?? 3);
-      
+
       for (let i = 1; i <= 3; i++) {
         const thick = Number(currentValues[`bar_${i}_thickness`] ?? 15);
         rules[`bar_${i}_text_size`] = { max: Math.max(1, thick - 2) };
@@ -134,7 +134,7 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
         rules[`bar_${i}_y_pos`] = { min: -maxY, max: maxY };
       }
     }
-    
+
     return rules;
   }, [model.id, currentValues]);
 
@@ -142,27 +142,27 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
   useEffect(() => {
     let hasChanges = false;
     const nextValues = { ...currentValues };
-    
+
     for (const param of model.parameters) {
       const constraint = dynamicConstraints[param.id];
       if (!constraint) continue;
-      
+
       const val = Number(nextValues[param.id] ?? param.default);
       let clampedVal = val;
-      
+
       if (constraint.min !== undefined && clampedVal < constraint.min) {
         clampedVal = constraint.min;
       }
       if (constraint.max !== undefined && clampedVal > constraint.max) {
         clampedVal = constraint.max;
       }
-      
+
       if (clampedVal !== val) {
         nextValues[param.id] = clampedVal;
         hasChanges = true;
       }
     }
-    
+
     if (hasChanges) {
       onChangeValues(nextValues);
     }

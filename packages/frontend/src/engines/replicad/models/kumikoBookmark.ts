@@ -356,9 +356,27 @@ export function buildKumikoBookmarkParts(params: KumikoBookmarkParameters): Repl
   let frameSolid = frameOuterSolid.cut(frameInnerSolid);
 
   const barsConfig = [
-    { enable: params.enable_bar_1, text: params.bar_1_text, yPos: Number(params.bar_1_y_pos ?? 0), thick: Number(params.bar_1_thickness ?? 15), size: Number(params.bar_1_text_size ?? 10) },
-    { enable: params.enable_bar_2, text: params.bar_2_text, yPos: Number(params.bar_2_y_pos ?? 40), thick: Number(params.bar_2_thickness ?? 15), size: Number(params.bar_2_text_size ?? 10) },
-    { enable: params.enable_bar_3, text: params.bar_3_text, yPos: Number(params.bar_3_y_pos ?? -40), thick: Number(params.bar_3_thickness ?? 15), size: Number(params.bar_3_text_size ?? 10) }
+    {
+      enable: params.enable_bar_1,
+      text: params.bar_1_text,
+      yPos: Number(params.bar_1_y_pos ?? 0),
+      thick: Number(params.bar_1_thickness ?? 15),
+      size: Number(params.bar_1_text_size ?? 10)
+    },
+    {
+      enable: params.enable_bar_2,
+      text: params.bar_2_text,
+      yPos: Number(params.bar_2_y_pos ?? 40),
+      thick: Number(params.bar_2_thickness ?? 15),
+      size: Number(params.bar_2_text_size ?? 10)
+    },
+    {
+      enable: params.enable_bar_3,
+      text: params.bar_3_text,
+      yPos: Number(params.bar_3_y_pos ?? -40),
+      thick: Number(params.bar_3_thickness ?? 15),
+      size: Number(params.bar_3_text_size ?? 10)
+    }
   ].filter((b) => b.enable);
 
   let frameInnerMinusBarsSolid = frameInnerSolid;
@@ -376,25 +394,29 @@ export function buildKumikoBookmarkParts(params: KumikoBookmarkParameters): Repl
       .lineTo([-barWidth / 2, -thick / 2])
       .lineTo([barWidth / 2, -thick / 2])
       .close();
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let barSolid = (bar2D.sketchOnPlane('XY') as any).extrude(depth).translate([0, yPos, 0]);
     frameInnerMinusBarsSolid = frameInnerMinusBarsSolid.cut(barSolid);
 
     if (b.text && b.text.trim().length > 0) {
       try {
-        const textSketches = sketchText(b.text.trim(), { fontSize: size, fontFamily: 'Stencil' as any }, { plane: 'XY' });
+        const textSketches = sketchText(
+          b.text.trim(),
+          { fontSize: size, fontFamily: 'Stencil' as any },
+          { plane: 'XY' }
+        );
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const text3D = (textSketches as any).extrude(depth + 2);
-        
+
         // Center text via bounding box
         const bb = text3D.boundingBox;
         const boundsMin = bb.bounds ? bb.bounds[0] : [0, 0, 0];
         const boundsMax = bb.bounds ? bb.bounds[1] : [0, 0, 0];
-        
+
         const cx = (boundsMax[0] + boundsMin[0]) / 2;
         const cy = (boundsMax[1] + boundsMin[1]) / 2;
-        
+
         // Translate text to center it at [0, yPos]
         const centeredText3D = text3D.translate([-cx, -cy + yPos, -1]);
         barSolid = barSolid.cut(centeredText3D);
