@@ -7,6 +7,7 @@ export interface ParameterGroupCardProps {
   groupName: string;
   parameters: ParameterDefinition[];
   values: Record<string, number | string | boolean>;
+  constraints?: Record<string, { min?: number; max?: number }>;
   onChange: (id: string, value: number | string | boolean) => void;
   onChangeBatch?: (newValues: Record<string, number | string | boolean>) => void;
 }
@@ -42,6 +43,7 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
   groupName,
   parameters,
   values,
+  constraints = {},
   onChange,
   onChangeBatch
 }) => {
@@ -343,6 +345,7 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
                             param={param}
                             value={val}
                             isEnabled={isEnabled}
+                            constraint={constraints[param.id]}
                             onChange={(newVal) => onChange(param.id, newVal)}
                           />
                         </div>
@@ -386,6 +389,7 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
                       param={effectiveParam}
                       value={val}
                       isEnabled={isEnabled}
+                      constraint={constraints[param.id]}
                       onChange={(newVal) => onChange(param.id, newVal)}
                     />
                   </div>

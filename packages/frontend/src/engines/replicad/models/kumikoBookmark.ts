@@ -1,4 +1,4 @@
-import { draw, AnyShape, makeCompound } from 'replicad';
+import { draw, AnyShape, makeCompound, sketchText } from 'replicad';
 import { ParameterDefinition } from '../../../types/model';
 import { type ReplicadPart, type ReplicadModelDefinition, type ModelDimensionItem } from '../types';
 import { KumikoParameters, kumikoParameters, buildKumikoHexCellParts } from './kumikoPatterns';
@@ -9,6 +9,21 @@ export interface KumikoBookmarkParameters extends KumikoParameters {
   depth?: number;
   corner_radius?: number;
   frame_thickness?: number;
+  enable_bar_1?: boolean;
+  bar_1_y_pos?: number;
+  bar_1_thickness?: number;
+  bar_1_text?: string;
+  bar_1_text_size?: number;
+  enable_bar_2?: boolean;
+  bar_2_y_pos?: number;
+  bar_2_thickness?: number;
+  bar_2_text?: string;
+  bar_2_text_size?: number;
+  enable_bar_3?: boolean;
+  bar_3_y_pos?: number;
+  bar_3_thickness?: number;
+  bar_3_text?: string;
+  bar_3_text_size?: number;
 }
 
 /**
@@ -110,7 +125,9 @@ export const kumikoBookmarkParameters: ParameterDefinition[] = [
           'ring_thickness',
           'ring_fillet',
           'height',
-          'hex_fillet'
+          'hex_fillet',
+          'single_part',
+          'fuse_all_parts'
         ].includes(p.id)
     )
     .map((p) => {
@@ -119,7 +136,162 @@ export const kumikoBookmarkParameters: ParameterDefinition[] = [
       if (p.id === 'hex_thickness') return { ...p, default: 1 };
       if (p.id === 'hex_spoke_thickness') return { ...p, default: 1 };
       return p;
-    })
+    }),
+  {
+    id: 'enable_bar_1',
+    type: 'boolean',
+    name: 'Enable Text Bar 1',
+    default: false,
+    group: 'Text Bar 1'
+  },
+  {
+    id: 'bar_1_text',
+    type: 'string',
+    name: 'Text (Bar 1)',
+    default: 'READ',
+    group: 'Text Bar 1',
+    dependsOn: 'enable_bar_1'
+  },
+  {
+    id: 'bar_1_y_pos',
+    type: 'quantity',
+    name: 'Y Position (Bar 1)',
+    unit: 'millimeter',
+    default: 0,
+    min: -100,
+    max: 100,
+    step: 1,
+    group: 'Text Bar 1',
+    dependsOn: 'enable_bar_1'
+  },
+  {
+    id: 'bar_1_thickness',
+    type: 'quantity',
+    name: 'Bar Thickness (Bar 1)',
+    unit: 'millimeter',
+    default: 15,
+    min: 5,
+    max: 40,
+    step: 1,
+    group: 'Text Bar 1',
+    dependsOn: 'enable_bar_1'
+  },
+  {
+    id: 'bar_1_text_size',
+    type: 'quantity',
+    name: 'Text Size (Bar 1)',
+    unit: 'millimeter',
+    default: 10,
+    min: 3,
+    max: 30,
+    step: 0.5,
+    group: 'Text Bar 1',
+    dependsOn: 'enable_bar_1'
+  },
+  {
+    id: 'enable_bar_2',
+    type: 'boolean',
+    name: 'Enable Text Bar 2',
+    default: false,
+    group: 'Text Bar 2'
+  },
+  {
+    id: 'bar_2_text',
+    type: 'string',
+    name: 'Text (Bar 2)',
+    default: '',
+    group: 'Text Bar 2',
+    dependsOn: 'enable_bar_2'
+  },
+  {
+    id: 'bar_2_y_pos',
+    type: 'quantity',
+    name: 'Y Position (Bar 2)',
+    unit: 'millimeter',
+    default: 40,
+    min: -100,
+    max: 100,
+    step: 1,
+    group: 'Text Bar 2',
+    dependsOn: 'enable_bar_2'
+  },
+  {
+    id: 'bar_2_thickness',
+    type: 'quantity',
+    name: 'Bar Thickness (Bar 2)',
+    unit: 'millimeter',
+    default: 15,
+    min: 5,
+    max: 40,
+    step: 1,
+    group: 'Text Bar 2',
+    dependsOn: 'enable_bar_2'
+  },
+  {
+    id: 'bar_2_text_size',
+    type: 'quantity',
+    name: 'Text Size (Bar 2)',
+    unit: 'millimeter',
+    default: 10,
+    min: 3,
+    max: 30,
+    step: 0.5,
+    group: 'Text Bar 2',
+    dependsOn: 'enable_bar_2'
+  },
+  {
+    id: 'enable_bar_3',
+    type: 'boolean',
+    name: 'Enable Text Bar 3',
+    default: false,
+    group: 'Text Bar 3'
+  },
+  {
+    id: 'bar_3_text',
+    type: 'string',
+    name: 'Text (Bar 3)',
+    default: '',
+    group: 'Text Bar 3',
+    dependsOn: 'enable_bar_3'
+  },
+  {
+    id: 'bar_3_y_pos',
+    type: 'quantity',
+    name: 'Y Position (Bar 3)',
+    unit: 'millimeter',
+    default: -40,
+    min: -100,
+    max: 100,
+    step: 1,
+    group: 'Text Bar 3',
+    dependsOn: 'enable_bar_3'
+  },
+  {
+    id: 'bar_3_thickness',
+    type: 'quantity',
+    name: 'Bar Thickness (Bar 3)',
+    unit: 'millimeter',
+    default: 15,
+    min: 5,
+    max: 40,
+    step: 1,
+    group: 'Text Bar 3',
+    dependsOn: 'enable_bar_3'
+  },
+  {
+    id: 'bar_3_text_size',
+    type: 'quantity',
+    name: 'Text Size (Bar 3)',
+    unit: 'millimeter',
+    default: 10,
+    min: 3,
+    max: 30,
+    step: 0.5,
+    group: 'Text Bar 3',
+    dependsOn: 'enable_bar_3',
+    description: 'Will be clamped to 2mm less than the bar thickness'
+  },
+  ...kumikoParameters.filter((p) => ['fuse_all_parts', 'single_part'].includes(p.id))
 ];
 
 export function buildKumikoBookmarkParts(params: KumikoBookmarkParameters): ReplicadPart[] {
@@ -183,6 +355,78 @@ export function buildKumikoBookmarkParts(params: KumikoBookmarkParameters): Repl
   const frameInnerSolid = (frameInner2D.sketchOnPlane('XY') as any).extrude(depth);
   let frameSolid = frameOuterSolid.cut(frameInnerSolid);
 
+  const barsConfig = [
+    {
+      enable: params.enable_bar_1,
+      text: params.bar_1_text,
+      yPos: Number(params.bar_1_y_pos ?? 0),
+      thick: Number(params.bar_1_thickness ?? 15),
+      size: Number(params.bar_1_text_size ?? 10)
+    },
+    {
+      enable: params.enable_bar_2,
+      text: params.bar_2_text,
+      yPos: Number(params.bar_2_y_pos ?? 40),
+      thick: Number(params.bar_2_thickness ?? 15),
+      size: Number(params.bar_2_text_size ?? 10)
+    },
+    {
+      enable: params.enable_bar_3,
+      text: params.bar_3_text,
+      yPos: Number(params.bar_3_y_pos ?? -40),
+      thick: Number(params.bar_3_thickness ?? 15),
+      size: Number(params.bar_3_text_size ?? 10)
+    }
+  ].filter((b) => b.enable);
+
+  let frameInnerMinusBarsSolid = frameInnerSolid;
+  const processedBars: any[] = [];
+
+  for (const b of barsConfig) {
+    const thick = Number(b.thick ?? 15);
+    const size = Math.min(Number(b.size ?? 10), Math.max(1, thick - 2));
+    const maxY = Math.max(0, (h - 2 * tFrame - thick) / 2);
+    const yPos = Math.max(-maxY, Math.min(maxY, Number(b.yPos ?? 0)));
+
+    const barWidth = w - 2 * tFrame + 1; // +1 for overlap safety
+    const bar2D = draw([barWidth / 2, thick / 2])
+      .lineTo([-barWidth / 2, thick / 2])
+      .lineTo([-barWidth / 2, -thick / 2])
+      .lineTo([barWidth / 2, -thick / 2])
+      .close();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let barSolid = (bar2D.sketchOnPlane('XY') as any).extrude(depth).translate([0, yPos, 0]);
+    frameInnerMinusBarsSolid = frameInnerMinusBarsSolid.cut(barSolid);
+
+    if (b.text && b.text.trim().length > 0) {
+      try {
+        const textSketches = sketchText(
+          b.text.trim(),
+          { fontSize: size, fontFamily: 'Stencil' as any },
+          { plane: 'XY' }
+        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const text3D = (textSketches as any).extrude(depth + 2);
+
+        // Center text via bounding box
+        const bb = text3D.boundingBox;
+        const boundsMin = bb.bounds ? bb.bounds[0] : [0, 0, 0];
+        const boundsMax = bb.bounds ? bb.bounds[1] : [0, 0, 0];
+
+        const cx = (boundsMax[0] + boundsMin[0]) / 2;
+        const cy = (boundsMax[1] + boundsMin[1]) / 2;
+
+        // Translate text to center it at [0, yPos]
+        const centeredText3D = text3D.translate([-cx, -cy + yPos, -1]);
+        barSolid = barSolid.cut(centeredText3D);
+      } catch (err) {
+        console.warn('Failed to cut text for bar', err);
+      }
+    }
+    processedBars.push(barSolid);
+  }
+
   // 2. Generate a single hexagon cell
   const hexParams: KumikoParameters = {
     ...params,
@@ -236,11 +480,11 @@ export function buildKumikoBookmarkParts(params: KumikoBookmarkParameters): Repl
   let latticeSolid: any = null;
 
   if (cells.length > 0) {
-    // Intersect each cell independently (much faster than intersecting a giant fused object)
+    // Intersect each cell independently with the inner frame (excluding bars area)
     const trimmedCells = cells
       .map((cell) => {
         try {
-          return cell.intersect(frameInnerSolid);
+          return cell.intersect(frameInnerMinusBarsSolid);
         } catch {
           return null;
         }
@@ -259,6 +503,17 @@ export function buildKumikoBookmarkParts(params: KumikoBookmarkParameters): Repl
     } else {
       // If not fusing to frame, we still want the lattice to be one unified part
       latticeSolid = fuseArrayBinary(trimmedCells);
+    }
+  }
+
+  if (processedBars.length > 0) {
+    const fusedBars = fuseArrayBinary(processedBars);
+    if (fusedBars) {
+      try {
+        frameSolid = frameSolid.fuse(fusedBars);
+      } catch {
+        // fallback
+      }
     }
   }
 
