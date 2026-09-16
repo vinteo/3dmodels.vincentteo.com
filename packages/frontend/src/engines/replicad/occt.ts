@@ -36,27 +36,13 @@ export async function ensureReplicadReady(): Promise<void> {
       });
       setOC(OC);
 
-      // Load Stencil Font for text cutouts
-      try {
-        const resolvedFont = isRealBrowser
-          ? fontUrl
-          : typeof fontUrl === 'string' && fontUrl.startsWith('/@fs/')
-            ? fontUrl.replace('/@fs', '')
-            : fontUrl;
-
-        if (isRealBrowser) {
-          await loadFont(resolvedFont, 'Stencil');
-        } else {
-          // Node.js fallback using fs for jsdom test environments
-          const fs = await import('fs/promises');
-          const fsPath = resolvedFont.startsWith('/public/')
-            ? process.cwd() + resolvedFont
-            : resolvedFont;
-          const buffer = await fs.readFile(fsPath);
-          await loadFont(buffer.buffer, 'Stencil');
+      // Load Stencil Font for text cutouts in browser
+      if (isRealBrowser) {
+        try {
+          await loadFont(fontUrl, 'Stencil');
+        } catch (err) {
+          console.warn('Failed to load Stencil font:', err);
         }
-      } catch (err) {
-        console.warn('Failed to load Stencil font:', err);
       }
 
       isInitialized = true;
