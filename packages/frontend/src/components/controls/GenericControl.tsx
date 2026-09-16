@@ -6,6 +6,7 @@ export interface GenericControlProps {
   param: ParameterDefinition;
   value: number | string | boolean;
   isEnabled?: boolean;
+  constraint?: { min?: number; max?: number };
   onChange: (value: number | string | boolean) => void;
 }
 
@@ -16,11 +17,12 @@ export const QuantityControl: React.FC<GenericControlProps> = ({
   param,
   value,
   isEnabled = true,
+  constraint,
   onChange
 }) => {
   const numVal = Number(value);
-  const min = param.min ?? 1;
-  const max = param.max ?? 300;
+  const min = constraint?.min ?? param.min ?? 1;
+  const max = constraint?.max ?? param.max ?? 300;
   const step = param.step ?? 1;
 
   const isHalf = param.layout === 'half';

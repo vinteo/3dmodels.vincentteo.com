@@ -119,6 +119,55 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
     };
   }, [model.parameters]);
 
+  // Compute dynamic min/max constraints based on sibling values
+  const dynamicConstraints = useMemo(() => {
+    const rules: Record<string, { min?: number; max?: number }> = {};
+    
+    if (model.id === 'kumiko-bookmark') {
+      const h = Number(currentValues['height'] ?? 120);
+      const tFrame = Number(currentValues['frame_thickness'] ?? 3);
+      
+      for (let i = 1; i <= 3; i++) {
+        const thick = Number(currentValues[`bar_${i}_thickness`] ?? 15);
+        rules[`bar_${i}_text_size`] = { max: Math.max(1, thick - 2) };
+        const maxY = Math.max(0, (h - 2 * tFrame - thick) / 2);
+        rules[`bar_${i}_y_pos`] = { min: -maxY, max: maxY };
+      }
+    }
+    
+    return rules;
+  }, [model.id, currentValues]);
+
+  // Enforce dynamic constraints on current values so they don't stay out of bounds
+  useEffect(() => {
+    let hasChanges = false;
+    const nextValues = { ...currentValues };
+    
+    for (const param of model.parameters) {
+      const constraint = dynamicConstraints[param.id];
+      if (!constraint) continue;
+      
+      const val = Number(nextValues[param.id] ?? param.default);
+      let clampedVal = val;
+      
+      if (constraint.min !== undefined && clampedVal < constraint.min) {
+        clampedVal = constraint.min;
+      }
+      if (constraint.max !== undefined && clampedVal > constraint.max) {
+        clampedVal = constraint.max;
+      }
+      
+      if (clampedVal !== val) {
+        nextValues[param.id] = clampedVal;
+        hasChanges = true;
+      }
+    }
+    
+    if (hasChanges) {
+      onChangeValues(nextValues);
+    }
+  }, [dynamicConstraints, currentValues, model.parameters, onChangeValues]);
+
   if (collapsed) {
     return (
       <aside className="w-12 h-full bg-slate-900/80 border-r border-slate-800/80 flex flex-col items-center justify-between py-4 z-20">
@@ -308,6 +357,7 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
             groupName={groupName}
             parameters={params}
             values={currentValues}
+            constraints={dynamicConstraints}
             onChange={handleChange}
             onChangeBatch={(updates) => onChangeValues({ ...currentValues, ...updates })}
           />
@@ -333,6 +383,7 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                           : Boolean(currentValues[param.dependsOn] ?? true)
                         : true
                     }
+                    constraint={dynamicConstraints[param.id]}
                     onChange={(newVal) => handleChange(param.id, newVal)}
                   />
                 </div>

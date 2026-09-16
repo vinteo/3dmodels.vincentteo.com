@@ -1,6 +1,7 @@
-import { setOC } from 'replicad';
+import { setOC, loadFont } from 'replicad';
 import opencascade from 'replicad-opencascadejs';
 import wasmUrl from 'replicad-opencascadejs/wasm?url';
+import fontUrl from '../../../public/fonts/AllertaStencil-Regular.ttf?url';
 
 let occtPromise: Promise<unknown> | null = null;
 let isInitialized = false;
@@ -34,6 +35,30 @@ export async function ensureReplicadReady(): Promise<void> {
         }
       });
       setOC(OC);
+
+      // Load Stencil Font for text cutouts
+      try {
+        const resolvedFont = isRealBrowser
+          ? fontUrl
+          : typeof fontUrl === 'string' && fontUrl.startsWith('/@fs/')
+            ? fontUrl.replace('/@fs', '')
+            : fontUrl;
+
+        if (isRealBrowser) {
+          await loadFont(resolvedFont, 'Stencil');
+        } else {
+          // Node.js fallback using fs for jsdom test environments
+          const fs = await import('fs/promises');
+          const fsPath = resolvedFont.startsWith('/public/')
+            ? process.cwd() + resolvedFont
+            : resolvedFont;
+          const buffer = await fs.readFile(fsPath);
+          await loadFont(buffer.buffer, 'Stencil');
+        }
+      } catch (err) {
+        console.warn('Failed to load Stencil font:', err);
+      }
+
       isInitialized = true;
     })();
   }
