@@ -49,7 +49,7 @@ test.describe('3D Models Customizer & Exporter Studio Layout Flow', () => {
     await expect(catalogDrawer.locator('text=Kumiko Keychain (Onshape)')).not.toBeVisible();
 
     // Grouped project cards should be visible
-    await expect(catalogDrawer.locator('text=Project (2 Parts)')).toBeVisible();
+    await expect(catalogDrawer.locator('text=Project (2 Parts)').first()).toBeVisible();
     await expect(catalogDrawer.locator("button:has-text('Kumiko')").first()).toBeVisible();
     await expect(
       catalogDrawer.locator("button:has-text('Flags of the World')").first()

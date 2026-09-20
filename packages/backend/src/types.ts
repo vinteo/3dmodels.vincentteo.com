@@ -37,6 +37,15 @@ export interface ModelLink {
   site?: 'printables' | 'qidimaker' | 'makerworld' | 'thingiverse' | 'github' | string;
 }
 
+export interface ModelSource {
+  title: string;
+  url: string;
+  authors?: string;
+  year?: string | number;
+  publication?: string;
+  description?: string;
+}
+
 export interface ModelAiDisclosure {
   customiserNotice?: string;
   modelNotice?: string;
@@ -58,6 +67,7 @@ export interface ModelConfig {
   parameters: ParameterDefinition[];
   thumbnail?: string;
   links?: ModelLink[];
+  sources?: ModelSource[];
   aiDisclosure?: ModelAiDisclosure;
 }
 

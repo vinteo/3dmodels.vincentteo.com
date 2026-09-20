@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Sparkles, Layers, Bot } from 'lucide-react';
+import { Box, Sparkles, Layers, Bot, BookOpen } from 'lucide-react';
 
 interface HeaderProps {
   mockMode?: boolean;
@@ -7,6 +7,8 @@ interface HeaderProps {
   activeModelName: string;
   activeModelEngine?: string;
   activeModelGuideUrl?: string;
+  hasSources?: boolean;
+  onOpenSources?: () => void;
   onOpenAiDisclosure?: () => void;
 }
 
@@ -16,6 +18,8 @@ export const Header: React.FC<HeaderProps> = ({
   activeModelName,
   activeModelEngine,
   activeModelGuideUrl,
+  hasSources,
+  onOpenSources,
   onOpenAiDisclosure
 }) => {
   // Only show Demo Mode badge if in mock mode and the active model uses the Onshape cloud engine
@@ -84,6 +88,19 @@ export const Header: React.FC<HeaderProps> = ({
             <Sparkles className="w-3 h-3" />
             Demo Mode
           </span>
+        )}
+
+        {/* Sources Pill */}
+        {hasSources && (
+          <button
+            type="button"
+            onClick={onOpenSources}
+            title="Sources & References"
+            className="playful-btn inline-flex items-center gap-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700/80 px-2.5 py-1 text-[11px] font-bold text-slate-300 hover:text-white border border-slate-700/80 hover:border-slate-600 transition-all cursor-pointer shadow-sm"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+            <span>Sources</span>
+          </button>
         )}
 
         {/* AI Disclosure Pill */}

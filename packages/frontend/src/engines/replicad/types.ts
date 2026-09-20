@@ -1,5 +1,5 @@
 import { AnyShape } from 'replicad';
-import { ParameterDefinition, ModelLink, ModelAiDisclosure } from '../../types/model';
+import { ParameterDefinition, ModelLink, ModelSource, ModelAiDisclosure } from '../../types/model';
 
 export interface ReplicadPart {
   shape: AnyShape;
@@ -27,10 +27,14 @@ export interface ReplicadModelDefinition<TParams = Record<string, number | strin
   hidden?: boolean;
   thumbnail?: string;
   links?: ModelLink[];
+  sources?: ModelSource[];
   parameters: ParameterDefinition[];
   aiDisclosure?: ModelAiDisclosure;
   defaultConfiguration?: string;
   calculateDimensions?: (params: TParams) => ModelDimensionItem[];
+  calculateDynamicConstraints?: (
+    params: Record<string, any>
+  ) => Record<string, { min?: number; max?: number }>;
   buildParts: (params: TParams) => ReplicadPart[];
   buildShape?: (params: TParams) => AnyShape;
 }

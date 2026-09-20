@@ -582,6 +582,23 @@ export function calculateKumikoBookmarkDimensions(
   ];
 }
 
+export function calculateKumikoBookmarkDynamicConstraints(
+  params: Record<string, any>
+): Record<string, { min?: number; max?: number }> {
+  const rules: Record<string, { min?: number; max?: number }> = {};
+  const h = Number(params['height'] ?? 120);
+  const tFrame = Number(params['frame_thickness'] ?? 3);
+
+  for (let i = 1; i <= 3; i++) {
+    const thick = Number(params[`bar_${i}_thickness`] ?? 15);
+    rules[`bar_${i}_text_size`] = { max: Math.max(1, thick - 2) };
+    const maxY = Math.max(0, (h - 2 * tFrame - thick) / 2);
+    rules[`bar_${i}_y_pos`] = { min: -maxY, max: maxY };
+  }
+
+  return rules;
+}
+
 export const kumikoBookmarkModel: ReplicadModelDefinition<KumikoBookmarkParameters> = {
   id: 'kumiko-bookmark',
   name: 'Kumiko Bookmark',
@@ -591,6 +608,7 @@ export const kumikoBookmarkModel: ReplicadModelDefinition<KumikoBookmarkParamete
   tags: ['Kumiko', '3D Print', 'Bookmark', 'Replicad'],
   parameters: kumikoBookmarkParameters,
   calculateDimensions: calculateKumikoBookmarkDimensions,
+  calculateDynamicConstraints: calculateKumikoBookmarkDynamicConstraints,
   buildParts: buildKumikoBookmarkParts,
   buildShape: buildKumikoBookmark
 };

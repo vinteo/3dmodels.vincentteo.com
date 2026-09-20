@@ -35,6 +35,7 @@ describe('Replicad Model Registry & Parameter Management', () => {
     expect(isReplicadModel('kumiko-keychain-replicad')).toBe(true);
     expect(isReplicadModel('kumiko-pattern-keychain')).toBe(true);
     expect(isReplicadModel('flags-keychain')).toBe(true);
+    expect(isReplicadModel('chinese-lattice-bookmark')).toBe(true);
     expect(isReplicadModel('unknown-model-xyz')).toBe(false);
   });
 
@@ -86,7 +87,7 @@ describe('Replicad Model Registry & Parameter Management', () => {
     ];
 
     const merged = mergeWithReplicadModels(rawCatalog);
-    expect(merged.length).toBe(3);
+    expect(merged.length).toBe(4);
 
     const kumiko = merged.find((m) => m.id === 'kumiko-keychain');
     expect(kumiko).toBeDefined();

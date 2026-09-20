@@ -10,6 +10,7 @@ import { ModelViewer } from './components/ModelViewer';
 import { ParameterControls } from './components/ParameterControls';
 import { ExportModal } from './components/ExportModal';
 import { AiDisclosureModal } from './components/AiDisclosureModal';
+import { SourcesModal } from './components/SourcesModal';
 import { Footer } from './components/Footer';
 
 export const App: React.FC = () => {
@@ -22,6 +23,7 @@ export const App: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
   const [aiDisclosureOpen, setAiDisclosureOpen] = useState<boolean>(false);
+  const [sourcesModalOpen, setSourcesModalOpen] = useState<boolean>(false);
 
   // Parameter State: user edited vs last previewed
   const [currentValues, setCurrentValues] = useState<Record<string, number | string | boolean>>({});
@@ -223,6 +225,8 @@ export const App: React.FC = () => {
         activeModelName={activeModel?.name || ''}
         activeModelEngine={activeModel?.engine}
         activeModelGuideUrl={activeModel?.links?.find((l) => l.label === 'Guide')?.url}
+        hasSources={Boolean(activeModel?.sources && activeModel.sources.length > 0)}
+        onOpenSources={() => setSourcesModalOpen(true)}
         onOpenAiDisclosure={() => setAiDisclosureOpen(true)}
       />
 
@@ -294,6 +298,14 @@ export const App: React.FC = () => {
         isOpen={aiDisclosureOpen}
         onClose={() => setAiDisclosureOpen(false)}
         disclosure={activeModel?.aiDisclosure}
+      />
+
+      {/* Sources & Academic References Modal Dialog */}
+      <SourcesModal
+        isOpen={sourcesModalOpen}
+        onClose={() => setSourcesModalOpen(false)}
+        modelName={activeModel?.name || ''}
+        sources={activeModel?.sources}
       />
     </div>
   );
