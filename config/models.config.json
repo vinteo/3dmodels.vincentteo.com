@@ -92,6 +92,13 @@
     "elementType": "partstudio",
     "tags": ["Kumiko", "3D Print", "Keychain", "Onshape"],
     "defaultConfiguration": "include_keychain_ring=true;ring_thickness=2+millimeter;ring_fillet=0.2+millimeter;hex_radius=20+millimeter;hex_thickness=2+millimeter;hex_fillet=0.2+millimeter;hex_spoke_thickness=2+millimeter;hex_design_thickness=1+millimeter;height=3+millimeter;section_1=1;section_2=1;section_3=1;section_4=1;section_5=1;section_6=1",
+    "sources": [
+      {
+        "title": "Kumiko Designer",
+        "url": "https://www.kumikodesigner.com/",
+        "description": "An interactive design application for traditional Japanese kumiko woodworking patterns and panel arrangements."
+      }
+    ],
     "links": [
       {
         "label": "Guide",
@@ -538,6 +545,13 @@
     "description": "Customisable Simple Kumiko Inspired Keychain",
     "engine": "replicad",
     "tags": ["Kumiko", "3D Print", "Keychain", "Replicad", "Instant CAD"],
+    "sources": [
+      {
+        "title": "Kumiko Designer",
+        "url": "https://www.kumikodesigner.com/",
+        "description": "An interactive design application for traditional Japanese kumiko woodworking patterns and panel arrangements."
+      }
+    ],
     "links": [
       {
         "label": "Guide",
@@ -579,7 +593,14 @@
     "partName": "Kumiko Bookmark",
     "description": "Customizable rectangular bookmark filled with geometric Kumiko lattice patterns.",
     "engine": "replicad",
-    "tags": ["Kumiko", "3D Print", "Bookmark", "Replicad"]
+    "tags": ["Kumiko", "3D Print", "Bookmark", "Replicad"],
+    "sources": [
+      {
+        "title": "Kumiko Designer",
+        "url": "https://www.kumikodesigner.com/",
+        "description": "An interactive design application for traditional Japanese kumiko woodworking patterns and panel arrangements."
+      }
+    ]
   },
   {
     "id": "chinese-lattice-bookmark",

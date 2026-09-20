@@ -89,6 +89,44 @@ describe('Sources & References Feature', () => {
       expect(pdfLink).toHaveAttribute('rel', 'noopener noreferrer');
     });
 
+    it('distinguishes between PDF and non-PDF sources with appropriate badges and button labels', () => {
+      const mixedSources = [
+        {
+          title: 'PDF Research Paper',
+          url: 'https://ejmt.mathandtech.org/Contents/eJMT_v3n1n4.pdf',
+          description: 'A mathematical paper in PDF format.'
+        },
+        {
+          title: 'Kumiko Designer App',
+          url: 'https://www.kumikodesigner.com/',
+          description: 'An interactive web design tool.'
+        }
+      ];
+
+      render(
+        <SourcesModal
+          isOpen={true}
+          onClose={vi.fn()}
+          modelName="Mixed Sources Model"
+          sources={mixedSources}
+        />
+      );
+
+      // PDF source badge and action
+      expect(screen.getByText('PDF')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /View Reference PDF/i })).toHaveAttribute(
+        'href',
+        'https://ejmt.mathandtech.org/Contents/eJMT_v3n1n4.pdf'
+      );
+
+      // Non-PDF source badge and action
+      expect(screen.getByText('Website')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Visit Website/i })).toHaveAttribute(
+        'href',
+        'https://www.kumikodesigner.com/'
+      );
+    });
+
     it('renders fallback message when sources list is empty', () => {
       render(<SourcesModal isOpen={true} onClose={vi.fn()} modelName="Empty Model" sources={[]} />);
 
@@ -228,6 +266,32 @@ describe('Sources & References Feature', () => {
       expect(ejmtSource).toBeDefined();
       expect(ejmtSource?.title).toContain('Chinese Lattice Design');
       expect(ejmtSource?.url).toBe('https://ejmt.mathandtech.org/Contents/eJMT_v3n1n4.pdf');
+    });
+
+    it('all kumiko models provide kumikodesigner.com as a source', async () => {
+      const { getModels } = await import('../services/api');
+      const { models } = await getModels(true);
+
+      const kumikoModelIds = ['kumiko-keychain', 'kumiko-bookmark', 'kumiko-pattern-keychain'];
+
+      for (const id of kumikoModelIds) {
+        const model = models.find((m) => m.id === id);
+        expect(model, `Expected model ${id} to exist`).toBeDefined();
+        expect(model?.sources, `Expected model ${id} to have sources`).toBeDefined();
+        expect(
+          model?.sources?.length,
+          `Expected model ${id} to have at least one source`
+        ).toBeGreaterThan(0);
+
+        const kumikoDesignerSource = model?.sources?.find(
+          (s) => s.url === 'https://www.kumikodesigner.com/'
+        );
+        expect(
+          kumikoDesignerSource,
+          `Expected model ${id} to have https://www.kumikodesigner.com/ in sources`
+        ).toBeDefined();
+        expect(kumikoDesignerSource?.title).toBe('Kumiko Designer');
+      }
     });
   });
 });

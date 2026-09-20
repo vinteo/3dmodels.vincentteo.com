@@ -179,6 +179,14 @@ export const kumikoKeychainModel: ReplicadModelDefinition<KumikoParameters> = {
   description:
     'Customisable Simple Kumiko Inspired Keychain powered by Replicad & OpenCASCADE.js (zero API limits).',
   tags: ['Kumiko', '3D Print', 'Keychain', 'Replicad', 'Instant CAD'],
+  sources: [
+    {
+      title: 'Kumiko Designer',
+      url: 'https://www.kumikodesigner.com/',
+      description:
+        'An interactive design application for traditional Japanese kumiko woodworking patterns and panel arrangements.'
+    }
+  ],
   parameters: kumikoParameters,
   calculateDimensions: (params: KumikoParameters) => calculateKumikoDimensions(params),
   buildParts: (params: KumikoParameters) => buildKumikoKeychainParts(params),
