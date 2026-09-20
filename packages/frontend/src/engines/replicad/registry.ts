@@ -2,6 +2,7 @@ import { ReplicadModelDefinition } from './types';
 import { kumikoKeychainModel } from './models/kumikoKeychain';
 import { flagsKeychainModel } from './models/flagsKeychain';
 import { kumikoBookmarkModel } from './models/kumikoBookmark';
+import { chineseLatticeBookmarkModel } from './models/chineseLatticeBookmark';
 
 const modelRegistry = new Map<string, ReplicadModelDefinition<any>>();
 
@@ -9,6 +10,7 @@ const modelRegistry = new Map<string, ReplicadModelDefinition<any>>();
 registerReplicadModel(kumikoKeychainModel);
 registerReplicadModel(flagsKeychainModel);
 registerReplicadModel(kumikoBookmarkModel);
+registerReplicadModel(chineseLatticeBookmarkModel);
 
 /**
  * Registers a Replicad model definition into the registry

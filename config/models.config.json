@@ -580,5 +580,36 @@
     "description": "Customizable rectangular bookmark filled with geometric Kumiko lattice patterns.",
     "engine": "replicad",
     "tags": ["Kumiko", "3D Print", "Bookmark", "Replicad"]
+  },
+  {
+    "id": "chinese-lattice-bookmark",
+    "name": "Chinese Lattice Bookmark",
+    "project": "Bookmarks",
+    "partName": "Chinese Lattice Bookmark",
+    "description": "Customizable rectangular bookmark featuring algorithmic Chinese lattice designs based on traditional window patterns.",
+    "engine": "replicad",
+    "tags": ["Chinese Lattice", "3D Print", "Bookmark", "Replicad", "Architecture"],
+    "sources": [
+      {
+        "title": "An Algorithmic Approach to Chinese Lattice Design",
+        "authors": "Miroslaw Majewski, Chuan-Kuan Wang",
+        "publication": "The Electronic Journal of Mathematics and Technology (eJMT), Vol. 3, No. 1",
+        "year": 2009,
+        "url": "https://ejmt.mathandtech.org/Contents/eJMT_v3n1n4.pdf",
+        "description": "Mathematical algorithms and generative geometric rules for classical Chinese window lattice designs based on traditional architectural window patterns."
+      },
+      {
+        "title": "Chinese Lattice Designs",
+        "authors": "Daniel Sheets Dye",
+        "publication": "Dover Publications (Originally Harvard-Yenching Institute Monograph Series)",
+        "year": 1974,
+        "url": "https://archive.org/details/chineselatticede0000dyed",
+        "description": "Comprehensive visual and structural catalog of classical Chinese window grilles, frets, and interlocking geometric woodwork."
+      }
+    ],
+    "aiDisclosure": {
+      "modelingAiAssisted": true,
+      "modelNotice": "The 3D model generation code, parametric geometry definitions, and CAD algorithms for this model were created with AI assistance."
+    }
   }
 ]

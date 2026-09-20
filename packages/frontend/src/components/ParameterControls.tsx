@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ModelConfig, ParameterDefinition } from '../types/model';
 import { ParameterGroupCard } from './controls/ParameterGroupCard';
 import { GenericControl } from './controls/GenericControl';
+import { getReplicadModel } from '../engines/replicad';
 import {
   Sliders,
   RotateCcw,
@@ -119,23 +120,13 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
     };
   }, [model.parameters]);
 
-  // Compute dynamic min/max constraints based on sibling values
+  // Compute dynamic min/max constraints based on model definition
   const dynamicConstraints = useMemo(() => {
-    const rules: Record<string, { min?: number; max?: number }> = {};
-
-    if (model.id === 'kumiko-bookmark') {
-      const h = Number(currentValues['height'] ?? 120);
-      const tFrame = Number(currentValues['frame_thickness'] ?? 3);
-
-      for (let i = 1; i <= 3; i++) {
-        const thick = Number(currentValues[`bar_${i}_thickness`] ?? 15);
-        rules[`bar_${i}_text_size`] = { max: Math.max(1, thick - 2) };
-        const maxY = Math.max(0, (h - 2 * tFrame - thick) / 2);
-        rules[`bar_${i}_y_pos`] = { min: -maxY, max: maxY };
-      }
+    const repDef = getReplicadModel(model.id);
+    if (repDef?.calculateDynamicConstraints) {
+      return repDef.calculateDynamicConstraints(currentValues);
     }
-
-    return rules;
+    return {};
   }, [model.id, currentValues]);
 
   // Enforce dynamic constraints on current values so they don't stay out of bounds
@@ -332,11 +323,13 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border shadow-sm ${
                     link.site === 'blog'
                       ? 'bg-purple-500/15 text-purple-300 border-purple-500/30 hover:bg-purple-500/25 hover:border-purple-500/50'
-                      : link.site === 'printables'
-                        ? 'bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/25 hover:border-orange-500/50'
-                        : link.site === 'qidimaker'
-                          ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/25 hover:border-sky-500/50'
-                          : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white'
+                      : link.site === 'paper'
+                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25 hover:border-amber-500/50'
+                        : link.site === 'printables'
+                          ? 'bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/25 hover:border-orange-500/50'
+                          : link.site === 'qidimaker'
+                            ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/25 hover:border-sky-500/50'
+                            : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white'
                   }`}
                   title={`Open model page on ${link.label}`}
                 >
