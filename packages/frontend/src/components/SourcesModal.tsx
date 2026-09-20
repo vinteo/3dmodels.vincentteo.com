@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, BookOpen, ExternalLink, FileText } from 'lucide-react';
+import { X, BookOpen, ExternalLink, FileText, Globe } from 'lucide-react';
 import { ModelSource } from '../types/model';
 
 interface SourcesModalProps {
@@ -73,53 +73,73 @@ export const SourcesModal: React.FC<SourcesModalProps> = ({
               No external sources documented for this model.
             </div>
           ) : (
-            sources.map((source, idx) => (
-              <div
-                key={source.url || idx}
-                className="rounded-2xl bg-slate-900/80 border border-slate-800/90 p-4 space-y-3"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-bold text-sm text-white leading-snug">{source.title}</h4>
-                    <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[10px] font-bold text-amber-300">
-                      <FileText className="w-3 h-3" />
-                      PDF
-                    </span>
+            sources.map((source, idx) => {
+              const isPdf =
+                source.type?.toLowerCase() === 'pdf' ||
+                (!source.type &&
+                  Boolean(source.url && source.url.toLowerCase().split('?')[0].includes('.pdf')));
+
+              const badgeLabel = source.type
+                ? source.type.toLowerCase() === 'pdf'
+                  ? 'PDF'
+                  : source.type.charAt(0).toUpperCase() + source.type.slice(1)
+                : isPdf
+                  ? 'PDF'
+                  : 'Website';
+
+              const actionLabel = isPdf ? 'View Reference PDF' : 'Visit Website';
+              const IconComponent = isPdf ? FileText : Globe;
+
+              return (
+                <div
+                  key={source.url || idx}
+                  className="rounded-2xl bg-slate-900/80 border border-slate-800/90 p-4 space-y-3"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-bold text-sm text-white leading-snug">{source.title}</h4>
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[10px] font-bold text-amber-300">
+                        <IconComponent className="w-3 h-3" />
+                        {badgeLabel}
+                      </span>
+                    </div>
+
+                    {source.authors && (
+                      <p className="text-slate-300 text-xs font-medium">
+                        Authors: {source.authors}
+                      </p>
+                    )}
+
+                    {(source.publication || source.year) && (
+                      <p className="text-slate-400 text-[11px] italic">
+                        {[source.publication, source.year ? `(${source.year})` : null]
+                          .filter(Boolean)
+                          .join(' ')}
+                      </p>
+                    )}
                   </div>
 
-                  {source.authors && (
-                    <p className="text-slate-300 text-xs font-medium">Authors: {source.authors}</p>
-                  )}
-
-                  {(source.publication || source.year) && (
-                    <p className="text-slate-400 text-[11px] italic">
-                      {[source.publication, source.year ? `(${source.year})` : null]
-                        .filter(Boolean)
-                        .join(' ')}
+                  {source.description && (
+                    <p className="text-slate-300 text-xs leading-relaxed bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/60">
+                      {source.description}
                     </p>
                   )}
-                </div>
 
-                {source.description && (
-                  <p className="text-slate-300 text-xs leading-relaxed bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/60">
-                    {source.description}
-                  </p>
-                )}
-
-                <div className="pt-1">
-                  <a
-                    href={source.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 hover:border-amber-500/50 text-xs font-bold text-amber-300 hover:text-amber-200 transition-all cursor-pointer shadow-sm group"
-                  >
-                    <FileText className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-                    <span>View Reference PDF</span>
-                    <ExternalLink className="w-3 h-3 opacity-70" />
-                  </a>
+                  <div className="pt-1">
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 hover:border-amber-500/50 text-xs font-bold text-amber-300 hover:text-amber-200 transition-all cursor-pointer shadow-sm group"
+                    >
+                      <IconComponent className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+                      <span>{actionLabel}</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 

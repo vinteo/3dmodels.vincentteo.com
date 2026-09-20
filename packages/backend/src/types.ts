@@ -44,6 +44,7 @@ export interface ModelSource {
   year?: string | number;
   publication?: string;
   description?: string;
+  type?: 'pdf' | 'web' | 'website' | 'book' | string;
 }
 
 export interface ModelAiDisclosure {

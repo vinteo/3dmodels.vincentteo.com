@@ -606,6 +606,14 @@ export const kumikoBookmarkModel: ReplicadModelDefinition<KumikoBookmarkParamete
   partName: 'Kumiko Bookmark',
   description: 'Customizable rectangular bookmark filled with geometric Kumiko lattice patterns.',
   tags: ['Kumiko', '3D Print', 'Bookmark', 'Replicad'],
+  sources: [
+    {
+      title: 'Kumiko Designer',
+      url: 'https://www.kumikodesigner.com/',
+      description:
+        'An interactive design application for traditional Japanese kumiko woodworking patterns and panel arrangements.'
+    }
+  ],
   parameters: kumikoBookmarkParameters,
   calculateDimensions: calculateKumikoBookmarkDimensions,
   calculateDynamicConstraints: calculateKumikoBookmarkDynamicConstraints,
