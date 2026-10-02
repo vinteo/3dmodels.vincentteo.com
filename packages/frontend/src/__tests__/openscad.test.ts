@@ -12,7 +12,8 @@ import {
 } from '../engines/openscad/registry';
 import {
   openGridDisplayCaseShellParameters,
-  calculateOpenGridDimensions
+  calculateOpenGridDimensions,
+  calculateOpenGridDisplayCaseShellDynamicConstraints
 } from '../engines/openscad/models/openGridDisplayCaseShell';
 import {
   openGridDisplayCaseCoverParameters,
@@ -22,6 +23,11 @@ import {
   openGridDisplayCaseConnectorParameters,
   calculateOpenGridConnectorDimensions
 } from '../engines/openscad/models/openGridDisplayCaseConnector';
+import {
+  openGridDeskOrganiserBinParameters,
+  calculateOpenGridDeskOrganiserBinDimensions,
+  calculateOpenGridDeskOrganiserBinDynamicConstraints
+} from '../engines/openscad/models/openGridDeskOrganiserBin';
 import { mergeWithOpenSCADModels, mergeWithLocalEngineModels } from '../services/api';
 import { ModelConfig } from '../types/model';
 
@@ -99,7 +105,7 @@ describe('OpenSCAD Model Registry & OpenGrid Case Model', () => {
     expect(model).toBeDefined();
     expect(model?.id).toBe('opengrid-display-case-shell');
     expect(model?.name).toBe('OpenGrid Display Case Shell');
-    expect(model?.parameters.length).toBe(33);
+    expect(model?.parameters.length).toBe(openGridDisplayCaseShellParameters.length);
     expect(isOpenSCADModel('opengrid-display-case-shell')).toBe(true);
     expect(isOpenSCADModel('unknown-model')).toBe(false);
   });
@@ -116,10 +122,12 @@ describe('OpenSCAD Model Registry & OpenGrid Case Model', () => {
     expect(defaults.back_thickness).toBe(1);
     expect(defaults.connector_offset).toBe(0.1);
     expect(defaults.h_divider_count).toBe(0);
+    expect(defaults.h_divider_position_mode).toBe('auto');
     expect(defaults.h_divider_thickness).toBe(3);
     expect(defaults.h_divider_1_pos).toBe(0);
     expect(defaults.h_divider_1_depth).toBe(32);
     expect(defaults.v_divider_count).toBe(0);
+    expect(defaults.v_divider_position_mode).toBe('auto');
     expect(defaults.v_divider_thickness).toBe(3);
     expect(defaults.v_divider_1_pos).toBe(0);
     expect(defaults.v_divider_1_depth).toBe(32);
@@ -264,6 +272,269 @@ describe('OpenSCAD Model Registry & OpenGrid Case Model', () => {
     expect(snapBase?.formatted).toBe('Mounted');
   });
 
+  it('registers and retrieves the OpenGrid Desk Organiser Bin model', () => {
+    const model = getOpenSCADModel('opengrid-desk-organiser-bin');
+    expect(model).toBeDefined();
+    expect(model?.id).toBe('opengrid-desk-organiser-bin');
+    expect(model?.name).toBe('OpenGrid Desk Organiser Bin');
+    expect(model?.project).toBe('OpenGrid Desk Organiser');
+    expect(model?.partName).toBe('Bin');
+    expect(model?.parameters.length).toBe(openGridDeskOrganiserBinParameters.length);
+    expect(isOpenSCADModel('opengrid-desk-organiser-bin')).toBe(true);
+  });
+
+  it('extracts default parameters from OpenGrid Desk Organiser Bin model', () => {
+    const defaults = extractDefaultOpenSCADParameters(openGridDeskOrganiserBinParameters);
+    expect(defaults.grid_width).toBe(2);
+    expect(defaults.grid_depth).toBe(2);
+    expect(defaults.height).toBe(100);
+    expect(defaults.wall_thickness).toBe(1.6);
+    expect(defaults.bottom_thickness).toBe(2.0);
+    expect(defaults.corner_chamfer).toBe(4.2);
+    expect(defaults.inner_base_radius).toBe(2.5);
+    expect(defaults.tolerance).toBe(0.5);
+    expect(defaults.snap_type).toBe('lite');
+    expect(defaults.dividers_x).toBe(0);
+    expect(defaults.divider_x_position_mode).toBe('auto');
+    expect(defaults.dividers_y).toBe(0);
+    expect(defaults.divider_y_position_mode).toBe('auto');
+    expect(defaults.divider_thickness).toBe(1.2);
+  });
+
+  it('calculates desk organiser bin dimensions accurately', () => {
+    const dims = calculateOpenGridDeskOrganiserBinDimensions({
+      grid_width: 2,
+      grid_depth: 2,
+      height: 100,
+      wall_thickness: 1.6,
+      bottom_thickness: 2.0,
+      corner_chamfer: 4.2,
+      inner_base_radius: 2.5,
+      tolerance: 0.5,
+      snap_type: 'lite',
+      dividers_x: 0,
+      dividers_y: 0
+    });
+
+    const outerW = dims.find((d) => d.id === 'outer_width');
+    const outerD = dims.find((d) => d.id === 'outer_depth');
+    const binH = dims.find((d) => d.id === 'bin_height');
+    const totalH = dims.find((d) => d.id === 'total_height');
+    const snapCount = dims.find((d) => d.id === 'snap_count');
+    const compartments = dims.find((d) => d.id === 'compartments');
+    const chamfer = dims.find((d) => d.id === 'corner_chamfer');
+    const baseR = dims.find((d) => d.id === 'inner_base_radius');
+
+    expect(outerW?.formatted).toBe('55.5 mm (2u)');
+    expect(outerD?.formatted).toBe('55.5 mm (2u)');
+    expect(binH?.formatted).toBe('100.0 mm');
+    expect(totalH?.formatted).toBe('103.4 mm');
+    expect(snapCount?.formatted).toBe('4 snaps (2 × 2, Lite)');
+    expect(compartments?.formatted).toBe('1 cell (open bin)');
+    expect(chamfer?.formatted).toBe('4.2 mm (45°)');
+    expect(baseR?.formatted).toBe('2.5 mm');
+
+    // Test with Normal Snap and dividers
+    const normalDims = calculateOpenGridDeskOrganiserBinDimensions({
+      grid_width: 3,
+      grid_depth: 2,
+      height: 50,
+      snap_type: 'normal',
+      dividers_x: 2,
+      dividers_y: 1
+    });
+
+    const divCompartments = normalDims.find((d) => d.id === 'compartments');
+    const divSnaps = normalDims.find((d) => d.id === 'snap_count');
+    const divTotalH = normalDims.find((d) => d.id === 'total_height');
+    expect(divCompartments?.formatted).toBe('6 cells (3 col × 2 row)');
+    expect(divSnaps?.formatted).toBe('6 snaps (3 × 2, Normal)');
+    expect(divTotalH?.formatted).toBe('56.8 mm');
+
+    // Test with no outer walls (flat base plate with dividers)
+    const noWallsDims = calculateOpenGridDeskOrganiserBinDimensions({
+      grid_width: 2,
+      grid_depth: 2,
+      height: 30,
+      outer_walls: false,
+      dividers_x: 1,
+      dividers_y: 1
+    });
+    const noWallsHeight = noWallsDims.find((d) => d.id === 'bin_height');
+    expect(noWallsHeight?.label).toBe('Divider Height');
+    expect(noWallsHeight?.formatted).toBe('30.0 mm');
+  });
+
+  it('dynamically limits divider positions based on grid width and depth', () => {
+    // 2x2 grid (outer = 56 - 0.5 = 55.5mm, inner = 55.5 - 3.2 = 52.3mm -> max 52)
+    const constraints2x2 = calculateOpenGridDeskOrganiserBinDynamicConstraints({
+      grid_width: 2,
+      grid_depth: 2,
+      wall_thickness: 1.6,
+      tolerance: 0.5
+    });
+
+    expect(constraints2x2.divider_x_1_pos.max).toBe(52);
+    expect(constraints2x2.divider_y_1_pos.max).toBe(52);
+    expect(constraints2x2.divider_x_1_pos.min).toBe(0);
+
+    // 4x1 grid (X inner = 111.5 - 3.2 = 108.3mm -> 108, Y inner = 27.5 - 3.2 = 24.3mm -> 24)
+    const constraints4x1 = calculateOpenGridDeskOrganiserBinDynamicConstraints({
+      grid_width: 4,
+      grid_depth: 1,
+      wall_thickness: 1.6,
+      tolerance: 0.5
+    });
+
+    expect(constraints4x1.divider_x_1_pos.max).toBe(108);
+    expect(constraints4x1.divider_y_1_pos.max).toBe(24);
+  });
+
+  it('dynamically limits display case divider positions based on shell dimensions', () => {
+    // Grid mode: 6x4 units (168x112 mm nominal, wall 5mm -> inner 158x102 mm)
+    const gridConstraints = calculateOpenGridDisplayCaseShellDynamicConstraints({
+      dimension_mode: 'grid',
+      grid_width: 6,
+      grid_height: 4,
+      wall_thickness: 5
+    });
+
+    expect(gridConstraints.v_divider_1_pos.max).toBe(158);
+    expect(gridConstraints.h_divider_1_pos.max).toBe(102);
+    expect(gridConstraints.v_divider_1_pos.min).toBe(0);
+
+    // Custom mode: 200x150 mm (wall 5mm -> inner 190x140 mm)
+    const customConstraints = calculateOpenGridDisplayCaseShellDynamicConstraints({
+      dimension_mode: 'custom',
+      custom_width: 200,
+      custom_height: 150,
+      wall_thickness: 5
+    });
+
+    expect(customConstraints.v_divider_1_pos.max).toBe(190);
+    expect(customConstraints.h_divider_1_pos.max).toBe(140);
+  });
+
+  it('renders OpenGrid Desk Organiser Bin to valid STL via OpenSCAD WASM', async () => {
+    const model = getOpenSCADModel('opengrid-desk-organiser-bin');
+    expect(model).toBeDefined();
+
+    const injectedCode = injectOpenSCADParameters(model!.scadContent, {
+      grid_width: 1,
+      grid_depth: 1,
+      height: 20
+    });
+
+    const oscad = await createOpenSCAD();
+    const inst = oscad.getInstance();
+    inst.FS.writeFile('/input.scad', injectedCode);
+    inst.callMain(['/input.scad', '-o', '/output.stl']);
+    const stl = inst.FS.readFile('/output.stl');
+    expect(stl.length).toBeGreaterThan(1000);
+    inst.FS.unlink('/input.scad');
+    inst.FS.unlink('/output.stl');
+  });
+
+  it('renders OpenGrid Desk Organiser Bin with custom divider positions', async () => {
+    const model = getOpenSCADModel('opengrid-desk-organiser-bin');
+    expect(model).toBeDefined();
+
+    const injectedCode = injectOpenSCADParameters(model!.scadContent, {
+      grid_width: 2,
+      grid_depth: 2,
+      height: 25,
+      dividers_x: 2,
+      divider_x_position_mode: 'custom',
+      divider_x_1_pos: 12,
+      divider_x_2_pos: 35,
+      dividers_y: 1,
+      divider_y_position_mode: 'custom',
+      divider_y_1_pos: 20
+    });
+
+    const oscad = await createOpenSCAD();
+    const inst = oscad.getInstance();
+    inst.FS.writeFile('/input.scad', injectedCode);
+    inst.callMain(['/input.scad', '-o', '/output.stl']);
+    const stl = inst.FS.readFile('/output.stl');
+    expect(stl.length).toBeGreaterThan(1000);
+    inst.FS.unlink('/input.scad');
+    inst.FS.unlink('/output.stl');
+  });
+
+  it('renders OpenGrid Desk Organiser Bin without outer walls', async () => {
+    const model = getOpenSCADModel('opengrid-desk-organiser-bin');
+    expect(model).toBeDefined();
+
+    const injectedCode = injectOpenSCADParameters(model!.scadContent, {
+      grid_width: 2,
+      grid_depth: 2,
+      height: 20,
+      outer_walls: false,
+      dividers_x: 1,
+      divider_x_position_mode: 'custom',
+      divider_x_1_pos: 25,
+      dividers_y: 0
+    });
+
+    const oscad = await createOpenSCAD();
+    const inst = oscad.getInstance();
+    inst.FS.writeFile('/input.scad', injectedCode);
+    inst.callMain(['/input.scad', '-o', '/output.stl']);
+    const stl = inst.FS.readFile('/output.stl');
+    expect(stl.length).toBeGreaterThan(1000);
+    inst.FS.unlink('/input.scad');
+    inst.FS.unlink('/output.stl');
+  });
+
+  it('renders OpenGrid Desk Organiser Bin with divider at position 0 in custom mode', async () => {
+    const model = getOpenSCADModel('opengrid-desk-organiser-bin');
+    expect(model).toBeDefined();
+
+    const injectedCode = injectOpenSCADParameters(model!.scadContent, {
+      grid_width: 2,
+      grid_depth: 2,
+      height: 20,
+      dividers_x: 1,
+      divider_x_position_mode: 'custom',
+      divider_x_1_pos: 0,
+      dividers_y: 0
+    });
+
+    const oscad = await createOpenSCAD();
+    const inst = oscad.getInstance();
+    inst.FS.writeFile('/input.scad', injectedCode);
+    inst.callMain(['/input.scad', '-o', '/output.stl']);
+    const stl = inst.FS.readFile('/output.stl');
+    expect(stl.length).toBeGreaterThan(1000);
+    inst.FS.unlink('/input.scad');
+    inst.FS.unlink('/output.stl');
+  });
+
+  it('ignores custom position values when switching back to even spacing', async () => {
+    const model = getOpenSCADModel('opengrid-desk-organiser-bin');
+    expect(model).toBeDefined();
+
+    const injectedCode = injectOpenSCADParameters(model!.scadContent, {
+      grid_width: 2,
+      grid_depth: 2,
+      height: 20,
+      dividers_x: 1,
+      divider_x_position_mode: 'auto',
+      divider_x_1_pos: 45,
+      dividers_y: 0
+    });
+
+    const oscad = await createOpenSCAD();
+    const inst = oscad.getInstance();
+    inst.FS.writeFile('/input.scad', injectedCode);
+    inst.callMain(['/input.scad', '-o', '/output.stl']);
+    const stl = inst.FS.readFile('/output.stl');
+    expect(stl.length).toBeGreaterThan(1000);
+    inst.FS.unlink('/input.scad');
+    inst.FS.unlink('/output.stl');
+  });
+
   it('merges OpenSCAD models into the catalog seamlessly', () => {
     const rawCatalog: ModelConfig[] = [
       {
@@ -292,21 +563,32 @@ describe('OpenSCAD Model Registry & OpenGrid Case Model', () => {
         tags: ['OpenGrid'],
         defaultConfiguration: '',
         parameters: []
+      },
+      {
+        id: 'opengrid-desk-organiser-bin',
+        name: 'OpenGrid Desk Organiser Bin',
+        description: 'Raw description',
+        engine: 'openscad',
+        tags: ['OpenGrid'],
+        defaultConfiguration: '',
+        parameters: []
       }
     ];
 
     const merged = mergeWithOpenSCADModels(rawCatalog);
-    expect(merged.length).toBe(3);
+    expect(merged.length).toBe(4);
     expect(merged[0].engine).toBe('openscad');
     expect(merged[0].parameters.length).toBe(openGridDisplayCaseShellParameters.length);
     expect(merged[1].engine).toBe('openscad');
     expect(merged[1].parameters.length).toBe(openGridDisplayCaseCoverParameters.length);
     expect(merged[2].engine).toBe('openscad');
     expect(merged[2].parameters.length).toBe(openGridDisplayCaseConnectorParameters.length);
+    expect(merged[3].engine).toBe('openscad');
+    expect(merged[3].parameters.length).toBe(openGridDeskOrganiserBinParameters.length);
 
     const allLocal = mergeWithLocalEngineModels(rawCatalog);
-    const connector = allLocal.find((m) => m.id === 'opengrid-display-case-connector');
-    expect(connector).toBeDefined();
-    expect(connector?.parameters.length).toBe(openGridDisplayCaseConnectorParameters.length);
+    const bin = allLocal.find((m) => m.id === 'opengrid-desk-organiser-bin');
+    expect(bin).toBeDefined();
+    expect(bin?.parameters.length).toBe(openGridDeskOrganiserBinParameters.length);
   });
 });

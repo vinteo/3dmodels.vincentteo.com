@@ -17,6 +17,9 @@ export interface OpenSCADModelDefinition<TParams = Record<string, number | strin
   scadContent: string;
   defaultConfiguration?: string;
   calculateDimensions?: (params: TParams) => ModelDimensionItem[];
+  calculateDynamicConstraints?: (
+    params: Record<string, any>
+  ) => Record<string, { min?: number; max?: number }>;
 }
 
 /**

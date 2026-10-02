@@ -2,6 +2,7 @@ import { OpenSCADModelDefinition } from './types';
 import { openGridDisplayCaseShellModel } from './models/openGridDisplayCaseShell';
 import { openGridDisplayCaseCoverModel } from './models/openGridDisplayCaseCover';
 import { openGridDisplayCaseConnectorModel } from './models/openGridDisplayCaseConnector';
+import { openGridDeskOrganiserBinModel } from './models/openGridDeskOrganiserBin';
 
 const modelRegistry = new Map<string, OpenSCADModelDefinition<any>>();
 
@@ -9,6 +10,7 @@ const modelRegistry = new Map<string, OpenSCADModelDefinition<any>>();
 registerOpenSCADModel(openGridDisplayCaseShellModel);
 registerOpenSCADModel(openGridDisplayCaseCoverModel);
 registerOpenSCADModel(openGridDisplayCaseConnectorModel);
+registerOpenSCADModel(openGridDeskOrganiserBinModel);
 
 /**
  * Registers an OpenSCAD model definition into the registry
