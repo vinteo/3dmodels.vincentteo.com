@@ -280,6 +280,12 @@ describe('OpenSCAD Model Registry & OpenGrid Case Model', () => {
     expect(model?.project).toBe('OpenGrid Desk Organiser');
     expect(model?.partName).toBe('Bin');
     expect(model?.parameters.length).toBe(openGridDeskOrganiserBinParameters.length);
+    expect(model?.links?.length).toBe(3);
+    expect(model?.links?.[0].site).toBe('blog');
+    expect(model?.links?.[1].site).toBe('printables');
+    expect(model?.links?.[2].site).toBe('qidimaker');
+    expect(model?.aiDisclosure?.modelingAiAssisted).toBe(true);
+    expect(model?.aiDisclosure?.modelNotice).toContain('AI assistance');
     expect(isOpenSCADModel('opengrid-desk-organiser-bin')).toBe(true);
   });
 
@@ -590,5 +596,6 @@ describe('OpenSCAD Model Registry & OpenGrid Case Model', () => {
     const bin = allLocal.find((m) => m.id === 'opengrid-desk-organiser-bin');
     expect(bin).toBeDefined();
     expect(bin?.parameters.length).toBe(openGridDeskOrganiserBinParameters.length);
+    expect(bin?.aiDisclosure?.modelingAiAssisted).toBe(true);
   });
 });

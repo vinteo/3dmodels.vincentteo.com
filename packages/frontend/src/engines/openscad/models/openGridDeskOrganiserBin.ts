@@ -496,6 +496,28 @@ export const openGridDeskOrganiserBinModel: BinModelDef = {
   description:
     'Customisable OpenGrid desk organiser bin with evenly spaced OpenGrid Snap Lite connectors on the bottom.',
   tags: ['OpenGrid', 'Desk Organiser', 'Bin', 'Storage', 'OpenSCAD', 'Parametric', '3D Print'],
+  links: [
+    {
+      label: 'Guide',
+      url: 'https://vincentteo.com/blog/2026/10/02/customising-opengrid-desk-organiser-bin/',
+      site: 'blog'
+    },
+    {
+      label: 'Printables',
+      url: 'https://www.printables.com/model/1862914-opengrid-desk-organiser',
+      site: 'printables'
+    },
+    {
+      label: 'QIDI Maker',
+      url: 'https://www.qidimaker.com/en/models/detail/2105976479143243777',
+      site: 'qidimaker'
+    }
+  ],
+  aiDisclosure: {
+    modelingAiAssisted: true,
+    modelNotice:
+      'The 3D model generation code, parametric geometry definitions, and CAD algorithms for this model were created with AI assistance.'
+  },
   parameters: openGridDeskOrganiserBinParameters,
   scadContent: openGridDeskOrganiserBinScad,
   calculateDimensions: (params) => calculateOpenGridDeskOrganiserBinDimensions(params),

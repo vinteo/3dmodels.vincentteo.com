@@ -10,6 +10,21 @@ interface ModelSelectorProps {
   onSelectModel: (modelId: string) => void;
 }
 
+const getLinkBadgeClass = (site?: string): string => {
+  switch (site) {
+    case 'blog':
+      return 'bg-purple-500/15 text-purple-300 border-purple-500/30 hover:bg-purple-500/30';
+    case 'paper':
+      return 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/30';
+    case 'printables':
+      return 'bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/30';
+    case 'qidimaker':
+      return 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/30';
+    default:
+      return 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700';
+  }
+};
+
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
   isOpen,
   onClose,
@@ -111,7 +126,6 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             if (group.type === 'project' && group.projectName) {
               const hasActiveModel = group.models.some((m) => m.id === selectedModelId);
               const allTags = Array.from(new Set(group.models.flatMap((m) => m.tags)));
-              const allLinks = group.models.flatMap((m) => m.links || []);
 
               return (
                 <div
@@ -220,23 +234,52 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                       </div>
                     </div>
 
-                    {/* External Model Page Links */}
-                    {allLinks.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {allLinks.map((link) => (
-                          <a
-                            key={link.url}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
-                            title={`Open on ${link.label}`}
-                          >
-                            <span>{link.label}</span>
-                            <ExternalLink className="w-2.5 h-2.5 opacity-70" />
-                          </a>
-                        ))}
+                    {/* External Model Page Links separated per component */}
+                    {group.models.some((m) => m.links && m.links.length > 0) && (
+                      <div className="space-y-2 mb-3 bg-slate-950/40 border border-slate-800/60 rounded-xl p-2.5">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                          Component Links:
+                        </span>
+                        <div className="space-y-1.5">
+                          {group.models.map((m) => {
+                            if (!m.links || m.links.length === 0) return null;
+                            const isCompSelected = m.id === selectedModelId;
+                            const compName =
+                              m.partName ||
+                              m.name.replace(group.projectName || '', '').trim() ||
+                              m.name;
+
+                            return (
+                              <div key={m.id} className="flex items-center gap-2 flex-wrap">
+                                <span
+                                  className={`text-[11px] font-bold shrink-0 min-w-[70px] ${
+                                    isCompSelected ? 'text-fuchsia-300' : 'text-slate-300'
+                                  }`}
+                                >
+                                  {compName}:
+                                </span>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {m.links.map((link) => (
+                                    <a
+                                      key={`${m.id}-${link.url}`}
+                                      href={link.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border ${getLinkBadgeClass(
+                                        link.site
+                                      )}`}
+                                      title={`Open ${compName} on ${link.label}`}
+                                    >
+                                      <span>{link.label}</span>
+                                      <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -332,15 +375,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border ${
-                            link.site === 'blog'
-                              ? 'bg-purple-500/15 text-purple-300 border-purple-500/30 hover:bg-purple-500/30'
-                              : link.site === 'printables'
-                                ? 'bg-orange-500/15 text-orange-300 border-orange-500/30 hover:bg-orange-500/30'
-                                : link.site === 'qidimaker'
-                                  ? 'bg-sky-500/15 text-sky-300 border-sky-500/30 hover:bg-sky-500/30'
-                                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-                          }`}
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border ${getLinkBadgeClass(
+                            link.site
+                          )}`}
                           title={`Open on ${link.label}`}
                         >
                           <span>{link.label}</span>
