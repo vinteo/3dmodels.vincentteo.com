@@ -381,8 +381,11 @@ describe('OpenSCAD Model Registry & OpenGrid Case Model', () => {
     });
 
     expect(constraints2x2.divider_x_1_pos.max).toBe(52);
+    expect(constraints2x2.divider_x_10_pos.max).toBe(52);
     expect(constraints2x2.divider_y_1_pos.max).toBe(52);
+    expect(constraints2x2.divider_y_10_pos.max).toBe(52);
     expect(constraints2x2.divider_x_1_pos.min).toBe(0);
+    expect(constraints2x2.divider_x_10_pos.min).toBe(0);
 
     // 4x1 grid (X inner = 111.5 - 3.2 = 108.3mm -> 108, Y inner = 27.5 - 3.2 = 24.3mm -> 24)
     const constraints4x1 = calculateOpenGridDeskOrganiserBinDynamicConstraints({
