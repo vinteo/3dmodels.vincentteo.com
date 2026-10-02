@@ -17,6 +17,7 @@ export interface OpenGridDisplayCaseShellParameters {
   connector_offset?: number;
   // Horizontal Dividers
   h_divider_count?: number;
+  h_divider_position_mode?: 'auto' | 'custom' | string;
   h_divider_thickness?: number;
   h_divider_depth?: number;
   h_divider_1_pos?: number;
@@ -26,6 +27,7 @@ export interface OpenGridDisplayCaseShellParameters {
   h_divider_5_pos?: number;
   // Vertical Dividers
   v_divider_count?: number;
+  v_divider_position_mode?: 'auto' | 'custom' | string;
   v_divider_thickness?: number;
   v_divider_depth?: number;
   v_divider_1_pos?: number;
@@ -178,6 +180,21 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     description: 'Thickness of horizontal divider shelves'
   },
   {
+    id: 'h_divider_position_mode',
+    name: 'Shelf Spacing',
+    type: 'enum',
+    widget: 'segmented',
+    default: 'auto',
+    group: 'Horizontal Dividers',
+    dependsOn: 'h_divider_count>0',
+    options: [
+      { value: 'auto', label: 'Even / Auto' },
+      { value: 'custom', label: 'Custom' }
+    ],
+    description:
+      'Auto-space horizontal divider shelves evenly or specify custom millimeter positions'
+  },
+  {
     id: 'h_divider_1_pos',
     name: 'Shelf 1 Position (Y)',
     type: 'quantity',
@@ -187,8 +204,8 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     max: 400,
     step: 1,
     group: 'Horizontal Dividers',
-    dependsOn: 'h_divider_count>=1',
-    description: 'Position from bottom inner wall in mm (0 = auto-space evenly)'
+    dependsOn: 'h_divider_count>=1&h_divider_position_mode=custom',
+    description: 'Position from bottom inner wall in mm (0 = at edge)'
   },
   {
     id: 'h_divider_1_depth',
@@ -213,8 +230,8 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     max: 400,
     step: 1,
     group: 'Horizontal Dividers',
-    dependsOn: 'h_divider_count>=2',
-    description: 'Position from bottom inner wall in mm (0 = auto-space evenly)'
+    dependsOn: 'h_divider_count>=2&h_divider_position_mode=custom',
+    description: 'Position from bottom inner wall in mm (0 = at edge)'
   },
   {
     id: 'h_divider_2_depth',
@@ -239,8 +256,8 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     max: 400,
     step: 1,
     group: 'Horizontal Dividers',
-    dependsOn: 'h_divider_count>=3',
-    description: 'Position from bottom inner wall in mm (0 = auto-space evenly)'
+    dependsOn: 'h_divider_count>=3&h_divider_position_mode=custom',
+    description: 'Position from bottom inner wall in mm (0 = at edge)'
   },
   {
     id: 'h_divider_3_depth',
@@ -265,8 +282,8 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     max: 400,
     step: 1,
     group: 'Horizontal Dividers',
-    dependsOn: 'h_divider_count>=4',
-    description: 'Position from bottom inner wall in mm (0 = auto-space evenly)'
+    dependsOn: 'h_divider_count>=4&h_divider_position_mode=custom',
+    description: 'Position from bottom inner wall in mm (0 = at edge)'
   },
   {
     id: 'h_divider_4_depth',
@@ -291,8 +308,8 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     max: 400,
     step: 1,
     group: 'Horizontal Dividers',
-    dependsOn: 'h_divider_count>=5',
-    description: 'Position from bottom inner wall in mm (0 = auto-space evenly)'
+    dependsOn: 'h_divider_count>=5&h_divider_position_mode=custom',
+    description: 'Position from bottom inner wall in mm (0 = at edge)'
   },
   {
     id: 'h_divider_5_depth',
@@ -335,6 +352,20 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     description: 'Thickness of vertical divider walls'
   },
   {
+    id: 'v_divider_position_mode',
+    name: 'Divider Spacing',
+    type: 'enum',
+    widget: 'segmented',
+    default: 'auto',
+    group: 'Vertical Dividers',
+    dependsOn: 'v_divider_count>0',
+    options: [
+      { value: 'auto', label: 'Even / Auto' },
+      { value: 'custom', label: 'Custom' }
+    ],
+    description: 'Auto-space vertical divider walls evenly or specify custom millimeter positions'
+  },
+  {
     id: 'v_divider_1_pos',
     name: 'Divider 1 Position (X)',
     type: 'quantity',
@@ -344,8 +375,8 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     max: 400,
     step: 1,
     group: 'Vertical Dividers',
-    dependsOn: 'v_divider_count>=1',
-    description: 'Position from left inner wall in mm (0 = auto-space evenly)'
+    dependsOn: 'v_divider_count>=1&v_divider_position_mode=custom',
+    description: 'Position from left inner wall in mm (0 = at edge)'
   },
   {
     id: 'v_divider_1_depth',
@@ -370,8 +401,8 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     max: 400,
     step: 1,
     group: 'Vertical Dividers',
-    dependsOn: 'v_divider_count>=2',
-    description: 'Position from left inner wall in mm (0 = auto-space evenly)'
+    dependsOn: 'v_divider_count>=2&v_divider_position_mode=custom',
+    description: 'Position from left inner wall in mm (0 = at edge)'
   },
   {
     id: 'v_divider_2_depth',
@@ -396,8 +427,8 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     max: 400,
     step: 1,
     group: 'Vertical Dividers',
-    dependsOn: 'v_divider_count>=3',
-    description: 'Position from left inner wall in mm (0 = auto-space evenly)'
+    dependsOn: 'v_divider_count>=3&v_divider_position_mode=custom',
+    description: 'Position from left inner wall in mm (0 = at edge)'
   },
   {
     id: 'v_divider_3_depth',
@@ -422,8 +453,8 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     max: 400,
     step: 1,
     group: 'Vertical Dividers',
-    dependsOn: 'v_divider_count>=4',
-    description: 'Position from left inner wall in mm (0 = auto-space evenly)'
+    dependsOn: 'v_divider_count>=4&v_divider_position_mode=custom',
+    description: 'Position from left inner wall in mm (0 = at edge)'
   },
   {
     id: 'v_divider_4_depth',
@@ -448,8 +479,8 @@ export const openGridDisplayCaseShellParameters: ParameterDefinition[] = [
     max: 400,
     step: 1,
     group: 'Vertical Dividers',
-    dependsOn: 'v_divider_count>=5',
-    description: 'Position from left inner wall in mm (0 = auto-space evenly)'
+    dependsOn: 'v_divider_count>=5&v_divider_position_mode=custom',
+    description: 'Position from left inner wall in mm (0 = at edge)'
   },
   {
     id: 'v_divider_5_depth',
@@ -534,6 +565,34 @@ export function calculateOpenGridDimensions(
 
   return dimensions;
 }
+
+export function calculateOpenGridDisplayCaseShellDynamicConstraints(
+  params: Record<string, any>
+): Record<string, { min?: number; max?: number }> {
+  const isCustom = params.dimension_mode === 'custom';
+  const width = isCustom ? Number(params.custom_width ?? 168) : Number(params.grid_width ?? 6) * 28;
+  const height = isCustom
+    ? Number(params.custom_height ?? 112)
+    : Number(params.grid_height ?? 4) * 28;
+  const wall = Number(params.wall_thickness ?? 5);
+
+  const innerW = Math.max(1, Math.floor(width - wall * 2));
+  const innerH = Math.max(1, Math.floor(height - wall * 2));
+
+  return {
+    v_divider_1_pos: { min: 0, max: innerW },
+    v_divider_2_pos: { min: 0, max: innerW },
+    v_divider_3_pos: { min: 0, max: innerW },
+    v_divider_4_pos: { min: 0, max: innerW },
+    v_divider_5_pos: { min: 0, max: innerW },
+    h_divider_1_pos: { min: 0, max: innerH },
+    h_divider_2_pos: { min: 0, max: innerH },
+    h_divider_3_pos: { min: 0, max: innerH },
+    h_divider_4_pos: { min: 0, max: innerH },
+    h_divider_5_pos: { min: 0, max: innerH }
+  };
+}
+
 type ShellModelDef = OpenSCADModelDefinition<OpenGridDisplayCaseShellParameters>;
 
 export const openGridDisplayCaseShellModel: ShellModelDef = {
@@ -545,5 +604,7 @@ export const openGridDisplayCaseShellModel: ShellModelDef = {
   tags: ['OpenGrid', 'Display Case', 'Storage', 'OpenSCAD', 'Parametric', '3D Print'],
   parameters: openGridDisplayCaseShellParameters,
   scadContent: openGridDisplayCaseShellScad,
-  calculateDimensions: (params) => calculateOpenGridDimensions(params)
+  calculateDimensions: (params) => calculateOpenGridDimensions(params),
+  calculateDynamicConstraints: (params) =>
+    calculateOpenGridDisplayCaseShellDynamicConstraints(params)
 };

@@ -60,42 +60,50 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
     ? parameters.filter((p) => p.id !== primaryToggle.id)
     : parameters;
 
-  // Filter out dependent parameters when parent condition is false
-  const visibleBodyParams = bodyParams.filter((p) => {
-    if (!p.dependsOn) return true;
-    if (p.dependsOn.includes('>=')) {
-      const [key, expected] = p.dependsOn.split('>=');
-      const actual = Number(values[key] ?? 0);
-      return actual >= Number(expected);
+  const checkSingleCondition = (clause: string): boolean => {
+    const trimmed = clause.trim();
+    if (trimmed.includes('>=')) {
+      const [key, expected] = trimmed.split('>=');
+      const actual = Number(values[key.trim()] ?? 0);
+      return actual >= Number(expected.trim());
     }
-    if (p.dependsOn.includes('>')) {
-      const [key, expected] = p.dependsOn.split('>');
-      const actual = Number(values[key] ?? 0);
-      return actual > Number(expected);
+    if (trimmed.includes('>')) {
+      const [key, expected] = trimmed.split('>');
+      const actual = Number(values[key.trim()] ?? 0);
+      return actual > Number(expected.trim());
     }
-    if (p.dependsOn.includes('<=')) {
-      const [key, expected] = p.dependsOn.split('<=');
-      const actual = Number(values[key] ?? 0);
-      return actual <= Number(expected);
+    if (trimmed.includes('<=')) {
+      const [key, expected] = trimmed.split('<=');
+      const actual = Number(values[key.trim()] ?? 0);
+      return actual <= Number(expected.trim());
     }
-    if (p.dependsOn.includes('<')) {
-      const [key, expected] = p.dependsOn.split('<');
-      const actual = Number(values[key] ?? 0);
-      return actual < Number(expected);
+    if (trimmed.includes('<')) {
+      const [key, expected] = trimmed.split('<');
+      const actual = Number(values[key.trim()] ?? 0);
+      return actual < Number(expected.trim());
     }
-    if (p.dependsOn.includes('!=')) {
-      const [key, expected] = p.dependsOn.split('!=');
-      const actual = values[key];
-      return String(actual ?? '') !== expected;
+    if (trimmed.includes('!=')) {
+      const [key, expected] = trimmed.split('!=');
+      const actual = values[key.trim()];
+      return String(actual ?? '') !== expected.trim();
     }
-    if (p.dependsOn.includes('=')) {
-      const [key, expected] = p.dependsOn.split('=');
-      const actual = values[key];
-      return String(actual ?? '') === expected;
+    if (trimmed.includes('=')) {
+      const [key, expected] = trimmed.split('=');
+      const actual = values[key.trim()];
+      return String(actual ?? '') === expected.trim();
     }
-    const parentVal = values[p.dependsOn];
+    const parentVal = values[trimmed];
     return parentVal === undefined ? true : Boolean(parentVal);
-  });
+  };
+
+  const evaluateDependsOn = (dependsOn?: string): boolean => {
+    if (!dependsOn) return true;
+    const clauses = dependsOn.split('&');
+    return clauses.every(checkSingleCondition);
+  };
+
+  // Filter out dependent parameters when parent condition is false
+  const visibleBodyParams = bodyParams.filter((p) => evaluateDependsOn(p.dependsOn));
 
   // Identify clusters of 3 or more repeated enum parameters (e.g. 6 section patterns or 6 rotations)
   const { clusters, clusterParamIds, standaloneParams } = useMemo(() => {
@@ -332,9 +340,7 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {individualClusterParams.map((param) => {
                       const val = values[param.id] ?? param.default;
-                      const isEnabled = param.dependsOn
-                        ? Boolean(values[param.dependsOn] ?? true)
-                        : true;
+                      const isEnabled = evaluateDependsOn(param.dependsOn);
 
                       return (
                         <div
@@ -366,7 +372,7 @@ export const ParameterGroupCard: React.FC<ParameterGroupCardProps> = ({
             >
               {standaloneParams.map((param) => {
                 const val = values[param.id] ?? param.default;
-                const isEnabled = param.dependsOn ? Boolean(values[param.dependsOn] ?? true) : true;
+                const isEnabled = evaluateDependsOn(param.dependsOn);
                 const colSpan = param.layout === 'half' ? 'col-span-1' : 'col-span-1 sm:col-span-2';
 
                 // Dynamically bound divider depth parameters to shell depth ("shell height")

@@ -13,6 +13,7 @@ connector_offset = 0.1;
 
 // Horizontal Dividers
 h_divider_count = 0;
+h_divider_position_mode = "auto";
 h_divider_thickness = 3;
 h_divider_1_pos = 0;
 h_divider_1_depth = 32;
@@ -27,6 +28,7 @@ h_divider_5_depth = 32;
 
 // Vertical Dividers
 v_divider_count = 0;
+v_divider_position_mode = "auto";
 v_divider_thickness = 3;
 v_divider_1_pos = 0;
 v_divider_1_depth = 32;
@@ -48,21 +50,35 @@ module connector_cutoff() {
     }
 }
 
+function get_custom_h_divider_pos(idx, inner_h) =
+    (idx == 1) ? min(max(0, h_divider_1_pos), inner_h) :
+    (idx == 2) ? min(max(0, h_divider_2_pos), inner_h) :
+    (idx == 3) ? min(max(0, h_divider_3_pos), inner_h) :
+    (idx == 4) ? min(max(0, h_divider_4_pos), inner_h) :
+    (idx == 5) ? min(max(0, h_divider_5_pos), inner_h) :
+    (inner_h / 2);
+
+function get_custom_v_divider_pos(idx, inner_w) =
+    (idx == 1) ? min(max(0, v_divider_1_pos), inner_w) :
+    (idx == 2) ? min(max(0, v_divider_2_pos), inner_w) :
+    (idx == 3) ? min(max(0, v_divider_3_pos), inner_w) :
+    (idx == 4) ? min(max(0, v_divider_4_pos), inner_w) :
+    (idx == 5) ? min(max(0, v_divider_5_pos), inner_w) :
+    (inner_w / 2);
+
+function is_h_custom() = (h_divider_position_mode == "custom");
+
+function is_v_custom() = (v_divider_position_mode == "custom");
+
 function get_h_divider_pos(idx, count, inner_h) =
-    (idx == 1 && h_divider_1_pos > 0) ? h_divider_1_pos :
-    (idx == 2 && h_divider_2_pos > 0) ? h_divider_2_pos :
-    (idx == 3 && h_divider_3_pos > 0) ? h_divider_3_pos :
-    (idx == 4 && h_divider_4_pos > 0) ? h_divider_4_pos :
-    (idx == 5 && h_divider_5_pos > 0) ? h_divider_5_pos :
-    (idx * inner_h / (count + 1));
+    is_h_custom()
+        ? get_custom_h_divider_pos(idx, inner_h)
+        : (idx * inner_h / (count + 1));
 
 function get_v_divider_pos(idx, count, inner_w) =
-    (idx == 1 && v_divider_1_pos > 0) ? v_divider_1_pos :
-    (idx == 2 && v_divider_2_pos > 0) ? v_divider_2_pos :
-    (idx == 3 && v_divider_3_pos > 0) ? v_divider_3_pos :
-    (idx == 4 && v_divider_4_pos > 0) ? v_divider_4_pos :
-    (idx == 5 && v_divider_5_pos > 0) ? v_divider_5_pos :
-    (idx * inner_w / (count + 1));
+    is_v_custom()
+        ? get_custom_v_divider_pos(idx, inner_w)
+        : (idx * inner_w / (count + 1));
 
 function get_h_divider_depth(idx) =
     min(depth,

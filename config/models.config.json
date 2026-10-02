@@ -81,6 +81,17 @@
     "parameters": []
   },
   {
+    "id": "opengrid-desk-organiser-bin",
+    "name": "OpenGrid Desk Organiser Bin",
+    "project": "OpenGrid Desk Organiser",
+    "partName": "Bin",
+    "description": "Customisable OpenGrid desk organiser bin with evenly spaced OpenGrid Snap Lite connectors on the bottom",
+    "engine": "openscad",
+    "tags": ["OpenGrid", "Desk Organiser", "Bin", "Storage", "OpenSCAD", "Parametric", "3D Print"],
+    "links": [],
+    "parameters": []
+  },
+  {
     "id": "kumiko-pattern-keychain",
     "name": "Kumiko Keychain (Onshape)",
     "description": "Geometric Japanese Kumiko lattice keychain rendered via Onshape Cloud CAD engine.",

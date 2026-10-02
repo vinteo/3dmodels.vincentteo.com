@@ -3,6 +3,7 @@ import { ModelConfig, ParameterDefinition } from '../types/model';
 import { ParameterGroupCard } from './controls/ParameterGroupCard';
 import { GenericControl } from './controls/GenericControl';
 import { getReplicadModel } from '../engines/replicad';
+import { getOpenSCADModel } from '../engines/openscad';
 import {
   Sliders,
   RotateCcw,
@@ -125,6 +126,10 @@ export const ParameterControls: React.FC<ParameterControlsProps> = ({
     const repDef = getReplicadModel(model.id);
     if (repDef?.calculateDynamicConstraints) {
       return repDef.calculateDynamicConstraints(currentValues);
+    }
+    const oscadDef = getOpenSCADModel(model.id);
+    if (oscadDef?.calculateDynamicConstraints) {
+      return oscadDef.calculateDynamicConstraints(currentValues);
     }
     return {};
   }, [model.id, currentValues]);

@@ -243,6 +243,13 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({
     mainKeyLight.shadow.mapSize.width = 2048;
     mainKeyLight.shadow.mapSize.height = 2048;
     mainKeyLight.shadow.bias = -0.0001;
+    mainKeyLight.shadow.camera.left = -200;
+    mainKeyLight.shadow.camera.right = 200;
+    mainKeyLight.shadow.camera.top = 200;
+    mainKeyLight.shadow.camera.bottom = -200;
+    mainKeyLight.shadow.camera.near = 10;
+    mainKeyLight.shadow.camera.far = 600;
+    mainKeyLight.shadow.camera.updateProjectionMatrix();
     scene.add(mainKeyLight);
 
     const fillLight = new THREE.DirectionalLight('#93c5fd', 1.0);
