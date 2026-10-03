@@ -11,21 +11,31 @@ corner_chamfer = 4.2; // 45-degree outer corner chamfer in mm
 inner_base_radius = 2.5; // Radius of rounded transition from inner base floor to walls in mm
 tolerance = 0.5; // Grid clearance tolerance in mm
 snap_type = "lite"; // Snap type: "lite" (Snap Lite, 3.4mm) or "normal" (Normal Snap, 6.8mm)
-dividers_x = 0; // Number of vertical dividers along X (columns, 0 to 5)
+dividers_x = 0; // Number of vertical dividers along X (columns, 0 to 10)
 divider_x_position_mode = "auto"; // "auto" (evenly spaced) or "custom" (explicit mm)
 divider_x_1_pos = 0; // Position from left inner wall in mm (0 = at edge)
 divider_x_2_pos = 0;
 divider_x_3_pos = 0;
 divider_x_4_pos = 0;
 divider_x_5_pos = 0;
+divider_x_6_pos = 0;
+divider_x_7_pos = 0;
+divider_x_8_pos = 0;
+divider_x_9_pos = 0;
+divider_x_10_pos = 0;
 
-dividers_y = 0; // Number of horizontal dividers along Y (rows, 0 to 5)
+dividers_y = 0; // Number of horizontal dividers along Y (rows, 0 to 10)
 divider_y_position_mode = "auto"; // "auto" (evenly spaced) or "custom" (explicit mm)
 divider_y_1_pos = 0; // Position from front inner wall in mm (0 = at edge)
 divider_y_2_pos = 0;
 divider_y_3_pos = 0;
 divider_y_4_pos = 0;
 divider_y_5_pos = 0;
+divider_y_6_pos = 0;
+divider_y_7_pos = 0;
+divider_y_8_pos = 0;
+divider_y_9_pos = 0;
+divider_y_10_pos = 0;
 
 divider_thickness = 1.2; // Thickness of internal divider walls in mm
 
@@ -261,6 +271,11 @@ function get_custom_divider_x(idx, inner_w) =
     (idx == 3) ? min(max(0, divider_x_3_pos), inner_w) :
     (idx == 4) ? min(max(0, divider_x_4_pos), inner_w) :
     (idx == 5) ? min(max(0, divider_x_5_pos), inner_w) :
+    (idx == 6) ? min(max(0, divider_x_6_pos), inner_w) :
+    (idx == 7) ? min(max(0, divider_x_7_pos), inner_w) :
+    (idx == 8) ? min(max(0, divider_x_8_pos), inner_w) :
+    (idx == 9) ? min(max(0, divider_x_9_pos), inner_w) :
+    (idx == 10) ? min(max(0, divider_x_10_pos), inner_w) :
     (inner_w / 2);
 
 function get_custom_divider_y(idx, inner_d) =
@@ -269,6 +284,11 @@ function get_custom_divider_y(idx, inner_d) =
     (idx == 3) ? min(max(0, divider_y_3_pos), inner_d) :
     (idx == 4) ? min(max(0, divider_y_4_pos), inner_d) :
     (idx == 5) ? min(max(0, divider_y_5_pos), inner_d) :
+    (idx == 6) ? min(max(0, divider_y_6_pos), inner_d) :
+    (idx == 7) ? min(max(0, divider_y_7_pos), inner_d) :
+    (idx == 8) ? min(max(0, divider_y_8_pos), inner_d) :
+    (idx == 9) ? min(max(0, divider_y_9_pos), inner_d) :
+    (idx == 10) ? min(max(0, divider_y_10_pos), inner_d) :
     (inner_d / 2);
 
 function is_x_custom() = (divider_x_position_mode == "custom");

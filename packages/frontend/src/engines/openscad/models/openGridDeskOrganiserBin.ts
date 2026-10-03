@@ -21,6 +21,11 @@ export interface OpenGridDeskOrganiserBinParameters {
   divider_x_3_pos?: number;
   divider_x_4_pos?: number;
   divider_x_5_pos?: number;
+  divider_x_6_pos?: number;
+  divider_x_7_pos?: number;
+  divider_x_8_pos?: number;
+  divider_x_9_pos?: number;
+  divider_x_10_pos?: number;
   dividers_y?: number;
   divider_y_position_mode?: 'auto' | 'custom' | string;
   divider_y_1_pos?: number;
@@ -28,6 +33,11 @@ export interface OpenGridDeskOrganiserBinParameters {
   divider_y_3_pos?: number;
   divider_y_4_pos?: number;
   divider_y_5_pos?: number;
+  divider_y_6_pos?: number;
+  divider_y_7_pos?: number;
+  divider_y_8_pos?: number;
+  divider_y_9_pos?: number;
+  divider_y_10_pos?: number;
   divider_thickness?: number;
   [key: string]: unknown;
 }
@@ -159,7 +169,7 @@ export const openGridDeskOrganiserBinParameters: ParameterDefinition[] = [
     unit: 'dividers',
     default: 0,
     min: 0,
-    max: 5,
+    max: 10,
     step: 1,
     group: 'Internal Dividers',
     description: 'Number of vertical internal dividers creating compartments along X'
@@ -244,13 +254,78 @@ export const openGridDeskOrganiserBinParameters: ParameterDefinition[] = [
     description: 'Position from left inner wall in mm (0 = at edge)'
   },
   {
+    id: 'divider_x_6_pos',
+    name: 'Divider 6 Position (X)',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0,
+    min: 0,
+    max: 400,
+    step: 1,
+    group: 'Internal Dividers',
+    dependsOn: 'dividers_x>=6&divider_x_position_mode=custom',
+    description: 'Position from left inner wall in mm (0 = at edge)'
+  },
+  {
+    id: 'divider_x_7_pos',
+    name: 'Divider 7 Position (X)',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0,
+    min: 0,
+    max: 400,
+    step: 1,
+    group: 'Internal Dividers',
+    dependsOn: 'dividers_x>=7&divider_x_position_mode=custom',
+    description: 'Position from left inner wall in mm (0 = at edge)'
+  },
+  {
+    id: 'divider_x_8_pos',
+    name: 'Divider 8 Position (X)',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0,
+    min: 0,
+    max: 400,
+    step: 1,
+    group: 'Internal Dividers',
+    dependsOn: 'dividers_x>=8&divider_x_position_mode=custom',
+    description: 'Position from left inner wall in mm (0 = at edge)'
+  },
+  {
+    id: 'divider_x_9_pos',
+    name: 'Divider 9 Position (X)',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0,
+    min: 0,
+    max: 400,
+    step: 1,
+    group: 'Internal Dividers',
+    dependsOn: 'dividers_x>=9&divider_x_position_mode=custom',
+    description: 'Position from left inner wall in mm (0 = at edge)'
+  },
+  {
+    id: 'divider_x_10_pos',
+    name: 'Divider 10 Position (X)',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0,
+    min: 0,
+    max: 400,
+    step: 1,
+    group: 'Internal Dividers',
+    dependsOn: 'dividers_x>=10&divider_x_position_mode=custom',
+    description: 'Position from left inner wall in mm (0 = at edge)'
+  },
+  {
     id: 'dividers_y',
     name: 'Rows (Y Dividers)',
     type: 'quantity',
     unit: 'dividers',
     default: 0,
     min: 0,
-    max: 5,
+    max: 10,
     step: 1,
     group: 'Internal Dividers',
     description: 'Number of horizontal internal dividers creating compartments along Y'
@@ -332,6 +407,71 @@ export const openGridDeskOrganiserBinParameters: ParameterDefinition[] = [
     step: 1,
     group: 'Internal Dividers',
     dependsOn: 'dividers_y>=5&divider_y_position_mode=custom',
+    description: 'Position from front inner wall in mm (0 = at edge)'
+  },
+  {
+    id: 'divider_y_6_pos',
+    name: 'Divider 6 Position (Y)',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0,
+    min: 0,
+    max: 400,
+    step: 1,
+    group: 'Internal Dividers',
+    dependsOn: 'dividers_y>=6&divider_y_position_mode=custom',
+    description: 'Position from front inner wall in mm (0 = at edge)'
+  },
+  {
+    id: 'divider_y_7_pos',
+    name: 'Divider 7 Position (Y)',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0,
+    min: 0,
+    max: 400,
+    step: 1,
+    group: 'Internal Dividers',
+    dependsOn: 'dividers_y>=7&divider_y_position_mode=custom',
+    description: 'Position from front inner wall in mm (0 = at edge)'
+  },
+  {
+    id: 'divider_y_8_pos',
+    name: 'Divider 8 Position (Y)',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0,
+    min: 0,
+    max: 400,
+    step: 1,
+    group: 'Internal Dividers',
+    dependsOn: 'dividers_y>=8&divider_y_position_mode=custom',
+    description: 'Position from front inner wall in mm (0 = at edge)'
+  },
+  {
+    id: 'divider_y_9_pos',
+    name: 'Divider 9 Position (Y)',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0,
+    min: 0,
+    max: 400,
+    step: 1,
+    group: 'Internal Dividers',
+    dependsOn: 'dividers_y>=9&divider_y_position_mode=custom',
+    description: 'Position from front inner wall in mm (0 = at edge)'
+  },
+  {
+    id: 'divider_y_10_pos',
+    name: 'Divider 10 Position (Y)',
+    type: 'quantity',
+    unit: 'millimeter',
+    default: 0,
+    min: 0,
+    max: 400,
+    step: 1,
+    group: 'Internal Dividers',
+    dependsOn: 'dividers_y>=10&divider_y_position_mode=custom',
     description: 'Position from front inner wall in mm (0 = at edge)'
   },
   {
@@ -478,11 +618,21 @@ export function calculateOpenGridDeskOrganiserBinDynamicConstraints(
     divider_x_3_pos: { min: 0, max: innerW },
     divider_x_4_pos: { min: 0, max: innerW },
     divider_x_5_pos: { min: 0, max: innerW },
+    divider_x_6_pos: { min: 0, max: innerW },
+    divider_x_7_pos: { min: 0, max: innerW },
+    divider_x_8_pos: { min: 0, max: innerW },
+    divider_x_9_pos: { min: 0, max: innerW },
+    divider_x_10_pos: { min: 0, max: innerW },
     divider_y_1_pos: { min: 0, max: innerD },
     divider_y_2_pos: { min: 0, max: innerD },
     divider_y_3_pos: { min: 0, max: innerD },
     divider_y_4_pos: { min: 0, max: innerD },
-    divider_y_5_pos: { min: 0, max: innerD }
+    divider_y_5_pos: { min: 0, max: innerD },
+    divider_y_6_pos: { min: 0, max: innerD },
+    divider_y_7_pos: { min: 0, max: innerD },
+    divider_y_8_pos: { min: 0, max: innerD },
+    divider_y_9_pos: { min: 0, max: innerD },
+    divider_y_10_pos: { min: 0, max: innerD }
   };
 }
 
